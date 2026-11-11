@@ -68,7 +68,15 @@ CREATE TABLE affectation (
 CREATE TABLE histoPoste (
     id SERIAL PRIMARY KEY,
     idPoste INTEGER NOT NULL REFERENCES poste (id),
+    date DATE NOT NULL DEFAULT NOW(),
     status BOOLEAN NOT NULL
+);
+
+-- Historique de creation de poste, redondance avec histoPoste
+CREATE TABLE creationPoste (
+    id SERIAL PRIMARY KEY,
+    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    date DATE NOT NULL DEFAULT NOW()
 );
 
 -- =====================================================================
@@ -82,10 +90,11 @@ CREATE TABLE fonctionPoste (
     idFonction INTEGER NOT NULL REFERENCES fonction (id)
 );
 
--- Table de liaison
+-- Table de liaison entre poste et clearance
 CREATE TABLE clearancePoste (
     id SERIAL PRIMARY KEY,
-    idPoste INTEGER NOT NULL REFERENCES poste (id)
+    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    idClearance INTEGER NOT NULL REFERENCES clearance (id)
 );
 
 -- =====================================================================
@@ -124,7 +133,7 @@ CREATE TABLE demande (
     id SERIAL PRIMARY KEY,
     idDepartement INTEGER NOT NULL REFERENCES departement (id),
     idStatus INTEGER NOT NULL REFERENCES status (id),
-    dateDemande DATE NOT NULL DEFAULT NOW(),
+    date DATE NOT NULL DEFAULT NOW(),
     effectif INTEGER NOT NULL CHECK (effectif > 0),
     motif VARCHAR(200) NOT NULL
 );

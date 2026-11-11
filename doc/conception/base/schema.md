@@ -11,8 +11,11 @@ departement(**id**, label, nb)
 **Table de liaison entre poste et departement**  
 affectation(**id**, #idPoste, #idDepartement)
 
-**Historique de status d'un poste**  
-histoPoste(**id**, #idPoste, status:true/false)
+**Historique de status d'un poste**    
+histoPoste(**id**, #idPoste, status:true/false,date)
+
+**Historique de creationd de poste , redondance avec histoposte**  
+creationPoste(**id**,#idPoste,date)  
 
 ## Fonctions et qualifications
 
@@ -26,7 +29,7 @@ fonctionPoste(**id**, #idPoste, #idFonction)
 clearance(**id**, label)
 
 **Table de liaison**  
-clearancePoste(**id**, #idPoste)
+clearancePoste(**id**, #idPoste,#idClearance)
 
 ## Personnes et emplois
 

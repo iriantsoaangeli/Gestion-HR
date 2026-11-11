@@ -40,8 +40,8 @@ function envoyer() {
   if (erreur.value) return
 
   // À remplacer par l'appel à l'API (idPostes -> lignes de demandePoste)
-  // dateDemande = maintenant (DEFAULT NOW() en base)
-  const demande = { ...form, idStatus: ID_STATUS_INITIAL, dateDemande: aujourdhui() }
+  // date = maintenant (DEFAULT NOW() en base)
+  const demande = { ...form, idStatus: ID_STATUS_INITIAL, date: aujourdhui() }
   console.log('Nouvelle demande', demande)
   message.value = 'Demande enregistrée.'
   Object.assign(form, vide())
