@@ -54,8 +54,8 @@ historiqueEmploi(**id**, date, #idMouvement, #idPersonne)
 status(**id**, label)
 
 **Demande de personnel**  
-demande(**id**, #idDepartement, #idStatus,date,effectif,motif)
+demande(**id**, #idDepartement, #idStatus,date,motif)
 
 
 **Table de liason**
-demandePoste(**id**,#idPoste,#idDemande)
+demandePoste(**id**,#idPoste,#idDemande,effectif)

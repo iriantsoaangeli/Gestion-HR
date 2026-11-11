@@ -134,7 +134,6 @@ CREATE TABLE demande (
     idDepartement INTEGER NOT NULL REFERENCES departement (id),
     idStatus INTEGER NOT NULL REFERENCES status (id),
     date DATE NOT NULL DEFAULT NOW(),
-    effectif INTEGER NOT NULL CHECK (effectif > 0),
     motif VARCHAR(200) NOT NULL
 );
 
@@ -142,5 +141,6 @@ CREATE TABLE demande (
 CREATE TABLE demandePoste (
     id SERIAL PRIMARY KEY,
     idPoste INTEGER NOT NULL REFERENCES poste (id),
-    idDemande INTEGER NOT NULL REFERENCES demande (id)
+    idDemande INTEGER NOT NULL REFERENCES demande (id),
+    effectif INTEGER NOT NULL CHECK (effectif > 0)
 );
