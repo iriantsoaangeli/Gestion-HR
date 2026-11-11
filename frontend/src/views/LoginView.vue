@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import Erreur from '../components/Erreur.vue'
 
 const router = useRouter()
 const identifiant = ref('')
@@ -28,7 +29,7 @@ function seConnecter() {
       <label for="motDePasse">Mot de passe</label>
       <input id="motDePasse" v-model="motDePasse" type="password" autocomplete="current-password" />
 
-      <p v-if="erreur" class="error">{{ erreur }}</p>
+      <Erreur :message="erreur" />
       <button type="submit">Se connecter</button>
     </form>
   </div>

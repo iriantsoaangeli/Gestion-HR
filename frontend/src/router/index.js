@@ -27,6 +27,19 @@ const router = createRouter({
       component: () => import('../views/DemandeView.vue'),
       props: true,
     },
+    // TEMPORAIRE : pages de démonstration des erreurs — à supprimer avec views/temporaire/
+    {
+      path: '/temporaire/erreur-login',
+      component: () => import('../views/temporaire/ErreurLoginView.vue'),
+    },
+    {
+      path: '/temporaire/erreur-demande',
+      component: () => import('../views/temporaire/ErreurDemandeView.vue'),
+    },
+    {
+      path: '/temporaire/erreur-validation',
+      component: () => import('../views/temporaire/ErreurValidationView.vue'),
+    },
     {
       // A EFFACER avec views/AboutView.vue
       path: '/about',

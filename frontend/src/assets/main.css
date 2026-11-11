@@ -5,6 +5,7 @@
   --color-primary: hsla(160, 100%, 37%, 1);
   --color-primary-soft: hsla(160, 100%, 37%, 0.15);
   --color-danger: #d33;
+  --color-danger-soft: rgba(221, 51, 51, 0.1);
   --color-success: hsla(160, 100%, 37%, 1);
   --radius: 6px;
 }
@@ -103,6 +104,7 @@ h1 {
 }
 
 .form > label,
+.form-col > label,
 fieldset > legend {
   margin-bottom: 0.25rem;
 }
@@ -137,28 +139,109 @@ fieldset {
   margin-bottom: 0.25rem;
 }
 
-/* Recherche de postes + effectif par poste (DemandeForm) */
-fieldset input[type='search'] {
+/* Formulaire de demande sur deux colonnes : postes à gauche, motif et délai à droite */
+.form.demande-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 2.5rem;
+  max-width: 960px;
+}
+
+.form-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-col > .choice {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 720px) {
+  .form.demande-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Département à choisir en premier : surligné tant qu'il est vide */
+select.a-remplir {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.a-remplir-aide {
+  margin: -0.5rem 0 1rem;
+  padding: 0.4rem 0.6rem;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-primary-soft);
+  font-size: 0.9rem;
+}
+
+/* Postes grisés et inutilisables tant qu'aucun département n'est choisi */
+fieldset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+fieldset:disabled * {
+  pointer-events: none;
+}
+
+/* Case « Ajouter un délai » plus grande */
+.choice-grande {
+  gap: 0.6rem;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+
+.choice-grande input[type='checkbox'] {
+  width: 1.4rem;
+  height: 1.4rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Liste déroulante avec recherche (RechercheSelect) */
+.recherche-select {
+  position: relative;
+}
+
+.recherche-select input {
   width: 100%;
   margin-bottom: 0.5rem;
 }
 
-.suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0 0 0.75rem;
-  padding: 0;
+.recherche-liste {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 14rem;
+  overflow-y: auto;
+  margin: -0.5rem 0 0;
+  padding: 0.25rem 0;
   list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-background);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
 }
 
-.suggestions button {
-  padding: 0.3rem 0.7rem;
-  border: 1px solid var(--color-primary);
-  background: transparent;
-  color: var(--color-primary);
+.recherche-liste li {
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
 }
 
+.recherche-liste li.actif {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.recherche-liste li.help {
+  cursor: default;
+}
+
+/* Poste à créer + effectif (DemandeForm) */
 .poste-ligne {
   display: flex;
   align-items: center;
@@ -166,7 +249,7 @@ fieldset input[type='search'] {
   margin-bottom: 0.5rem;
 }
 
-.poste-ligne label {
+.poste-ligne span {
   flex: 1;
 }
 
@@ -177,6 +260,73 @@ fieldset input[type='search'] {
 
 .poste-ligne button {
   padding: 0.3rem 0.6rem;
+}
+
+/* Boutons − / + autour de l'effectif */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stepper button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.poste-ligne .stepper input {
+  width: 3.5rem;
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.stepper input::-webkit-inner-spin-button,
+.stepper input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Postes choisis (DemandeForm) */
+.selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.selection li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.3rem 0.2rem 0.7rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+}
+
+.selection button {
+  padding: 0.1rem 0.4rem;
+  background: transparent;
+  color: var(--color-danger);
 }
 
 button {
@@ -200,6 +350,79 @@ button {
   color: var(--color-danger);
 }
 
+/* Composant Erreur */
+.erreur {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-danger);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--color-danger-soft);
+  color: var(--color-text);
+}
+
+.erreur-icone {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: var(--color-danger);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.erreur-texte {
+  flex: 1;
+}
+
+.erreur-texte strong {
+  display: block;
+  color: var(--color-danger);
+}
+
+.erreur-texte p,
+.erreur-texte ul {
+  margin: 0;
+}
+
+.erreur-texte ul {
+  padding-left: 1.2rem;
+}
+
+.erreur-fermer {
+  align-self: flex-start;
+  padding: 0 0.3rem;
+  background: transparent;
+  color: var(--color-danger);
+}
+
+/* TEMPORAIRE : pages de démonstration des erreurs — à supprimer avec views/temporaire/ */
+.demo-erreurs {
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.demo-bandeau {
+  padding: 0.4rem 0.8rem;
+  border: 1px dashed var(--color-border-hover);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.demo-cas {
+  width: 100%;
+  max-width: 640px;
+}
+
+.demo-cas h2 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .success {
   margin-top: 1rem;
   color: var(--color-primary);
@@ -218,7 +441,7 @@ button {
   display: flex;
   list-style: none;
   padding: 0;
-  max-width: 640px;
+  max-width: 960px;
   margin-bottom: 2rem;
 }
 
