@@ -3,9 +3,15 @@ import { computed } from 'vue'
 import DemandesColonne from './DemandesColonne.vue'
 import { ETAPES } from '../../data/etapes'
 
-// Deux tableaux côte à côte : « En cours » à gauche, « Déjà traitées » à droite.
-// Utilisé par Mes demandes et Toutes les demandes (seule la liste passée change).
-const props = defineProps({ demandes: { type: Array, required: true } })
+// Deux tableaux côte à côte : demandes en cours à gauche, déjà traitées à droite.
+// Utilisé par Mes demandes, Toutes les demandes et Demandes à traiter.
+// titres : libellés des deux tableaux ; lienEnCours : page ouverte par une demande en cours
+const props = defineProps({
+  demandes: { type: Array, required: true },
+  titreEnCours: { type: String, default: 'En cours' },
+  titreTraitees: { type: String, default: 'Déjà traitées' },
+  lienEnCours: { type: Function, default: undefined },
+})
 
 // Manager crée la demande : les attentes commencent à HR
 const FILTRES_EN_COURS = ETAPES.slice(1).map((e) => ({ code: e.code, label: e.label }))
@@ -21,7 +27,7 @@ const traitees = computed(() => props.demandes.filter((d) => TRAITEES.includes(d
 
 <template>
   <div class="board">
-    <DemandesColonne titre="En cours" :demandes="enCours" :filtres="FILTRES_EN_COURS" />
-    <DemandesColonne titre="Déjà traitées" :demandes="traitees" :filtres="FILTRES_TRAITEES" />
+    <DemandesColonne :titre="titreEnCours" :demandes="enCours" :filtres="FILTRES_EN_COURS" :lien="lienEnCours" />
+    <DemandesColonne :titre="titreTraitees" :demandes="traitees" :filtres="FILTRES_TRAITEES" />
   </div>
 </template>

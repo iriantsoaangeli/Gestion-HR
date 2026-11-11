@@ -1,6 +1,6 @@
 <script setup>
-import AppLayout from '../components/layout/AppLayout.vue'
-import DemandeValidation from '../components/demande/DemandeValidation.vue'
+import AppLayout from '../../components/layout/AppLayout.vue'
+import DemandeValidation from '../../components/demande/DemandeValidation.vue'
 
 // Page de validation d'une étape (HR, Direction, Finance).
 // Chaque étape est tenue par des utilisateurs différents, sur leur propre poste :

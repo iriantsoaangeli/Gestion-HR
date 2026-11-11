@@ -1,19 +1,19 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import AppLayout from '../components/layout/AppLayout.vue'
-import FicheDemande from '../components/demande/FicheDemande.vue'
-import Erreur from '../components/ui/Erreur.vue'
-import { trouverDemande } from '../data/demandes'
+import AppLayout from '../../components/layout/AppLayout.vue'
+import FicheDemande from '../../components/demande/FicheDemande.vue'
+import Erreur from '../../components/ui/Erreur.vue'
+import { trouverDemande } from '../../data/demandes'
 
 // Fiche d'une demande : /demandes/:id
 const props = defineProps({ id: { type: String, required: true } })
 
 const d = computed(() => trouverDemande(Number(props.id)))
 
-// Retour à la page d'où l'on vient (Mes demandes, Toutes les demandes…), sinon Mes demandes
+// Retour à la page d'où l'on vient (Mes demandes, Toutes les demandes…), sinon l'accueil
 const router = useRouter()
-const retour = () => (window.history.state?.back ? router.back() : router.push('/mes-demandes'))
+const retour = () => (window.history.state?.back ? router.back() : router.push('/'))
 </script>
 
 <template>

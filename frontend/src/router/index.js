@@ -1,67 +1,70 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { chargerSession, utilisateur } from '../auth/session'
 
+// Une route = une vue de views/<dossier>/<Nom>View.vue (même découpage que components/)
+// meta.public : accessible sans être connecté
+// meta.acces(utilisateur) : page réservée, d'après ce que le backend renvoie sur l'utilisateur
+
+const auth = [
+  {
+    path: '/login',
+    name: 'login',
+    meta: { public: true },
+    component: () => import('../views/auth/LoginView.vue'),
+  },
+]
+
+const demande = [
+  {
+    path: '/demande',
+    name: 'nouvelle-demande',
+    component: () => import('../views/demande/NouvelleDemandeView.vue'),
+  },
+  {
+    // Demandes créées par l'utilisateur connecté (c'est aussi l'accueil)
+    path: '/mes-demandes',
+    name: 'mes-demandes',
+    component: () => import('../views/demande/MesDemandesView.vue'),
+  },
+  {
+    path: '/toutes-les-demandes',
+    name: 'toutes-les-demandes',
+    meta: { acces: (u) => u.voitToutesLesDemandes }, // ADMIN et DIRECTION
+    component: () => import('../views/demande/ToutesLesDemandesView.vue'),
+  },
+  {
+    // En attente (→ écran de validation) et déjà faites
+    path: '/demandes-a-traiter',
+    name: 'demandes-a-traiter',
+    component: () => import('../views/demande/DemandesATraiterView.vue'),
+  },
+  {
+    path: '/demandes/:id(\\d+)',
+    name: 'fiche-demande',
+    props: true,
+    component: () => import('../views/demande/FicheDemandeView.vue'),
+  },
+  {
+    // Une page par étape, chacune tenue par ses propres utilisateurs
+    path: '/validation/:etape(hr|direction|finance)',
+    name: 'validation',
+    props: true,
+    component: () => import('../views/demande/ValidationView.vue'),
+  },
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    // L'accueil, c'est Mes demandes
-    { path: '/', name: 'home', redirect: '/mes-demandes' },
-    {
-      path: '/login',
-      name: 'login',
-      meta: { public: true },
-      component: () => import('../views/LoginView.vue'),
-    },
-    {
-      // Le manager crée une demande
-      path: '/demande',
-      name: 'demande',
-      component: () => import('../views/DemandeView.vue'),
-    },
-    {
-      // Demandes créées par l'utilisateur connecté
-      path: '/mes-demandes',
-      name: 'mes-demandes',
-      component: () => import('../views/MesDemandesView.vue'),
-    },
-    {
-      // Réservée à ADMIN et DIRECTION (le backend le dit via utilisateur.voitToutesLesDemandes)
-      path: '/toutes-les-demandes',
-      name: 'toutes-les-demandes',
-      meta: { acces: (u) => u.voitToutesLesDemandes },
-      component: () => import('../views/ToutesDemandesView.vue'),
-    },
-    {
-      // Fiche détaillée d'une demande
-      path: '/demandes/:id(\\d+)',
-      name: 'demande-detail',
-      component: () => import('../views/DemandeDetailView.vue'),
-      props: true,
-    },
-    {
-      // Validation par étape, chacune par ses propres utilisateurs : /validation/hr, /direction, /finance
-      path: '/validation/:etape(hr|direction|finance)',
-      name: 'validation',
-      component: () => import('../views/ValidationView.vue'),
-      props: true,
-    },
-    // Anciennes adresses
-    { path: '/demande/manager', redirect: '/demande' },
-    {
-      path: '/demande/:etape(hr|direction|finance)',
-      redirect: (to) => ({ path: `/validation/${to.params.etape}`, query: to.query }),
-    },
-  ],
+  routes: [{ path: '/', name: 'accueil', redirect: '/mes-demandes' }, ...auth, ...demande],
 })
 
-// Il faut être connecté partout, sauf sur les pages marquées meta.public (login…)
+// Il faut être connecté partout, sauf sur les pages meta.public ; une page réservée renvoie à l'accueil
 router.beforeEach(async (to) => {
   await chargerSession()
   if (!utilisateur.value && !to.meta.public) {
     return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
   }
   if (utilisateur.value && to.name === 'login') return '/'
-  // Page réservée : sans le droit, retour à l'accueil (Mes demandes)
   if (to.meta.acces && !to.meta.acces(utilisateur.value)) return '/'
 })
 

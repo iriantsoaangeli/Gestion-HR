@@ -7,7 +7,7 @@
  *   layout/   cadre de toutes les pages (menu, contenu)
  *   ui/       petits composants réutilisables partout (message d'erreur, liste avec recherche, progression)
  *   demande/  composants des demandes de personnel
- *   views/    pages qui ont leurs propres styles
+ *   views/<dossier>/  pages (views/<dossier>/<Nom>.vue) qui ont leurs propres styles
  */
 
 /* Global : couleurs, balises HTML et classes utilitaires (aucun composant) */
@@ -25,7 +25,7 @@
 @import './css/ui/Progression.css';
 
 /* Pages */
-@import './css/views/LoginView.css';
+@import './css/views/auth/LoginView.css';
 
 /* Demandes de personnel */
 @import './css/demande/DemandeForm.css';

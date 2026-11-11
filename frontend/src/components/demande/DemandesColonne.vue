@@ -10,6 +10,8 @@ const props = defineProps({
   titre: { type: String, required: true },
   demandes: { type: Array, required: true },
   filtres: { type: Array, default: () => [] },
+  // Page ouverte par une ligne (par défaut la fiche de la demande)
+  lien: { type: Function, default: (d) => `/demandes/${d.id}` },
 })
 
 // Statut lisible et classe du badge
@@ -32,7 +34,7 @@ const COLONNES = [
 
 const router = useRouter()
 // Toute la ligne ouvre la fiche (le n° reste un vrai lien pour le clavier et le clic molette)
-const ouvrir = (d) => router.push(`/demandes/${d.id}`)
+const ouvrir = (d) => router.push(props.lien(d))
 
 const filtre = ref('')
 const recherche = ref('')
@@ -109,7 +111,7 @@ const ariaTri = (cle) =>
         </thead>
         <tbody>
           <tr v-for="d in lignes" :key="d.id" class="ligne-cliquable" :title="d.motif" @click="ouvrir(d)">
-            <td><RouterLink :to="`/demandes/${d.id}`" @click.stop>{{ d.id }}</RouterLink></td>
+            <td><RouterLink :to="lien(d)" @click.stop>{{ d.id }}</RouterLink></td>
             <td>{{ d.date }}</td>
             <td>{{ labelDepartement(d) }}</td>
             <td>{{ labelPostes(d) }}</td>
