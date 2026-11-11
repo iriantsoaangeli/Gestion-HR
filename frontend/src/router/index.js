@@ -25,8 +25,10 @@ const router = createRouter({
       component: () => import('../views/MesDemandesView.vue'),
     },
     {
+      // Réservée à ADMIN et DIRECTION (le backend le dit via utilisateur.voitToutesLesDemandes)
       path: '/toutes-les-demandes',
       name: 'toutes-les-demandes',
+      meta: { acces: (u) => u.voitToutesLesDemandes },
       component: () => import('../views/ToutesDemandesView.vue'),
     },
     {
@@ -82,6 +84,8 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
   }
   if (utilisateur.value && to.name === 'login') return '/'
+  // Page réservée : sans le droit, retour à l'accueil (Mes demandes)
+  if (to.meta.acces && !to.meta.acces(utilisateur.value)) return '/'
 })
 
 export default router

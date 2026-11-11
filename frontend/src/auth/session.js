@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import * as api from './api'
 
-// Utilisateur connecté { id, login, role, roleLibelle } renvoyé par le backend, ou null. Partagé par toute l'application.
+// Utilisateur connecté { id, login, role, roleLibelle, voitToutesLesDemandes } renvoyé par le backend, ou null. Partagé par toute l'application.
 export const utilisateur = ref(null)
 
 let chargement = null

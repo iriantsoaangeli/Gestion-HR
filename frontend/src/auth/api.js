@@ -49,7 +49,7 @@ export async function appel(methode, url, corps) {
   return json
 }
 
-// POST /api/auth/login → { id, login, role, roleLibelle }
+// POST /api/auth/login → { id, login, role, roleLibelle, voitToutesLesDemandes }
 export const login = (login, mdp) => appel('POST', '/api/auth/login', { login, mdp })
 
 // POST /api/auth/logout → ferme la session côté serveur

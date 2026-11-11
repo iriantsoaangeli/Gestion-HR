@@ -65,6 +65,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.login").value("manager"))
                 .andExpect(jsonPath("$.role").value("MANAGER"))
                 .andExpect(jsonPath("$.roleLibelle").value("Manager"))
+                .andExpect(jsonPath("$.voitToutesLesDemandes").value(false))
                 .andExpect(jsonPath("$.mdp").doesNotExist());
     }
 

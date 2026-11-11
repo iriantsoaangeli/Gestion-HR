@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FicheDemande from './FicheDemande.vue'
+import { utilisateur } from '../auth/session'
 import Progression from './Progression.vue'
 import { demandes, trouverDemande, aujourdhui, labelDepartement, totalPostes } from '../data/demandes'
 import { etapeSuivante, labelEtape } from '../data/etapes'
@@ -69,7 +70,7 @@ function suivante(id) {
     <Progression :etape="etape" />
     <p class="help">
       Aucune demande en attente à l'étape {{ labelEtape(etape) }}.
-      <RouterLink to="/toutes-les-demandes">Voir toutes les demandes</RouterLink>
+      <RouterLink v-if="utilisateur?.voitToutesLesDemandes" to="/toutes-les-demandes">Voir toutes les demandes</RouterLink>
     </p>
   </div>
 
@@ -108,7 +109,7 @@ function suivante(id) {
     </template>
 
     <footer class="fiche-actions">
-      <RouterLink to="/toutes-les-demandes">← Toutes les demandes</RouterLink>
+      <RouterLink v-if="utilisateur?.voitToutesLesDemandes" to="/toutes-les-demandes">← Toutes les demandes</RouterLink>
     </footer>
   </FicheDemande>
 </template>

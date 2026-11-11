@@ -33,7 +33,12 @@ Le front n'en garde aucune copie, il affiche le `roleLibelle` renvoyé par l'API
 
 Côté Spring Security, chaque rôle devient l'autorité `ROLE_<code>` (ex. `ROLE_HR`).
 
-> Pas encore fait : les rôles ne limitent pas encore l'accès aux pages ni aux routes. Ce sera ajouté avec l'API des demandes.
+**Toutes les demandes** : seuls `ADMIN` et `DIRECTION` les voient (`Role.voitToutesLesDemandes()`),
+les autres ne voient que les leurs. L'API renvoie ce droit dans `voitToutesLesDemandes` ; le front masque
+le lien et renvoie vers l'accueil si on tape l'adresse `/toutes-les-demandes`.
+
+> Pas encore fait : l'API des demandes n'existe pas encore. Quand elle sera là, `GET /api/demandes`
+> devra filtrer côté serveur (`@PreAuthorize("hasAnyRole('ADMIN','DIRECTION')")` pour la liste complète).
 
 ## Comptes de test
 
@@ -58,7 +63,7 @@ psql -U postgres -d gestion_hr -f base/init.sql -f base/data.sql
 | Méthode | Route | Corps | Réponse |
 |---|---|---|---|
 | GET | `/api/auth/csrf` | — | pose le cookie `XSRF-TOKEN` (à appeler avant le premier POST) |
-| POST | `/api/auth/login` | `{ "login", "mdp" }` | 200 `{ id, login, role, roleLibelle }` + cookie `JSESSIONID` |
+| POST | `/api/auth/login` | `{ "login", "mdp" }` | 200 `{ id, login, role, roleLibelle, voitToutesLesDemandes }` + cookie `JSESSIONID` |
 | GET | `/api/auth/moi` | — | 200 utilisateur connecté |
 | POST | `/api/auth/logout` | — | 204, session fermée |
 

@@ -22,4 +22,9 @@ public enum Role {
     public String getLibelle() {
         return libelle;
     }
+
+    /** Seuls ADMIN et DIRECTION voient toutes les demandes ; les autres ne voient que les leurs. */
+    public boolean voitToutesLesDemandes() {
+        return this == ADMIN || this == DIRECTION;
+    }
 }

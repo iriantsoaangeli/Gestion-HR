@@ -37,7 +37,9 @@ const items = [
       <ul>
         <li><RouterLink to="/demande">Nouvelle demande</RouterLink></li>
         <li><RouterLink to="/mes-demandes">Mes demandes</RouterLink></li>
-        <li><RouterLink to="/toutes-les-demandes">Toutes les demandes</RouterLink></li>
+        <li v-if="utilisateur?.voitToutesLesDemandes">
+          <RouterLink to="/toutes-les-demandes">Toutes les demandes</RouterLink>
+        </li>
       </ul>
 
       <!-- Une page par étape : chaque étape a ses propres utilisateurs -->
