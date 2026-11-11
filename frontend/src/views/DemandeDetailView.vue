@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import AppLayout from '../components/AppLayout.vue'
 import FicheDemande from '../components/FicheDemande.vue'
 import Erreur from '../components/Erreur.vue'
@@ -9,6 +10,10 @@ import { trouverDemande } from '../data/demandes'
 const props = defineProps({ id: { type: String, required: true } })
 
 const d = computed(() => trouverDemande(Number(props.id)))
+
+// Retour à la page d'où l'on vient (Mes demandes, Toutes les demandes…), sinon Mes demandes
+const router = useRouter()
+const retour = () => (window.history.state?.back ? router.back() : router.push('/mes-demandes'))
 </script>
 
 <template>
@@ -22,7 +27,7 @@ const d = computed(() => trouverDemande(Number(props.id)))
 
     <FicheDemande v-else :demande="d">
       <footer class="fiche-actions">
-        <RouterLink to="/mes-demandes">← Retour à mes demandes</RouterLink>
+        <a href="#" @click.prevent="retour">← Retour</a>
       </footer>
     </FicheDemande>
   </AppLayout>

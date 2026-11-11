@@ -1,24 +1,31 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: HomeView,
-    },
+    // L'accueil, c'est Mes demandes
+    { path: '/', name: 'home', redirect: '/mes-demandes' },
     {
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),
     },
-    { path: '/demande', redirect: '/demande/manager' },
     {
+      // Le manager crée une demande
+      path: '/demande',
+      name: 'demande',
+      component: () => import('../views/DemandeView.vue'),
+    },
+    {
+      // Demandes créées par l'utilisateur connecté
       path: '/mes-demandes',
       name: 'mes-demandes',
       component: () => import('../views/MesDemandesView.vue'),
+    },
+    {
+      path: '/toutes-les-demandes',
+      name: 'toutes-les-demandes',
+      component: () => import('../views/ToutesDemandesView.vue'),
     },
     {
       // Fiche détaillée d'une demande
@@ -28,11 +35,17 @@ const router = createRouter({
       props: true,
     },
     {
-      // Workflow : /demande/manager (formulaire), /hr, /direction, /finance (validation)
-      path: '/demande/:etape(manager|hr|direction|finance)',
-      name: 'demande',
-      component: () => import('../views/DemandeView.vue'),
+      // Validation par étape, chacune par ses propres utilisateurs : /validation/hr, /direction, /finance
+      path: '/validation/:etape(hr|direction|finance)',
+      name: 'validation',
+      component: () => import('../views/ValidationView.vue'),
       props: true,
+    },
+    // Anciennes adresses
+    { path: '/demande/manager', redirect: '/demande' },
+    {
+      path: '/demande/:etape(hr|direction|finance)',
+      redirect: (to) => ({ path: `/validation/${to.params.etape}`, query: to.query }),
     },
     // TEMPORAIRE : pages de démonstration des erreurs — à supprimer avec views/temporaire/
     {

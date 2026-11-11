@@ -12,3 +12,6 @@ export const postes = [
   { id: 4, label: 'Administrateur système', idDepartement: 2 },
   { id: 5, label: 'Comptable', idDepartement: 3 },
 ]
+
+// Utilisateur connecté (en attendant l'authentification) : managers 1 et 2
+export const UTILISATEUR_COURANT = 1

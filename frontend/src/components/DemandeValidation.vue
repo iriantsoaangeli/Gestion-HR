@@ -60,7 +60,7 @@ function refuser() {
 
 // Passe à la demande suivante de la file
 function suivante(id) {
-  router.push(`/demande/${props.etape}?id=${id}`)
+  router.push(`/validation/${props.etape}?id=${id}`)
 }
 </script>
 
@@ -69,7 +69,7 @@ function suivante(id) {
     <Progression :etape="etape" />
     <p class="help">
       Aucune demande en attente à l'étape {{ labelEtape(etape) }}.
-      <RouterLink to="/mes-demandes">Voir mes demandes</RouterLink>
+      <RouterLink to="/toutes-les-demandes">Voir toutes les demandes</RouterLink>
     </p>
   </div>
 
@@ -108,7 +108,7 @@ function suivante(id) {
     </template>
 
     <footer class="fiche-actions">
-      <RouterLink to="/mes-demandes">← Retour à mes demandes</RouterLink>
+      <RouterLink to="/toutes-les-demandes">← Toutes les demandes</RouterLink>
     </footer>
   </FicheDemande>
 </template>

@@ -612,6 +612,15 @@ h2 {
   color: var(--color-primary);
 }
 
+/* Ligne entière cliquable : ouvre la fiche */
+.ligne-cliquable {
+  cursor: pointer;
+}
+
+.ligne-cliquable:hover td {
+  background: var(--color-primary-soft);
+}
+
 .table .badge.petit {
   margin-left: 0;
 }

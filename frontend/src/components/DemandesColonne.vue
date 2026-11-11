@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { labelDepartement, labelPostes, totalPostes } from '../data/demandes'
 import { labelEtape } from '../data/etapes'
 
@@ -28,6 +29,10 @@ const COLONNES = [
   { cle: 'delai', label: 'Délai', valeur: (d) => d.delai || '9999' }, // sans délai = en dernier
   { cle: 'statut', label: 'Statut', valeur: (d) => statut(d).texte },
 ]
+
+const router = useRouter()
+// Toute la ligne ouvre la fiche (le n° reste un vrai lien pour le clavier et le clic molette)
+const ouvrir = (d) => router.push(`/demandes/${d.id}`)
 
 const filtre = ref('')
 const recherche = ref('')
@@ -103,8 +108,8 @@ const ariaTri = (cle) =>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="d in lignes" :key="d.id" :title="d.motif">
-            <td><RouterLink :to="`/demandes/${d.id}`">{{ d.id }}</RouterLink></td>
+          <tr v-for="d in lignes" :key="d.id" class="ligne-cliquable" :title="d.motif" @click="ouvrir(d)">
+            <td><RouterLink :to="`/demandes/${d.id}`" @click.stop>{{ d.id }}</RouterLink></td>
             <td>{{ d.date }}</td>
             <td>{{ labelDepartement(d) }}</td>
             <td>{{ labelPostes(d) }}</td>

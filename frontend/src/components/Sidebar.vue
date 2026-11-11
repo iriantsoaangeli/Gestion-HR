@@ -1,9 +1,11 @@
 <script setup>
 import { ETAPES } from '../data/etapes'
 
+// Manager crée la demande, les autres étapes valident
+const ETAPES_VALIDATION = ETAPES.slice(1)
+
 // Les entrées sans route ne sont pas encore cliquables
 const items = [
-  { label: 'Accueil', to: '/' },
   { label: 'Postes' },
   { label: 'Départements' },
   { label: 'Personnes' },
@@ -24,9 +26,16 @@ const items = [
 
       <p class="section">Demandes</p>
       <ul>
+        <li><RouterLink to="/demande">Nouvelle demande</RouterLink></li>
         <li><RouterLink to="/mes-demandes">Mes demandes</RouterLink></li>
-        <li v-for="e in ETAPES" :key="e.code">
-          <RouterLink :to="`/demande/${e.code}`">{{ e.label }}</RouterLink>
+        <li><RouterLink to="/toutes-les-demandes">Toutes les demandes</RouterLink></li>
+      </ul>
+
+      <!-- Une page par étape : chaque étape a ses propres utilisateurs -->
+      <p class="section">Validation</p>
+      <ul>
+        <li v-for="e in ETAPES_VALIDATION" :key="e.code">
+          <RouterLink :to="`/validation/${e.code}`">{{ e.label }}</RouterLink>
         </li>
       </ul>
 

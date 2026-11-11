@@ -1,34 +1,15 @@
 <script setup>
 import { computed } from 'vue'
 import AppLayout from '../components/AppLayout.vue'
-import DemandesColonne from '../components/DemandesColonne.vue'
-import { demandes } from '../data/demandes'
-import { ETAPES } from '../data/etapes'
+import DemandesBoard from '../components/DemandesBoard.vue'
+import { demandes, estAMoi } from '../data/demandes'
 
-// Manager crée la demande : les attentes commencent à HR
-const attentes = ETAPES.slice(1)
-const TRAITEES = ['approuvee', 'refusee']
-
-const enCours = computed(() => demandes.value.filter((d) => !TRAITEES.includes(d.etape)))
-const traitees = computed(() => demandes.value.filter((d) => TRAITEES.includes(d.etape)))
+// Seulement les demandes créées par l'utilisateur connecté
+const mesDemandes = computed(() => demandes.value.filter(estAMoi))
 </script>
 
 <template>
   <AppLayout title="Mes demandes">
-    <div class="board">
-      <DemandesColonne
-        titre="En cours"
-        :demandes="enCours"
-        :filtres="attentes.map((e) => ({ code: e.code, label: e.label }))"
-      />
-      <DemandesColonne
-        titre="Déjà traitées"
-        :demandes="traitees"
-        :filtres="[
-          { code: 'approuvee', label: 'Terminées' },
-          { code: 'refusee', label: 'Refusées' },
-        ]"
-      />
-    </div>
+    <DemandesBoard :demandes="mesDemandes" />
   </AppLayout>
 </template>

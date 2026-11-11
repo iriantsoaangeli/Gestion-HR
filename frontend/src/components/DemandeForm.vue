@@ -103,7 +103,8 @@ function envoyer() {
     date: aujourdhui(),
   }
   console.log('Nouvelle demande', demande)
-  router.push(`/demande/hr?id=${ajouterDemande(demande)}`)
+  // Le manager ne valide pas : il arrive sur la fiche de sa demande, qui part chez HR
+  router.push(`/demandes/${ajouterDemande(demande)}`)
 }
 </script>
 
