@@ -54,15 +54,10 @@ CREATE TABLE status (
 CREATE TABLE poste (
     id SERIAL PRIMARY KEY,
     label VARCHAR(100) NOT NULL,
-    idPersonne INTEGER REFERENCES personne (id)
-);
-
--- Table de liaison entre poste et departement
-CREATE TABLE affectation (
-    id SERIAL PRIMARY KEY,
-    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    idPersonne INTEGER REFERENCES personne (id),
     idDepartement INTEGER NOT NULL REFERENCES departement (id)
 );
+
 
 -- Historique de status d'un poste
 CREATE TABLE histoPoste (

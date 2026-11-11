@@ -3,13 +3,10 @@
 ## Organisation
 
 **Un poste est comme un siege, idPersonne nulle si ce n'est pas occupe (la redondance est voulue)**  
-poste(**id**, label, #idPersonne?)
+poste(**id**, label, #idPersonne?,#idDepartment)
 
 **Le departement d'un poste**  
 departement(**id**, label, nb)
-
-**Table de liaison entre poste et departement**  
-affectation(**id**, #idPoste, #idDepartement)
 
 **Historique de status d'un poste**    
 histoPoste(**id**, #idPoste, status:true/false,date)
