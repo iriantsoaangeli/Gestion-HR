@@ -1,45 +1,54 @@
-# Schema relationnel :
+# Schéma relationnel
 
-## Tables :
+## Organisation
 
-**Un poste est comme un siege ,idPersonne nulle si ce n'est pas occupe(la redondance est voulue)**  
-poste(**id**,label,#idPersonne?)  
+**Un poste est comme un siege, idPersonne nulle si ce n'est pas occupe (la redondance est voulue)**  
+poste(**id**, label, #idPersonne?)
 
 **Le departement d'un poste**  
-departement(**id**,label,nb)
+departement(**id**, label, nb)
 
 **Table de liaison entre poste et departement**  
-affectation(**id**,#idPoste,#idDepartement)  
+affectation(**id**, #idPoste, #idDepartement)
 
-**Historique d'affectation des personnes au postes**  
-histoAffectation(**id**,#idPersonne,#idMouvement,date)
+**Historique de status d'un poste**  
+histoPoste(**id**, #idPoste, status:true/false)
 
-**Un individu dans la base de donnees**  
-personne(**id**,nom,prenom,naissance)  
+## Fonctions et qualifications
 
 **Le travail qu'on donnera a un poste**  
-fonction(**id**,label)  
+fonction(**id**, label)
 
-**Les types de mouvements : entree/sortie**  
-mouvement(**id**,label)  
-
-**Une fonction associee a un poste , le poste est comme un siege**  
-fonctionPoste(**id**,#idPoste,#idFonction)  
-
-**On emploie une personne pour un poste sinon l'id est null**  
-emploi(**id**,#idPoste,#idPersonne?)  
-
-**Un historique des mouvement entree/sortie des employees**   
-historiqueEmploi(**id**,date,#idMouvement,#idPersonne)  
+**Une fonction associee a un poste, le poste est comme un siege**  
+fonctionPoste(**id**, #idPoste, #idFonction)
 
 **Qualification d'un poste**  
-clearance(**id**,label)
+clearance(**id**, label)
 
 **Table de liaison**  
-clearancePoste(**id**,#idPoste)
+clearancePoste(**id**, #idPoste)
+
+## Personnes et emplois
+
+**Un individu dans la base de donnees**  
+personne(**id**, nom, prenom, naissance)
+
+**On emploie une personne pour un poste sinon l'id est null**  
+emploi(**id**, #idPoste, #idPersonne?)
+
+**Les types de mouvements : entree/sortie**  
+mouvement(**id**, label)
+
+**Historique d'affectation des personnes au postes**  
+histoAffectation(**id**, #idPersonne, #idMouvement, date)
+
+**Un historique des mouvement entree/sortie des employees**  
+historiqueEmploi(**id**, date, #idMouvement, #idPersonne)
+
+## Demandes de personnel
 
 **Des status des demandes**  
-status(**id**,label)
+status(**id**, label)
 
 **Demande de personnel**  
-demande(**id**,#idDepartement,#idStatus)
+demande(**id**, #idDepartement, #idStatus)
