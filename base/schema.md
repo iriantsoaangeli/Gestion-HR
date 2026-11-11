@@ -2,8 +2,8 @@
 
 ## Tables :
 
-**Un poste est comme un siege**  
-poste(**id**,label)  
+**Un poste est comme un siege ,idPersonne nulle si ce n'est pas occupe(la redondance est voulue)**  
+poste(**id**,label,#idPersonne?)  
 
 **Le departement d'un poste**  
 departement(**id**,label)
@@ -11,6 +11,10 @@ departement(**id**,label)
 **Table de liaison entre poste et departement**  
 affectation(**id**,#idPoste,#idDepartement)  
 
+**Historique d'affectation des personnes au postes**
+histoAffectation(**id**,#idPersonne,#idMouvement,date)
+
+**Un individu dans la base de donnees**
 personne(**id**,nom,prenom,naissance)  
 
 **Le travail qu'on donnera a un poste**  
