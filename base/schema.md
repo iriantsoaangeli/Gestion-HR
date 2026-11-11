@@ -5,6 +5,12 @@
 **Un poste est comme un siege**  
 poste(**id**,label)  
 
+**Le departement d'un poste**  
+departement(**id**,label)
+
+**Table de liaison entre poste et departement**  
+affectation(**id**,#idPoste,#idDepartement)  
+
 personne(**id**,nom,prenom,naissance)  
 
 **Le travail qu'on donnera a un poste**  
