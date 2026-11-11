@@ -20,7 +20,7 @@ Création : `base/init.sql`. Comptes de test : `base/data.sql`.
 
 ## Rôles
 
-Définis dans `Role.java` (enum) : c'est la **seule source** des codes et des libellés.
+Définis dans `auth/Model/Role.java` (enum) : c'est la **seule source** des codes et des libellés.
 Le front n'en garde aucune copie, il affiche le `roleLibelle` renvoyé par l'API.
 
 | Code | Libellé | Dans le workflow d'une demande |
@@ -94,18 +94,18 @@ curl -b jar http://localhost:8080/api/auth/moi
 
 ### Backend : `backend/src/main/java/gestion/hr/auth/`
 
-| Fichier | Rôle |
-|---|---|
-| `Role.java` | enum des rôles + libellés |
-| `Utilisateur.java` | entité JPA de la table `utilisateur` |
-| `UtilisateurRepository.java` | `findByLogin` |
-| `UtilisateurDetailsService.java` | charge un compte pour Spring Security |
-| `SecurityConfig.java` | règles d'accès, CSRF, session, BCrypt, logout |
-| `AuthController.java` | `/login`, `/moi`, `/csrf` |
-| `AuthErreurs.java` | réponses 401 / 403 en JSON |
-| `LoginRequest.java`, `UtilisateurResponse.java` | corps de requête et de réponse (le mot de passe ne sort jamais) |
+```
+auth/
+├── Config/       SecurityConfig (règles d'accès, CSRF, session, BCrypt, logout)
+│                 AuthErreurs (réponses 401 / 403 en JSON)
+├── Controller/   AuthController (/login, /moi, /csrf)
+├── Dto/          LoginRequest, UtilisateurResponse (le mot de passe ne sort jamais)
+├── Model/        Utilisateur (entité JPA de la table utilisateur), Role (enum des rôles + libellés)
+├── Repository/   UtilisateurRepository (findByLogin)
+└── Service/      UtilisateurDetailsService (charge un compte pour Spring Security)
+```
 
-Tests : `backend/src/test/java/gestion/hr/auth/` (`AuthControllerTest`, `CsrfCookieTest`).
+Tests : `backend/src/test/java/gestion/hr/auth/Controller/` (`AuthControllerTest`, `CsrfCookieTest`).
 `HrApplicationTests` démarre toute l'application : il faut que la base locale tourne.
 
 ### Front : `frontend/src/auth/`

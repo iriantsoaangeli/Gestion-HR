@@ -1,4 +1,4 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Config;
 
 import java.io.IOException;
 

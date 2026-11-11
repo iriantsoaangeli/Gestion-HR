@@ -1,4 +1,4 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Model;
 
 /**
  * Rôle d'un utilisateur, stocké en texte dans {@code utilisateur.role}.

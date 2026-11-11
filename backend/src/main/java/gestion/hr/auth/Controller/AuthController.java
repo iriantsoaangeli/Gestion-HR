@@ -1,4 +1,8 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Controller;
+
+import gestion.hr.auth.Dto.LoginRequest;
+import gestion.hr.auth.Dto.UtilisateurResponse;
+import gestion.hr.auth.Repository.UtilisateurRepository;
 
 import java.util.Map;
 

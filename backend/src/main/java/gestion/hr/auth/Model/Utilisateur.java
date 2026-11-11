@@ -1,4 +1,4 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

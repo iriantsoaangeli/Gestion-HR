@@ -1,4 +1,6 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Repository;
+
+import gestion.hr.auth.Model.Utilisateur;
 
 import java.util.Optional;
 

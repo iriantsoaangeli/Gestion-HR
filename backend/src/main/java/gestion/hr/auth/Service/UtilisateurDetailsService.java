@@ -1,4 +1,7 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Service;
+
+import gestion.hr.auth.Model.Utilisateur;
+import gestion.hr.auth.Repository.UtilisateurRepository;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

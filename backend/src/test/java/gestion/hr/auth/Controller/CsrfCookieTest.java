@@ -1,4 +1,9 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Controller;
+
+import gestion.hr.auth.Config.AuthErreurs;
+import gestion.hr.auth.Config.SecurityConfig;
+import gestion.hr.auth.Repository.UtilisateurRepository;
+import gestion.hr.auth.Service.UtilisateurDetailsService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;

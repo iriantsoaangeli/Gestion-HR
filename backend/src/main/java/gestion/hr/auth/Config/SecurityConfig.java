@@ -1,4 +1,6 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Config;
+
+import gestion.hr.auth.Service.UtilisateurDetailsService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

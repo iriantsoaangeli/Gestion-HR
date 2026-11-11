@@ -1,4 +1,7 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Dto;
+
+import gestion.hr.auth.Model.Role;
+import gestion.hr.auth.Model.Utilisateur;
 
 /**
  * Utilisateur renvoyé au front : jamais le mot de passe.

@@ -1,4 +1,11 @@
-package gestion.hr.auth;
+package gestion.hr.auth.Controller;
+
+import gestion.hr.auth.Config.AuthErreurs;
+import gestion.hr.auth.Config.SecurityConfig;
+import gestion.hr.auth.Model.Role;
+import gestion.hr.auth.Model.Utilisateur;
+import gestion.hr.auth.Repository.UtilisateurRepository;
+import gestion.hr.auth.Service.UtilisateurDetailsService;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
