@@ -58,4 +58,4 @@ demande(**id**, #idDepartement, #idStatus,date,motif)
 
 
 **Table de liason**
-demandePoste(**id**,#idPoste,#idDemande,effectif)
+demandePoste(**id**,#idPoste,#idDemande)

@@ -1,5 +1,5 @@
 <script setup>
-import { labelDepartement, labelPostes } from '../data/demandes'
+import { labelDepartement, labelPostes, effectifTotal } from '../data/demandes'
 
 // lien : le n° ouvre la demande à son étape ; refus : ajoute la colonne « Refusée par »
 defineProps({
@@ -32,7 +32,7 @@ defineProps({
             <td>{{ d.date }}</td>
             <td>{{ labelDepartement(d) }}</td>
             <td>{{ labelPostes(d) }}</td>
-            <td>{{ d.effectif }}</td>
+            <td>{{ effectifTotal(d) }}</td>
             <td v-if="refus" class="error">{{ d.refuseePar }}</td>
           </tr>
         </tbody>

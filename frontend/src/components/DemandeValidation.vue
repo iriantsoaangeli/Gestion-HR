@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { demandes, trouverDemande, labelDepartement, labelPostes } from '../data/demandes'
+import { demandes, trouverDemande, labelDepartement, labelPostes, effectifTotal } from '../data/demandes'
 import { etapeSuivante, labelEtape } from '../data/etapes'
 
 const props = defineProps({ etape: { type: String, required: true } })
@@ -38,7 +38,7 @@ function refuser() {
       <dt>N°</dt><dd>{{ d.id }}</dd>
       <dt>Département</dt><dd>{{ labelDepartement(d) }}</dd>
       <dt>Postes</dt><dd>{{ labelPostes(d) }}</dd>
-      <dt>Effectif</dt><dd>{{ d.effectif }}</dd>
+      <dt>Effectif total</dt><dd>{{ effectifTotal(d) }}</dd>
       <dt>Date</dt><dd>{{ d.date }}</dd>
       <dt>Motif</dt><dd>{{ d.motif }}</dd>
     </dl>

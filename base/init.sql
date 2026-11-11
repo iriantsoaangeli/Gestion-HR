@@ -141,6 +141,5 @@ CREATE TABLE demande (
 CREATE TABLE demandePoste (
     id SERIAL PRIMARY KEY,
     idPoste INTEGER NOT NULL REFERENCES poste (id),
-    idDemande INTEGER NOT NULL REFERENCES demande (id),
-    effectif INTEGER NOT NULL CHECK (effectif > 0)
+    idDemande INTEGER NOT NULL REFERENCES demande (id)
 );
