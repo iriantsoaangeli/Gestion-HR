@@ -1,39 +1,31 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { labelDepartement, labelPostes, totalPostes } from '../../data/demandes'
-import { labelEtape } from '../../data/etapes'
+import { labelPostes, totalPostes, texteStatut, classeStatut } from '../../utils/demande'
 
-// Tableau de demandes avec filtre (puces + recherche) et tri en cliquant sur les en-têtes.
-// filtres : [{ code, label }] — code = valeur de d.etape ('' = tout). Le n° ouvre la fiche.
+// Tableau de demandes (DemandeResponse de l'API) avec filtre (puces + recherche) et tri par en-tête.
+// Les puces de filtre sont construites à partir des statuts présents dans la liste.
 const props = defineProps({
   titre: { type: String, required: true },
   demandes: { type: Array, required: true },
-  filtres: { type: Array, default: () => [] },
   // Page ouverte par une ligne (par défaut la fiche de la demande)
   lien: { type: Function, default: (d) => `/demandes/${d.id}` },
+  vide: { type: String, default: 'Pas de demande' },
 })
-
-// Statut lisible et classe du badge
-function statut(d) {
-  if (d.etape === 'approuvee') return { texte: 'Approuvée', classe: 'ok' }
-  if (d.etape === 'refusee') return { texte: `Refusée par ${d.refuseePar}`, classe: 'ko' }
-  return { texte: `En attente ${labelEtape(d.etape)}`, classe: 'attente' }
-}
 
 // Colonnes triables : valeur utilisée pour le tri
 const COLONNES = [
   { cle: 'id', label: 'N°', valeur: (d) => d.id },
   { cle: 'date', label: 'Date', valeur: (d) => d.date },
-  { cle: 'departement', label: 'Département', valeur: (d) => labelDepartement(d) },
+  { cle: 'departement', label: 'Département', valeur: (d) => d.departement },
   { cle: 'postes', label: 'Postes', valeur: (d) => labelPostes(d) },
   { cle: 'nombre', label: 'Nb', valeur: (d) => totalPostes(d) },
   { cle: 'delai', label: 'Délai', valeur: (d) => d.delai || '9999' }, // sans délai = en dernier
-  { cle: 'statut', label: 'Statut', valeur: (d) => statut(d).texte },
+  { cle: 'statut', label: 'Statut', valeur: (d) => texteStatut(d) },
 ]
 
 const router = useRouter()
-// Toute la ligne ouvre la fiche (le n° reste un vrai lien pour le clavier et le clic molette)
+// Toute la ligne ouvre la page (le n° reste un vrai lien pour le clavier et le clic molette)
 const ouvrir = (d) => router.push(props.lien(d))
 
 const filtre = ref('')
@@ -44,17 +36,20 @@ function trier(cle) {
   tri.value = tri.value.cle === cle ? { cle, sens: -tri.value.sens } : { cle, sens: 1 }
 }
 
-const nombreParFiltre = (code) => props.demandes.filter((d) => !code || d.etape === code).length
+// Une puce par statut présent dans la liste
+const filtres = computed(() => {
+  const vus = new Map()
+  props.demandes.forEach((d) => vus.set(d.statut, d.statutLibelle))
+  return [...vus].map(([code, label]) => ({ code, label }))
+})
+const nombreParFiltre = (code) => props.demandes.filter((d) => !code || d.statut === code).length
 
 const lignes = computed(() => {
   const texte = recherche.value.trim().toLowerCase()
   const colonne = COLONNES.find((c) => c.cle === tri.value.cle)
   return props.demandes
-    .filter((d) => !filtre.value || d.etape === filtre.value)
-    .filter((d) =>
-      !texte ||
-      [d.id, labelDepartement(d), labelPostes(d), d.motif].join(' ').toLowerCase().includes(texte),
-    )
+    .filter((d) => !filtre.value || d.statut === filtre.value)
+    .filter((d) => !texte || [d.id, d.departement, labelPostes(d), d.motif].join(' ').toLowerCase().includes(texte))
     .sort((a, b) => {
       const va = colonne.valeur(a)
       const vb = colonne.valeur(b)
@@ -62,8 +57,7 @@ const lignes = computed(() => {
     })
 })
 
-const ariaTri = (cle) =>
-  tri.value.cle !== cle ? 'none' : tri.value.sens === 1 ? 'ascending' : 'descending'
+const ariaTri = (cle) => (tri.value.cle !== cle ? 'none' : tri.value.sens === 1 ? 'ascending' : 'descending')
 </script>
 
 <template>
@@ -71,7 +65,7 @@ const ariaTri = (cle) =>
     <h2>{{ titre }} <span class="count">{{ demandes.length }}</span></h2>
 
     <div class="filtres">
-      <div v-if="filtres.length" class="puces" role="group" :aria-label="`Filtrer : ${titre}`">
+      <div v-if="filtres.length > 1" class="puces" role="group" :aria-label="`Filtrer : ${titre}`">
         <button
           v-for="f in [{ code: '', label: 'Toutes' }, ...filtres]"
           :key="f.code"
@@ -93,7 +87,7 @@ const ariaTri = (cle) =>
       />
     </div>
 
-    <p v-if="!lignes.length" class="vide">Pas de demande</p>
+    <p v-if="!lignes.length" class="vide">{{ vide }}</p>
 
     <div v-else class="table-wrap">
       <table class="table">
@@ -113,11 +107,11 @@ const ariaTri = (cle) =>
           <tr v-for="d in lignes" :key="d.id" class="ligne-cliquable" :title="d.motif" @click="ouvrir(d)">
             <td><RouterLink :to="lien(d)" @click.stop>{{ d.id }}</RouterLink></td>
             <td>{{ d.date }}</td>
-            <td>{{ labelDepartement(d) }}</td>
+            <td>{{ d.departement }}</td>
             <td>{{ labelPostes(d) }}</td>
             <td class="nombre">{{ totalPostes(d) }}</td>
             <td>{{ d.delai || '—' }}</td>
-            <td><span class="badge petit" :class="statut(d).classe">{{ statut(d).texte }}</span></td>
+            <td><span class="badge petit" :class="classeStatut(d)">{{ texteStatut(d) }}</span></td>
           </tr>
         </tbody>
       </table>

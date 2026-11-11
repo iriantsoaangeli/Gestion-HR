@@ -1,31 +1,14 @@
 <script setup>
-import { computed } from 'vue'
-import { ETAPES } from '../../data/etapes'
-
-// etape : code de l'étape en cours, 'approuvee' (tout est fait)
-// refusee : code de l'étape qui a refusé (marquée en rouge, la suite reste à venir)
-const props = defineProps({
-  etape: { type: String, required: true },
-  refusee: { type: String, default: '' },
-})
-
-const courante = computed(() => {
-  if (props.etape === 'approuvee') return ETAPES.length
-  return ETAPES.findIndex((e) => e.code === (props.refusee || props.etape))
-})
-
-function etat(i) {
-  if (i < courante.value) return 'faite'
-  if (i === courante.value) return props.refusee ? 'refusee' : 'courante'
-  return 'a-venir'
-}
+// Barre de progression des étapes. etapes = [{ libelle, etat }] calculées par le backend
+// (suivi d'une demande, ou GET /api/demandes/etapes) ; etat : faite, courante, refusee, a-venir.
+defineProps({ etapes: { type: Array, required: true } })
 </script>
 
 <template>
   <ol class="progression">
-    <li v-for="(e, i) in ETAPES" :key="e.code" :class="etat(i)">
+    <li v-for="e in etapes" :key="e.libelle" :class="e.etat">
       <span class="point"></span>
-      <span class="label">{{ e.label }}</span>
+      <span class="label">{{ e.libelle }}</span>
     </li>
   </ol>
 </template>

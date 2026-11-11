@@ -1,71 +1,37 @@
 <script setup>
 import { computed } from 'vue'
 import Progression from '../ui/Progression.vue'
-import {
-  labelDepartement,
-  lignesPostes,
-  NATURES,
-  totalPostes,
-  joursRestants,
-} from '../../data/demandes'
-import { ETAPES, codeEtape, labelEtape } from '../../data/etapes'
+import { lignesPostes, NATURES, totalPostes, texteStatut, classeStatut } from '../../utils/demande'
+import { dateLongue, joursAvant } from '../../utils/dates'
 
-// Fiche complète d'une demande (progression, en-tête, chiffres, infos, motif, postes, suivi).
-// Utilisée par la page détail et par la validation.
-// Slot « cote » : panneau affiché en haut de la colonne de droite, au-dessus du suivi
-// (ex. les boutons Valider / Refuser).
+// Fiche complète d'une demande (DemandeResponse de l'API) : progression, en-tête, chiffres, infos,
+// motif, postes, suivi. Le suivi et la progression sont calculés par le backend (demande.suivi).
+// Slot « cote » : panneau en haut de la colonne de droite, au-dessus du suivi (ex. la décision).
 const props = defineProps({ demande: { type: Object, required: true } })
-
 const d = computed(() => props.demande)
-const refusee = computed(() => (d.value?.etape === 'refusee' ? codeEtape(d.value.refuseePar) : ''))
 
-// Statut affiché dans le badge de l'en-tête
-const statut = computed(() => {
-  if (!d.value) return null
-  if (d.value.etape === 'approuvee') return { classe: 'ok', texte: 'Approuvée' }
-  if (d.value.etape === 'refusee') return { classe: 'ko', texte: `Refusée par ${d.value.refuseePar}` }
-  return { classe: 'attente', texte: `En attente ${labelEtape(d.value.etape)}` }
-})
-
+const jours = computed(() => joursAvant(d.value.delai))
 
 // Délai : texte + niveau d'urgence (moins de 2 semaines = proche)
 const delai = computed(() => {
-  const j = joursRestants(d.value)
+  const j = jours.value
   if (j === null) return { texte: 'Aucun délai fixé', classe: '' }
   if (j < 0) return { texte: `Dépassé de ${-j} jour(s)`, classe: 'ko' }
   return { texte: `${j} jour(s) restant(s)`, classe: j < 14 ? 'attente' : 'ok' }
 })
-
-// Suivi étape par étape, daté : création, puis date de décision de chaque étape (historique)
-const suivi = computed(() => {
-  const dem = d.value
-  const i = dem.etape === 'approuvee' ? ETAPES.length : ETAPES.findIndex((e) => e.code === (refusee.value || dem.etape))
-  const dateDe = (k) => (k === 0 ? dem.date : dem.historique?.[ETAPES[k].code])
-  return ETAPES.map((e, k) => {
-    const date = dateDe(k)
-    if (k === 0) return { ...e, etat: 'faite', texte: 'Demande créée', date }
-    if (k < i) return { ...e, etat: 'faite', texte: 'Validée', date }
-    if (k === i && refusee.value) return { ...e, etat: 'refusee', texte: 'Refusée', date }
-    if (k === i) return { ...e, etat: 'courante', texte: 'En attente depuis', date: dateDe(k - 1) }
-    return { ...e, etat: 'a-venir', texte: refusee.value ? 'Non atteinte' : 'À venir', date: null }
-  })
-})
-
-const dateLongue = (iso) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 </script>
 
 <template>
   <div class="fiche">
-    <Progression :etape="d.etape" :refusee="refusee" />
+    <Progression :etapes="d.suivi" />
 
     <header class="fiche-entete">
       <div>
         <p class="fiche-sur-titre">Demande de personnel</p>
-        <h1>N° {{ d.id }} — {{ labelDepartement(d) }}</h1>
-        <p class="help">Créée le {{ dateLongue(d.date) }}</p>
+        <h1>N° {{ d.id }} — {{ d.departement }}</h1>
+        <p class="help">Créée le {{ dateLongue(d.date) }} par {{ d.demandeur }}</p>
       </div>
-      <span class="badge" :class="statut.classe">{{ statut.texte }}</span>
+      <span class="badge" :class="classeStatut(d)">{{ texteStatut(d) }}</span>
     </header>
 
     <!-- Chiffres clés -->
@@ -75,8 +41,8 @@ const dateLongue = (iso) =>
         <span class="chiffre-label">postes demandés</span>
       </div>
       <div class="chiffre">
-        <span class="chiffre-valeur">{{ joursRestants(d) === null ? '—' : Math.abs(joursRestants(d)) }}</span>
-        <span class="chiffre-label">{{ joursRestants(d) < 0 ? 'jours de retard' : 'jours restants' }}</span>
+        <span class="chiffre-valeur">{{ jours === null ? '—' : Math.abs(jours) }}</span>
+        <span class="chiffre-label">{{ jours < 0 ? 'jours de retard' : 'jours restants' }}</span>
       </div>
       <div class="chiffre">
         <span class="chiffre-valeur">{{ d.delai ? dateLongue(d.delai) : '—' }}</span>
@@ -89,7 +55,8 @@ const dateLongue = (iso) =>
         <h2>Informations</h2>
         <dl class="fiche-infos">
           <dt>N° de demande</dt><dd>{{ d.id }}</dd>
-          <dt>Département</dt><dd>{{ labelDepartement(d) }}</dd>
+          <dt>Département</dt><dd>{{ d.departement }}</dd>
+          <dt>Demandeur</dt><dd>{{ d.demandeur }}</dd>
           <dt>Date de création</dt><dd>{{ dateLongue(d.date) }}</dd>
           <dt>Délai</dt>
           <dd>
@@ -97,7 +64,7 @@ const dateLongue = (iso) =>
             <span v-if="delai.classe" class="badge petit" :class="delai.classe">{{ delai.texte }}</span>
             <span v-else class="help">{{ delai.texte }}</span>
           </dd>
-          <dt>Statut</dt><dd>{{ statut.texte }}</dd>
+          <dt>Statut</dt><dd>{{ texteStatut(d) }}</dd>
         </dl>
       </section>
 
@@ -131,10 +98,11 @@ const dateLongue = (iso) =>
         <section class="fiche-bloc fiche-suivi">
           <h2>Suivi</h2>
           <ol class="suivi">
-            <li v-for="e in suivi" :key="e.code" :class="e.etat">
-              <strong>{{ e.label }}</strong>
+            <li v-for="e in d.suivi" :key="e.libelle" :class="e.etat">
+              <strong>{{ e.libelle }}</strong>
               <span>
                 {{ e.texte }}<template v-if="e.date"> le <time :datetime="e.date">{{ dateLongue(e.date) }}</time></template>
+                <template v-if="e.utilisateur"> · {{ e.utilisateur }}</template>
               </span>
             </li>
           </ol>

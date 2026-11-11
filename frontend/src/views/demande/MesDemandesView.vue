@@ -1,15 +1,18 @@
 <script setup>
-import { computed } from 'vue'
 import AppLayout from '../../components/layout/AppLayout.vue'
 import DemandesBoard from '../../components/demande/DemandesBoard.vue'
-import { demandes, estAMoi } from '../../data/demandes'
+import Erreur from '../../components/ui/Erreur.vue'
+import * as api from '../../api/demandes'
+import { useChargement } from '../../utils/chargement'
 
-// Seulement les demandes créées par l'utilisateur connecté
-const mesDemandes = computed(() => demandes.value.filter(estAMoi))
+// Demandes créées par l'utilisateur connecté (c'est aussi l'accueil)
+const { donnees: demandes, erreur, chargement } = useChargement(api.mesDemandes, [])
 </script>
 
 <template>
   <AppLayout title="Mes demandes">
-    <DemandesBoard :demandes="mesDemandes" />
+    <Erreur :message="erreur" />
+    <p v-if="chargement" class="help">Chargement…</p>
+    <DemandesBoard v-else :demandes="demandes" />
   </AppLayout>
 </template>

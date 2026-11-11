@@ -16,9 +16,11 @@ async function deconnexion() {
     <nav>
       <p class="section">Demandes</p>
       <ul>
-        <li><RouterLink to="/demande">Nouvelle demande</RouterLink></li>
+        <li v-if="utilisateur?.peutCreerDemande"><RouterLink to="/demande">Nouvelle demande</RouterLink></li>
         <li><RouterLink to="/mes-demandes">Mes demandes</RouterLink></li>
-        <li><RouterLink to="/demandes-a-traiter">Demandes à traiter</RouterLink></li>
+        <li v-if="utilisateur?.valideDesDemandes">
+          <RouterLink to="/demandes-a-traiter">Demandes à traiter</RouterLink>
+        </li>
         <li v-if="utilisateur?.voitToutesLesDemandes">
           <RouterLink to="/toutes-les-demandes">Toutes les demandes</RouterLink>
         </li>

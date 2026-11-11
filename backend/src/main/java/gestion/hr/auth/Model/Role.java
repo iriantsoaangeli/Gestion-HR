@@ -23,6 +23,11 @@ public enum Role {
         return libelle;
     }
 
+    /** Seul un manager crée des demandes de personnel. */
+    public boolean peutCreerDemande() {
+        return this == MANAGER;
+    }
+
     /** Seuls ADMIN et DIRECTION voient toutes les demandes ; les autres ne voient que les leurs. */
     public boolean voitToutesLesDemandes() {
         return this == ADMIN || this == DIRECTION;

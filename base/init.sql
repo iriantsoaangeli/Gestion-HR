@@ -121,31 +121,53 @@ CREATE TABLE historiqueEmploi (
 );
 
 -- =====================================================================
+-- Utilisateurs
+-- =====================================================================
+
+-- Utilisateurs de l'application (mdp = hachage BCrypt, role = enum gestion.hr.auth.Model.Role)
+CREATE TABLE utilisateur (
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    mdp VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL
+);
+
+-- =====================================================================
 -- Demandes de personnel
 -- =====================================================================
 
--- Demande de personnel
+-- Demande de personnel, creee par un manager (idDemandeur)
 CREATE TABLE demande (
     id SERIAL PRIMARY KEY,
     idDepartement INTEGER NOT NULL REFERENCES departement (id),
     idStatus INTEGER NOT NULL REFERENCES status (id),
+    idDemandeur INTEGER NOT NULL REFERENCES utilisateur (id),
     date DATE NOT NULL DEFAULT NOW(),
     motif VARCHAR(200) NOT NULL,
     delai DATE DEFAULT NULL
 );
 
--- Table de liaison entre demande et poste
+-- Remplacement : un poste existant a remplir (1 poste = 1 siege, pas d'effectif)
 CREATE TABLE demandePoste (
     id SERIAL PRIMARY KEY,
     idPoste INTEGER NOT NULL REFERENCES poste (id),
     idDemande INTEGER NOT NULL REFERENCES demande (id)
 );
 
-
--- Utilisateurs de l'application
-CREATE TABLE utilisateur (
+-- Creation : le poste n'est pas encore cree (en suspens), on designe sa fonction
+-- et le nombre de postes voulus (l'effectif n'existe que pour une creation)
+CREATE TABLE demandeFonction (
     id SERIAL PRIMARY KEY,
-    login VARCHAR(50) NOT NULL UNIQUE,
-    mdp VARCHAR(100) NOT NULL,
-    role VARCHAR(20) NOT NULL
+    idFonction INTEGER NOT NULL REFERENCES fonction (id),
+    idDemande INTEGER NOT NULL REFERENCES demande (id),
+    effectif INTEGER NOT NULL CHECK (effectif > 0)
+);
+
+-- Historique des decisions sur une demande : qui a valide / refuse, quand, et le statut obtenu
+CREATE TABLE histoDemande (
+    id SERIAL PRIMARY KEY,
+    idDemande INTEGER NOT NULL REFERENCES demande (id),
+    idUtilisateur INTEGER NOT NULL REFERENCES utilisateur (id),
+    idStatus INTEGER NOT NULL REFERENCES status (id),
+    date DATE NOT NULL DEFAULT NOW()
 );

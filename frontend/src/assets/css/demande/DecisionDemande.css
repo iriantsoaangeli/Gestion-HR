@@ -1,4 +1,4 @@
-/* Panneau de décision et file d'attente de la validation (components/demande/DemandeValidation.vue) */
+/* Panneau Valider / Refuser et file des demandes qui attendent ma décision (components/demande/DecisionDemande.vue) */
 
 /* Panneau de décision mis en avant */
 .fiche-bloc.decision {
@@ -21,7 +21,7 @@
   list-style: none;
 }
 
-.file-attente button {
+.file-attente a {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 0.5rem;
@@ -34,7 +34,7 @@
   text-align: left;
 }
 
-.file-attente button:hover {
+.file-attente a:hover {
   background: var(--color-background-mute);
 }
 

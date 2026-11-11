@@ -18,6 +18,7 @@ const demande = [
   {
     path: '/demande',
     name: 'nouvelle-demande',
+    meta: { acces: (u) => u.peutCreerDemande }, // MANAGER
     component: () => import('../views/demande/NouvelleDemandeView.vue'),
   },
   {
@@ -33,9 +34,10 @@ const demande = [
     component: () => import('../views/demande/ToutesLesDemandesView.vue'),
   },
   {
-    // En attente (→ écran de validation) et déjà faites
+    // À valider (mon étape) et déjà traitées par moi ; la décision se prend dans la fiche
     path: '/demandes-a-traiter',
     name: 'demandes-a-traiter',
+    meta: { acces: (u) => u.valideDesDemandes }, // HR, DIRECTION, FINANCE
     component: () => import('../views/demande/DemandesATraiterView.vue'),
   },
   {
@@ -43,13 +45,6 @@ const demande = [
     name: 'fiche-demande',
     props: true,
     component: () => import('../views/demande/FicheDemandeView.vue'),
-  },
-  {
-    // Une page par étape, chacune tenue par ses propres utilisateurs
-    path: '/validation/:etape(hr|direction|finance)',
-    name: 'validation',
-    props: true,
-    component: () => import('../views/demande/ValidationView.vue'),
   },
 ]
 

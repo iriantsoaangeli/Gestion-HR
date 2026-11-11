@@ -1,19 +1,30 @@
 <script setup>
 import AppLayout from '../../components/layout/AppLayout.vue'
-import DemandesBoard from '../../components/demande/DemandesBoard.vue'
-import { demandes } from '../../data/demandes'
+import DemandesColonne from '../../components/demande/DemandesColonne.vue'
+import Erreur from '../../components/ui/Erreur.vue'
+import * as api from '../../api/demandes'
+import { useChargement } from '../../utils/chargement'
 
-// Demandes à traiter : en attente à gauche (ouvre l'écran de validation de l'étape), déjà faites à droite (ouvre la fiche)
-const versValidation = (d) => `/validation/${d.etape}?id=${d.id}`
+// À gauche : les demandes qui attendent ma décision ; à droite : celles sur lesquelles j'ai déjà décidé.
+// La décision se prend dans la fiche (une ligne ouvre la fiche).
+const aValider = useChargement(api.aTraiter, [])
+const traitees = useChargement(api.traitees, [])
 </script>
 
 <template>
   <AppLayout title="Demandes à traiter">
-    <DemandesBoard
-      :demandes="demandes"
-      titre-en-cours="En attente"
-      titre-traitees="Déjà faites"
-      :lien-en-cours="versValidation"
-    />
+    <Erreur :message="aValider.erreur.value || traitees.erreur.value" />
+    <div class="board">
+      <DemandesColonne
+        titre="À valider"
+        :demandes="aValider.donnees.value"
+        :vide="aValider.chargement.value ? 'Chargement…' : 'Rien à valider'"
+      />
+      <DemandesColonne
+        titre="Déjà traitées par moi"
+        :demandes="traitees.donnees.value"
+        :vide="traitees.chargement.value ? 'Chargement…' : 'Aucune demande traitée'"
+      />
+    </div>
   </AppLayout>
 </template>

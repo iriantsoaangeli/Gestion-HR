@@ -51,11 +51,19 @@ historiqueEmploi(**id**, date, #idMouvement, #idPersonne)
 status(**id**, label)
 
 **Demande de personnel**  
-demande(**id**, #idDepartement, #idStatus,date,motif,delais?)
+demande(**id**, #idDepartement, #idStatus, #idDemandeur, date, motif, delai?)  
+> idDemandeur = utilisateur (manager) qui a créé la demande
 
 
-**Table de liason**
-demandePoste(**id**,#idPoste,#idDemande)
+**Remplacement d'un poste existant** (1 poste = 1 siège, pas d'effectif)  
+demandePoste(**id**, #idPoste, #idDemande)
+
+**Création de postes** : le poste n'est pas encore créé, on désigne sa fonction et l'effectif voulu  
+demandeFonction(**id**, #idFonction, #idDemande, effectif)
+
+**Historique des décisions** (qui a validé / refusé, quand, statut obtenu)  
+histoDemande(**id**, #idDemande, #idUtilisateur, #idStatus, date)  
+> status : 1 EN_ATTENTE_HR, 2 EN_ATTENTE_DIRECTION, 3 EN_ATTENTE_FINANCE, 4 APPROUVEE, 5 REFUSEE (base/data.sql)
 
 
 **Les utilisateurs de l'application**  
