@@ -127,6 +127,7 @@ CREATE TABLE demande (
     dateDemande DATE NOT NULL DEFAULT NOW(),
     dateLimite DATE NOT NULL,
     effectif INTEGER NOT NULL CHECK (effectif > 0),
+    motif VARCHAR(200) NOT NULL,
     CHECK (dateLimite >= dateDemande)
 );
 
