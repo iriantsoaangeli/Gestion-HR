@@ -129,7 +129,8 @@ CREATE TABLE demande (
     idDepartement INTEGER NOT NULL REFERENCES departement (id),
     idStatus INTEGER NOT NULL REFERENCES status (id),
     date DATE NOT NULL DEFAULT NOW(),
-    motif VARCHAR(200) NOT NULL
+    motif VARCHAR(200) NOT NULL,
+    delai DATE DEFAULT NULL
 );
 
 -- Table de liaison entre demande et poste
