@@ -6,7 +6,7 @@
 poste(**id**,label,#idPersonne?)  
 
 **Le departement d'un poste**  
-departement(**id**,label)
+departement(**id**,label,nb)
 
 **Table de liaison entre poste et departement**  
 affectation(**id**,#idPoste,#idDepartement)  
@@ -37,3 +37,9 @@ clearance(**id**,label)
 
 **Table de liaison**  
 clearancePoste(**id**,#idPoste)
+
+**Des status des demandes**  
+status(**id**,label)
+
+**Demande de personnel**  
+demande(**id**,#idDepartement,#idStatus)
