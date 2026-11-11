@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { ETAPES } from '../data/etapes'
-import { utilisateur, seDeconnecter } from '../auth/session'
+import { ETAPES } from '../../data/etapes'
+import { utilisateur, seDeconnecter } from '../../auth/session'
 
 const router = useRouter()
 
@@ -48,14 +48,6 @@ const items = [
         <li v-for="e in ETAPES_VALIDATION" :key="e.code">
           <RouterLink :to="`/validation/${e.code}`">{{ e.label }}</RouterLink>
         </li>
-      </ul>
-
-      <!-- TEMPORAIRE : liens vers les pages de démonstration des erreurs — à supprimer -->
-      <p class="section">Temporaire</p>
-      <ul>
-        <li><RouterLink to="/temporaire/erreur-login">Erreurs login</RouterLink></li>
-        <li><RouterLink to="/temporaire/erreur-demande">Erreurs demande</RouterLink></li>
-        <li><RouterLink to="/temporaire/erreur-validation">Erreurs validation</RouterLink></li>
       </ul>
     </nav>
 

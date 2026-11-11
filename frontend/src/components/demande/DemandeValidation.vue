@@ -2,10 +2,10 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FicheDemande from './FicheDemande.vue'
-import { utilisateur } from '../auth/session'
-import Progression from './Progression.vue'
-import { demandes, trouverDemande, aujourdhui, labelDepartement, totalPostes } from '../data/demandes'
-import { etapeSuivante, labelEtape } from '../data/etapes'
+import { utilisateur } from '../../auth/session'
+import Progression from '../ui/Progression.vue'
+import { demandes, trouverDemande, aujourdhui, labelDepartement, totalPostes } from '../../data/demandes'
+import { etapeSuivante, labelEtape } from '../../data/etapes'
 
 const props = defineProps({ etape: { type: String, required: true } })
 const route = useRoute()

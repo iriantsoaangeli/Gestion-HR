@@ -1,0 +1,104 @@
+/* Un tableau de demandes : filtres, tri, lignes cliquables (components/demande/DemandesColonne.vue) */
+
+/* Filtre au-dessus du tableau : puces + recherche */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.puce {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.85rem;
+}
+
+.puce.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.puce.active .count {
+  background: rgb(255 255 255 / 0.25);
+}
+
+.filtres .filtre-recherche {
+  flex: 1;
+  min-width: 12rem;
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+/* En-têtes cliquables pour trier */
+.table th .tri {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table th .tri:hover {
+  color: var(--color-primary);
+}
+
+.tri-fleche {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.table th[aria-sort='ascending'] .tri-fleche,
+.table th[aria-sort='descending'] .tri-fleche {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+/* Ligne entière cliquable : ouvre la fiche */
+.ligne-cliquable {
+  cursor: pointer;
+}
+
+.ligne-cliquable:hover td {
+  background: var(--color-primary-soft);
+}
+
+.table .badge.petit {
+  margin-left: 0;
+}
+
+.colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-soft);
+}
+
+/* Card vide : message centré */
+.colonne .vide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+}

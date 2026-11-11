@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { ETAPES } from '../data/etapes'
+import { ETAPES } from '../../data/etapes'
 
 // etape : code de l'étape en cours, 'approuvee' (tout est fait)
 // refusee : code de l'étape qui a refusé (marquée en rouge, la suite reste à venir)

@@ -51,29 +51,6 @@ const router = createRouter({
       path: '/demande/:etape(hr|direction|finance)',
       redirect: (to) => ({ path: `/validation/${to.params.etape}`, query: to.query }),
     },
-    // TEMPORAIRE : pages de démonstration des erreurs — à supprimer avec views/temporaire/
-    {
-      path: '/temporaire/erreur-login',
-      meta: { public: true },
-      component: () => import('../views/temporaire/ErreurLoginView.vue'),
-    },
-    {
-      path: '/temporaire/erreur-demande',
-      component: () => import('../views/temporaire/ErreurDemandeView.vue'),
-    },
-    {
-      path: '/temporaire/erreur-validation',
-      component: () => import('../views/temporaire/ErreurValidationView.vue'),
-    },
-    {
-      // A EFFACER avec views/AboutView.vue
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
-    },
   ],
 })
 

@@ -1,10 +1,10 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import RechercheSelect from './RechercheSelect.vue'
-import Erreur from './Erreur.vue'
-import { departements, postes } from '../data/mock'
-import { ajouterDemande } from '../data/demandes'
+import RechercheSelect from '../ui/RechercheSelect.vue'
+import Erreur from '../ui/Erreur.vue'
+import { departements, postes } from '../../data/mock'
+import { ajouterDemande } from '../../data/demandes'
 
 // demande(id, #idDepartement, #idStatus, date, motif, delai) — delai : date limite, NULL si aucun
 // demandePoste(id, #idPoste, #idDemande) — 1 poste = 1 siège, donc pas d'effectif

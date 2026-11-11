@@ -1,0 +1,13 @@
+/* Mise en page : menu à gauche, contenu à droite (components/layout/AppLayout.vue) */
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+}

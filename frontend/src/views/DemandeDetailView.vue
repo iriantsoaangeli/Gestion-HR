@@ -1,9 +1,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import AppLayout from '../components/AppLayout.vue'
-import FicheDemande from '../components/FicheDemande.vue'
-import Erreur from '../components/Erreur.vue'
+import AppLayout from '../components/layout/AppLayout.vue'
+import FicheDemande from '../components/demande/FicheDemande.vue'
+import Erreur from '../components/ui/Erreur.vue'
 import { trouverDemande } from '../data/demandes'
 
 // Fiche d'une demande : /demandes/:id

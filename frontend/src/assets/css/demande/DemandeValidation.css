@@ -1,0 +1,43 @@
+/* Panneau de décision et file d'attente de la validation (components/demande/DemandeValidation.vue) */
+
+/* Panneau de décision mis en avant */
+.fiche-bloc.decision {
+  border: 2px solid var(--color-primary);
+  background: var(--color-background);
+}
+
+.decision .actions button {
+  flex: 1;
+}
+
+.decision .success,
+.decision .error {
+  margin: 0;
+}
+
+.file-attente {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.file-attente button {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.file-attente button:hover {
+  background: var(--color-background-mute);
+}
+
+.file-attente .help {
+  width: 100%;
+}

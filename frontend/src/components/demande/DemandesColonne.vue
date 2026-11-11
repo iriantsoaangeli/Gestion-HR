@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { labelDepartement, labelPostes, totalPostes } from '../data/demandes'
-import { labelEtape } from '../data/etapes'
+import { labelDepartement, labelPostes, totalPostes } from '../../data/demandes'
+import { labelEtape } from '../../data/etapes'
 
 // Tableau de demandes avec filtre (puces + recherche) et tri en cliquant sur les en-têtes.
 // filtres : [{ code, label }] — code = valeur de d.etape ('' = tout). Le n° ouvre la fiche.

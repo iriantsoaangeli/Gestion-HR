@@ -1,0 +1,42 @@
+/* Liste déroulante avec recherche (components/ui/RechercheSelect.vue) */
+
+/* Liste déroulante avec recherche (RechercheSelect) */
+.recherche-select {
+  position: relative;
+}
+
+.recherche-select input {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.recherche-liste {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 14rem;
+  overflow-y: auto;
+  margin: -0.5rem 0 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-background);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+}
+
+.recherche-liste li {
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+}
+
+.recherche-liste li.actif {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.recherche-liste li.help {
+  cursor: default;
+}

@@ -1,0 +1,229 @@
+/* Fiche d'une demande : en-tête, chiffres, blocs, suivi (components/demande/FicheDemande.vue) */
+
+.fiche {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fiche .progression {
+  max-width: none;
+  margin-bottom: 0.5rem;
+}
+
+.fiche-entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.fiche-entete h1 {
+  margin-bottom: 0.25rem;
+}
+
+.fiche-sur-titre {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.fiche-chiffres {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.chiffre {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-soft);
+}
+
+.chiffre-valeur {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.chiffre-label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* Remplit la hauteur restante : 3 colonnes, le suivi occupe toute la hauteur à droite */
+.fiche-grille {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(220px, 0.7fr);
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+}
+
+.fiche-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-soft);
+}
+
+.fiche-bloc .vide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+.fiche-postes {
+  grid-column: 1 / span 2;
+}
+
+.badge.nature.creation {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.badge.nature.remplacement {
+  background: rgba(60, 120, 220, 0.15);
+  color: #2f63b8;
+}
+
+/* Colonne de droite : panneau éventuel (décision…) puis suivi, sur toute la hauteur */
+.fiche-cote {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.fiche-cote .fiche-suivi {
+  flex: 1;
+}
+
+.fiche-infos {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.25rem;
+}
+
+.fiche-infos dt {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.fiche-motif {
+  flex: 1;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-background);
+  font-style: italic;
+  white-space: pre-wrap;
+}
+
+/* Suivi vertical des étapes */
+.suivi {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suivi li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 1.5rem 1.75rem;
+}
+
+.suivi li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border-hover);
+  border-radius: 50%;
+  background: var(--color-background);
+}
+
+/* Trait vertical entre un point et le suivant */
+.suivi li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: calc(0.2rem + 14px);
+  bottom: -0.2rem;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.suivi .faite:not(:last-child)::after {
+  background: var(--color-primary);
+}
+
+.suivi .faite::before {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.suivi .courante::before {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-soft);
+}
+
+.suivi .refusee::before {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+}
+
+.suivi .refusee span {
+  color: var(--color-danger);
+}
+
+.suivi .a-venir {
+  opacity: 0.6;
+}
+
+.suivi span {
+  font-size: 0.9rem;
+}
+
+.fiche-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .fiche-chiffres {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fiche-grille {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .fiche-postes,
+  .fiche-cote {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}

@@ -1,14 +1,14 @@
 <script setup>
 import { computed } from 'vue'
-import Progression from './Progression.vue'
+import Progression from '../ui/Progression.vue'
 import {
   labelDepartement,
   lignesPostes,
   NATURES,
   totalPostes,
   joursRestants,
-} from '../data/demandes'
-import { ETAPES, codeEtape, labelEtape } from '../data/etapes'
+} from '../../data/demandes'
+import { ETAPES, codeEtape, labelEtape } from '../../data/etapes'
 
 // Fiche complète d'une demande (progression, en-tête, chiffres, infos, motif, postes, suivi).
 // Utilisée par la page détail et par la validation.

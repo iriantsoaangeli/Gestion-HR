@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Erreur from '../components/Erreur.vue'
+import Erreur from '../components/ui/Erreur.vue'
 import { seConnecter } from '../auth/session'
 
 const router = useRouter()

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import DemandesColonne from './DemandesColonne.vue'
-import { ETAPES } from '../data/etapes'
+import { ETAPES } from '../../data/etapes'
 
 // Deux tableaux côte à côte : « En cours » à gauche, « Déjà traitées » à droite.
 // Utilisé par Mes demandes et Toutes les demandes (seule la liste passée change).
