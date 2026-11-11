@@ -146,5 +146,6 @@ CREATE TABLE demandePoste (
 CREATE TABLE utilisateur (
     id SERIAL PRIMARY KEY,
     login VARCHAR(50) NOT NULL UNIQUE,
-    mdp VARCHAR(100) NOT NULL
+    mdp VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL
 );
