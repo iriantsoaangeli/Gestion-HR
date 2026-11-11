@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { chargerSession, utilisateur } from '../auth/session'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,6 +9,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
+      meta: { public: true },
       component: () => import('../views/LoginView.vue'),
     },
     {
@@ -50,6 +52,7 @@ const router = createRouter({
     // TEMPORAIRE : pages de démonstration des erreurs — à supprimer avec views/temporaire/
     {
       path: '/temporaire/erreur-login',
+      meta: { public: true },
       component: () => import('../views/temporaire/ErreurLoginView.vue'),
     },
     {
@@ -70,6 +73,15 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
   ],
+})
+
+// Il faut être connecté partout, sauf sur les pages marquées meta.public (login…)
+router.beforeEach(async (to) => {
+  await chargerSession()
+  if (!utilisateur.value && !to.meta.public) {
+    return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
+  }
+  if (utilisateur.value && to.name === 'login') return '/'
 })
 
 export default router

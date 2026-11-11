@@ -1,0 +1,13 @@
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/Controller/DemandeController.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/HrApplication.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/Model/Demande.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/Service/DemandeService.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/AuthController.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/AuthErreurs.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/LoginRequest.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/Role.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/SecurityConfig.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/Utilisateur.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/UtilisateurDetailsService.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/UtilisateurRepository.java
+/home/angeli/Asa/Mr tovo/Gestion HR/backend/src/main/java/gestion/hr/auth/UtilisateurResponse.java

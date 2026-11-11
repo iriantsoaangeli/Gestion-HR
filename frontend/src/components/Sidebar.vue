@@ -1,5 +1,14 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { ETAPES } from '../data/etapes'
+import { utilisateur, seDeconnecter } from '../auth/session'
+
+const router = useRouter()
+
+async function deconnexion() {
+  await seDeconnecter()
+  router.push('/login')
+}
 
 // Manager crée la demande, les autres étapes valident
 const ETAPES_VALIDATION = ETAPES.slice(1)
@@ -47,5 +56,14 @@ const items = [
         <li><RouterLink to="/temporaire/erreur-validation">Erreurs validation</RouterLink></li>
       </ul>
     </nav>
+
+    <!-- Utilisateur connecté -->
+    <div v-if="utilisateur" class="compte">
+      <div>
+        <strong>{{ utilisateur.login }}</strong>
+        <span class="help">{{ utilisateur.roleLibelle }}</span>
+      </div>
+      <button type="button" class="bouton-deconnexion" @click="deconnexion">Se déconnecter</button>
+    </div>
   </aside>
 </template>

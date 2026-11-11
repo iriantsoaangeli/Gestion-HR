@@ -59,4 +59,5 @@ demandePoste(**id**,#idPoste,#idDemande)
 
 
 **Les utilisateurs de l'application**  
-utilisateur(**id**,login,mdp)  
+utilisateur(**id**,login,mdp,role)  
+> mdp = hachage BCrypt ; role ∈ MANAGER, HR, DIRECTION, FINANCE, ADMIN (comptes de test : base/data.sql)  

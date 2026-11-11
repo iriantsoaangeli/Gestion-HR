@@ -60,11 +60,44 @@ h1 {
 
 /* ---------- Sidebar ---------- */
 .sidebar {
+  display: flex;
+  flex-direction: column;
   width: 240px;
   flex-shrink: 0;
   padding: 1.5rem 1rem;
   border-right: 1px solid var(--color-border);
   background: var(--color-background-soft);
+}
+
+/* Utilisateur connecté, en bas du menu */
+.sidebar nav {
+  flex: 1;
+}
+
+.sidebar .compte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 1rem 0.5rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.sidebar .compte strong,
+.sidebar .compte .help {
+  display: block;
+}
+
+.bouton-deconnexion {
+  align-self: stretch;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.bouton-deconnexion:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .sidebar .brand {
