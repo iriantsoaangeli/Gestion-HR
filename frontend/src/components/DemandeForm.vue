@@ -32,7 +32,7 @@ const DELAI_DEFAUT = dansLe({ mois: 3 })
 
 const router = useRouter()
 // ajouts : postes à créer [{ label, effectif }] — l'effectif ne concerne QUE la création
-//   (effectif = nombre de sièges à créer pour cet intitulé)
+//   (effectif = nombre de postes à créer pour cet intitulé)
 // remplacements : id des postes existants à remplir ou remplacer (1 poste = 1 siège, pas d'effectif)
 const form = reactive({
   idDepartement: '',
@@ -129,7 +129,7 @@ function envoyer() {
 
       <fieldset :disabled="!form.idDepartement">
         <legend><label for="ajout-poste">Ajouter un poste</label></legend>
-        <p class="help">Nouveau poste : indiquez combien de sièges créer.</p>
+        <p class="help">Nouveau poste : indiquez combien de postes créer.</p>
         <RechercheSelect
           id="ajout-poste"
           :options="libellesDisponibles"

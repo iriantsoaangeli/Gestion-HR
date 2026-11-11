@@ -8,3 +8,4 @@ export const ETAPES = [
 
 export const etapeSuivante = (code) => ETAPES[ETAPES.findIndex((e) => e.code === code) + 1]
 export const labelEtape = (code) => ETAPES.find((e) => e.code === code)?.label
+export const codeEtape = (label) => ETAPES.find((e) => e.label === label)?.code

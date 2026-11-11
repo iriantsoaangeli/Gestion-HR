@@ -9,9 +9,13 @@ defineProps({ etape: { type: String, required: true } })
 </script>
 
 <template>
-  <AppLayout title="Demande de personnel">
-    <Progression :etape="etape" />
-    <DemandeForm v-if="etape === 'manager'" />
+  <!-- En validation, le titre est dans l'en-tête de la fiche -->
+  <AppLayout :title="etape === 'manager' ? 'Demande de personnel' : ''">
+    <!-- La validation affiche sa propre progression (celle de la demande) dans la fiche -->
+    <template v-if="etape === 'manager'">
+      <Progression etape="manager" />
+      <DemandeForm />
+    </template>
     <DemandeValidation v-else :etape="etape" />
   </AppLayout>
 </template>

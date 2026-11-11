@@ -21,6 +21,13 @@ const router = createRouter({
       component: () => import('../views/MesDemandesView.vue'),
     },
     {
+      // Fiche détaillée d'une demande
+      path: '/demandes/:id(\\d+)',
+      name: 'demande-detail',
+      component: () => import('../views/DemandeDetailView.vue'),
+      props: true,
+    },
+    {
       // Workflow : /demande/manager (formulaire), /hr, /direction, /finance (validation)
       path: '/demande/:etape(manager|hr|direction|finance)',
       name: 'demande',
