@@ -5,6 +5,7 @@
   --color-primary: hsla(160, 100%, 37%, 1);
   --color-primary-soft: hsla(160, 100%, 37%, 0.15);
   --color-danger: #d33;
+  --color-success: hsla(160, 100%, 37%, 1);
   --radius: 6px;
 }
 
@@ -34,6 +35,8 @@ h1 {
 
 .content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 2rem;
 }
 
@@ -158,4 +161,178 @@ button {
 .success {
   margin-top: 1rem;
   color: var(--color-primary);
+}
+
+.sidebar .section {
+  margin: 1.5rem 0 0.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* ---------- Progression (étapes d'une demande) ---------- */
+.progression {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  max-width: 640px;
+  margin-bottom: 2rem;
+}
+
+.progression li {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Ligne horizontale entre deux points */
+.progression li + li::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--color-border);
+}
+
+.progression .point {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-hover);
+  background: var(--color-background);
+}
+
+.progression .faite .point,
+.progression .faite + li::before,
+.progression .courante::before {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.progression .courante .point {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-soft);
+}
+
+.progression .courante .label {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.progression .a-venir .label {
+  opacity: 0.6;
+}
+
+/* ---------- Validation d'une demande ---------- */
+.resume dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.5rem;
+  max-width: 640px;
+  margin-bottom: 1.5rem;
+}
+
+.resume dt {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-success {
+  background: var(--color-success);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+}
+
+/* ---------- Mes demandes : grille 3 x 2 de tableaux par statut ---------- */
+h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+/* Remplit toute la largeur et toute la hauteur restante */
+.board {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .board {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+}
+
+.colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-soft);
+}
+
+.count {
+  margin-left: 0.25rem;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: var(--color-background-mute);
+}
+
+/* Card vide : message centré */
+.colonne .vide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+.table-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  font-weight: 600;
+  color: var(--color-heading);
+  background: var(--color-background-soft);
 }

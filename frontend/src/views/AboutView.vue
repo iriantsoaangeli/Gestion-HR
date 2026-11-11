@@ -1,3 +1,4 @@
+<!-- A EFFACER : fichier du template Vite, utilisé seulement par la route /about (à retirer aussi de router/index.js) -->
 <template>
   <div class="about">
     <h1>This is an about page</h1>

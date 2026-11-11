@@ -1,4 +1,6 @@
 <script setup>
+import { ETAPES } from '../data/etapes'
+
 // Les entrées sans route ne sont pas encore cliquables
 const items = [
   { label: 'Accueil', to: '/' },
@@ -6,8 +8,7 @@ const items = [
   { label: 'Départements' },
   { label: 'Personnes' },
   { label: 'Emplois' },
-  { label: 'Demandes', to: '/demande' },
-]
+  ]
 </script>
 
 <template>
@@ -18,6 +19,14 @@ const items = [
         <li v-for="item in items" :key="item.label">
           <RouterLink v-if="item.to" :to="item.to">{{ item.label }}</RouterLink>
           <a v-else href="#" @click.prevent>{{ item.label }}</a>
+        </li>
+      </ul>
+
+      <p class="section">Demandes</p>
+      <ul>
+        <li><RouterLink to="/mes-demandes">Mes demandes</RouterLink></li>
+        <li v-for="e in ETAPES" :key="e.code">
+          <RouterLink :to="`/demande/${e.code}`">{{ e.label }}</RouterLink>
         </li>
       </ul>
     </nav>

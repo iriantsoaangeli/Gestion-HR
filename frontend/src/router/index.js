@@ -14,12 +14,21 @@ const router = createRouter({
       name: 'login',
       component: () => import('../views/LoginView.vue'),
     },
+    { path: '/demande', redirect: '/demande/manager' },
     {
-      path: '/demande',
-      name: 'demande',
-      component: () => import('../views/DemandeView.vue'),
+      path: '/mes-demandes',
+      name: 'mes-demandes',
+      component: () => import('../views/MesDemandesView.vue'),
     },
     {
+      // Workflow : /demande/manager (formulaire), /hr, /direction, /finance (validation)
+      path: '/demande/:etape(manager|hr|direction|finance)',
+      name: 'demande',
+      component: () => import('../views/DemandeView.vue'),
+      props: true,
+    },
+    {
+      // A EFFACER avec views/AboutView.vue
       path: '/about',
       name: 'about',
       // route level code-splitting
