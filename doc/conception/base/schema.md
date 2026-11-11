@@ -31,3 +31,9 @@ emploi(**id**,#idPoste,#idPersonne?)
 
 **Un historique des mouvement entree/sortie des employees**  
 historiqueEmploi(**id**,date,#idMouvement,#idPersonne)  
+
+**Qualification d'un poste**
+clearance(**id**,label)
+
+**Table de liaison**
+clearancePoste(**id**,#idPoste)
