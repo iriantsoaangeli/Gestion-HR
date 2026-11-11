@@ -56,3 +56,7 @@ demande(**id**, #idDepartement, #idStatus,date,motif,delais?)
 
 **Table de liason**
 demandePoste(**id**,#idPoste,#idDemande)
+
+
+**Les utilisateurs de l'application**  
+utilisateur(**id**,login,mdp)  

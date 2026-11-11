@@ -7,6 +7,7 @@
 -- =====================================================================
 
 -- Un individu dans la base de donnees
+
 CREATE TABLE personne (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
@@ -138,4 +139,12 @@ CREATE TABLE demandePoste (
     id SERIAL PRIMARY KEY,
     idPoste INTEGER NOT NULL REFERENCES poste (id),
     idDemande INTEGER NOT NULL REFERENCES demande (id)
+);
+
+
+-- Utilisateurs de l'application
+CREATE TABLE utilisateur (
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    mdp VARCHAR(100) NOT NULL
 );
