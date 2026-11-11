@@ -3,19 +3,20 @@ import { computed, reactive, ref, watch } from 'vue'
 import AppLayout from '../components/AppLayout.vue'
 import { departements, postes } from '../data/mock'
 
-// demande(id, #idDepartement, #idStatus, date, limite, effectif)
+// demande(id, #idDepartement, #idStatus, date, effectif, motif)
 // demandePoste(id, #idPoste, #idDemande) — cf. doc/conception/base/schema.md
 
 // Statut attribué à la création (début du workflow Manager -> HR -> Direction -> Finance)
 const ID_STATUS_INITIAL = 1
 
+// Date du jour au format AAAA-MM-JJ (format des <input type="date">)
 const aujourdhui = () => new Date().toISOString().slice(0, 10)
+
 const vide = () => ({
   idDepartement: '',
   idPostes: [],
   effectif: 1,
-  dateDemande: aujourdhui(),
-  dateLimite: '',
+  motif: '',
 })
 
 const form = reactive(vide())
@@ -29,8 +30,6 @@ const postesDuDepartement = computed(() =>
 watch(() => form.idDepartement, () => (form.idPostes = []))
 
 function verifier() {
-  if (form.dateLimite < form.dateDemande)
-    return 'La date limite doit être postérieure ou égale à la date de demande.'
   if (!form.idPostes.length) return 'Sélectionnez au moins un poste.'
   return ''
 }
@@ -41,7 +40,9 @@ function envoyer() {
   if (erreur.value) return
 
   // À remplacer par l'appel à l'API (idPostes -> lignes de demandePoste)
-  console.log('Nouvelle demande', { ...form, idStatus: ID_STATUS_INITIAL })
+  // dateDemande = maintenant (DEFAULT NOW() en base)
+  const demande = { ...form, idStatus: ID_STATUS_INITIAL, dateDemande: aujourdhui() }
+  console.log('Nouvelle demande', demande)
   message.value = 'Demande enregistrée.'
   Object.assign(form, vide())
 }
@@ -68,11 +69,8 @@ function envoyer() {
       <label for="effectif">Effectif demandé</label>
       <input id="effectif" v-model.number="form.effectif" type="number" min="1" required />
 
-      <label for="dateDemande">Date de demande</label>
-      <input id="dateDemande" v-model="form.dateDemande" type="date" required />
-
-      <label for="dateLimite">Date limite</label>
-      <input id="dateLimite" v-model="form.dateLimite" type="date" :min="form.dateDemande" required />
+      <label for="motif">Motif</label>
+      <textarea id="motif" v-model.trim="form.motif" rows="4" maxlength="200" required></textarea>
 
       <p v-if="erreur" class="error">{{ erreur }}</p>
       <button type="submit">Envoyer la demande</button>

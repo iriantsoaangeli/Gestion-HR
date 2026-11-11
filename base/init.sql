@@ -125,10 +125,8 @@ CREATE TABLE demande (
     idDepartement INTEGER NOT NULL REFERENCES departement (id),
     idStatus INTEGER NOT NULL REFERENCES status (id),
     dateDemande DATE NOT NULL DEFAULT NOW(),
-    dateLimite DATE NOT NULL,
     effectif INTEGER NOT NULL CHECK (effectif > 0),
-    motif VARCHAR(200) NOT NULL,
-    CHECK (dateLimite >= dateDemande)
+    motif VARCHAR(200) NOT NULL
 );
 
 -- Table de liaison entre demande et poste
