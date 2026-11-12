@@ -152,11 +152,19 @@
 }
 
 .offre-ligne > .offre-court {
-  flex: 0 0 7rem;
+  flex: 0 0 8rem;
 }
 
-.offre-form input[readonly] {
-  background: var(--color-background-mute);
+/* Nombre de postes : simple affichage, aligné sur les champs voisins */
+.offre-libelle {
+  margin-bottom: 0.25rem;
+}
+
+.offre-nombre {
+  margin: 0 0 1rem;
+  padding: 0.45rem 0;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Message tant qu'aucune demande n'est choisie */

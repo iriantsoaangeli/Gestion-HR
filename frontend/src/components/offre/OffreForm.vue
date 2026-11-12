@@ -87,6 +87,14 @@ function choisirPoste(cle) {
   offre.nombre = l?.effectif ?? 1 // remplacement : 1 poste = 1 siège
 }
 
+// Affichage seul : nombre de postes à créer ou à remplacer pour le poste choisi
+const texteNombre = computed(() => {
+  const l = postes.value.find((p) => p.cle === offre.poste)
+  if (!l) return '—'
+  const n = offre.nombre
+  return `${n} à ${l.nature === 'creation' ? 'créer' : 'remplacer'}`
+})
+
 const avecDuree = computed(() => offre.contrat !== 'CDI')
 
 function publier() {
@@ -137,8 +145,8 @@ function publier() {
               <input id="offre-intitule" v-model="offre.intitule" maxlength="100" required />
             </div>
             <div class="offre-court">
-              <label for="offre-nombre">Postes</label>
-              <input id="offre-nombre" :value="offre.nombre" type="number" readonly />
+              <span class="offre-libelle">Postes</span>
+              <p class="offre-nombre">{{ texteNombre }}</p>
             </div>
           </div>
 
