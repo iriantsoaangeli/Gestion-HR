@@ -13,4 +13,8 @@ Fonctionnalite future
 
 
 ## Entretien et evaluation 
-Un interviewer redige une evaluation apres un entretien 
+Un interviewer redige une evaluation apres un entretien  
+Le manager a la decision final  
+
+## Recrutement  
+Lorsque la decision finale est faite , l'offre est arretee  
