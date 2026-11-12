@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Tableau from '../ui/Tableau.vue'
 import FiltrePuces from '../ui/FiltrePuces.vue'
@@ -45,10 +45,16 @@ const ouvrir = (d) => router.push(props.lien(d))
 const filtre = ref('')
 const recherche = ref('')
 
+// Délai : deux cases cochées au départ (tout s'affiche) ; décocher retire les demandes avec / sans délai
+const delai = reactive({ avec: true, sans: true })
+const avecDelai = computed(() => props.demandes.filter((d) => d.delai).length)
+const gardeDelai = (d) => (d.delai ? delai.avec : delai.sans)
+
 // Recherche insensible à la casse et aux accents (utils/texte.js)
 const lignes = computed(() =>
   props.demandes
     .filter((d) => !filtre.value || d.statut === filtre.value)
+    .filter(gardeDelai)
     .filter((d) =>
       contient([d.id, d.departement, labelPostes(d), d.motif].join(' '), recherche.value),
     ),
@@ -72,6 +78,16 @@ const lignes = computed(() =>
         tous="Toutes"
         :aria-label="`Filtrer : ${titre}`"
       />
+      <div class="filtre-cases" role="group" aria-label="Délai">
+        <label class="choice">
+          <input v-model="delai.avec" type="checkbox" />
+          Avec délai <span class="count">{{ avecDelai }}</span>
+        </label>
+        <label class="choice">
+          <input v-model="delai.sans" type="checkbox" />
+          Sans délai <span class="count">{{ demandes.length - avecDelai }}</span>
+        </label>
+      </div>
       <BarreRecherche
         v-model="recherche"
         placeholder="Rechercher (n°, département, poste, motif)…"

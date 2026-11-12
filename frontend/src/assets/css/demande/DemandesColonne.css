@@ -2,6 +2,19 @@
    Le tableau lui-même (tri, défilement, sélection) : css/ui/Tableau.css ;
    les filtres : css/ui/FiltrePuces.css et css/ui/BarreRecherche.css */
 
+/* Filtre délai : cases « Avec délai » / « Sans délai » à côté des puces */
+.filtre-cases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.filtre-cases .choice {
+  margin: 0;
+  cursor: pointer;
+}
+
 .table .badge.petit {
   margin-left: 0;
 }
