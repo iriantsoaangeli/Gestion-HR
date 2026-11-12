@@ -1,0 +1,17 @@
+/* Fiche d'une évaluation (components/entretien/FicheEvaluation.vue).
+   Mise en page commune : css/demande/FicheDemande.css ; .note-barre et .interviewers : FicheEntretien.css */
+
+/* Remarques sous les deux premiers blocs, sur toute la largeur restante */
+.fiche-remarques {
+  grid-column: 1 / span 2;
+}
+
+/* Barre de la note dans le chiffre clé */
+.chiffre .note-barre {
+  margin: 0.35rem 0 0.25rem;
+}
+
+/* Note d'un autre interviewer : lien vers son évaluation */
+.interviewers a.badge {
+  text-decoration: none;
+}

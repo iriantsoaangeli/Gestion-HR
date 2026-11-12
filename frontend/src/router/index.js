@@ -101,6 +101,14 @@ const entretien = [
     component: () => import('../views/entretien/EntretiensView.vue'),
   },
   {
+    // Fiche d'une évaluation : note, remarques, entretien évalué, autres évaluations
+    path: '/evaluations/:id(\\d+)',
+    name: 'fiche-evaluation',
+    props: true,
+    meta: { acces: (u) => ['DIRECTION', 'MANAGER', 'HR'].includes(u.role) },
+    component: () => import('../views/entretien/FicheEvaluationView.vue'),
+  },
+  {
     // Préparer un entretien (HR) : offre ouverte, candidat (dossier), date, interviewers.
     // ?offre=<id>&dossier=<id> : choix déjà faits. Données statiques pour l'instant (api/entretiens.js)
     path: '/entretiens/nouveau',
@@ -108,6 +116,22 @@ const entretien = [
     meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
     props: (route) => ({ offre: route.query.offre ?? null, dossier: route.query.dossier ?? null }),
     component: () => import('../views/entretien/PreparationEntretienView.vue'),
+  },
+  {
+    // Fiche d'un entretien : infos, interviewers, évaluations, bouton « Évaluer »
+    path: '/entretiens/:id(\\d+)',
+    name: 'fiche-entretien',
+    props: true,
+    meta: { acces: (u) => ['DIRECTION', 'MANAGER', 'HR'].includes(u.role) },
+    component: () => import('../views/entretien/FicheEntretienView.vue'),
+  },
+  {
+    // Évaluation d'un entretien par l'interviewer connecté (une par interviewer)
+    path: '/entretiens/:id(\\d+)/evaluation',
+    name: 'evaluation-entretien',
+    props: true,
+    meta: { acces: (u) => ['DIRECTION', 'MANAGER', 'HR'].includes(u.role) },
+    component: () => import('../views/entretien/EvaluationView.vue'),
   },
 ]
 

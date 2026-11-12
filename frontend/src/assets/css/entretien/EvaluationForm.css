@@ -1,0 +1,76 @@
+/* Page d'évaluation d'un entretien (components/entretien/EvaluationForm.vue).
+   Reprend les classes .fiche-* (css/demande/FicheDemande.css), .interviewers et .note-barre (FicheEntretien.css) */
+
+.evaluation {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Rappel à gauche, formulaire à droite, sur toute la hauteur */
+.evaluation-grille {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 1rem;
+}
+
+.evaluation-form {
+  border: 2px solid var(--color-primary);
+  background: var(--color-background);
+}
+
+.evaluation-form fieldset {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.evaluation-form textarea {
+  flex: 1;
+  min-height: 8rem;
+}
+
+/* Champ de note et sa barre côte à côte */
+.evaluation-note {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.evaluation-note input {
+  width: 4.5rem;
+  margin-bottom: 0;
+}
+
+.evaluation-note .note-barre {
+  flex: 1;
+  height: 10px;
+}
+
+/* Pourquoi le formulaire est grisé */
+.evaluation-raison {
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.evaluation-form .actions {
+  align-items: center;
+}
+
+.evaluation-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .evaluation-grille {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

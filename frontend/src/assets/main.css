@@ -51,3 +51,6 @@
 
 /* Entretiens (EvaluationForm réutilise des classes de FicheEntretien : garder cet ordre) */
 @import './css/entretien/PreparationEntretienForm.css';
+@import './css/entretien/FicheEntretien.css';
+@import './css/entretien/EvaluationForm.css';
+@import './css/entretien/FicheEvaluation.css';

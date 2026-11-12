@@ -1,0 +1,127 @@
+/* Fiche d'un entretien (components/entretien/FicheEntretien.vue). Mise en page commune : css/demande/FicheDemande.css */
+
+/* Évaluations sous les deux premiers blocs, sur toute la largeur restante */
+.fiche-evaluations {
+  grid-column: 1 / span 2;
+}
+
+.fiche-evaluations h2 .badge {
+  font-weight: 600;
+}
+
+.evaluations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.evaluations li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-background);
+}
+
+.evaluation-tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.evaluation-tete > span:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.evaluation-valeur {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  white-space: nowrap;
+}
+
+.evaluation-valeur small {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.evaluations .fiche-motif {
+  flex: 1;
+}
+
+/* Barre de note sur 100 (aussi dans le formulaire d'évaluation) */
+.note-barre {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-background-mute);
+  overflow: hidden;
+}
+
+.note-barre > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+  transition: width 0.2s;
+}
+
+/* Lien vers la fiche de l'offre, grisé quand elle n'est pas accessible */
+.fiche-lien {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.fiche-lien.inactif {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Liste des interviewers : nom + poste à gauche, a évalué ou pas à droite */
+.interviewers {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.interviewers li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.interviewers li > span:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+/* L'utilisateur connecté */
+.interviewers li.moi {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 0.5rem;
+}
+
+.fiche-cote .fiche-interviewers {
+  flex: 1;
+}
+
+/* Bouton « Évaluer » grisé (raison affichée au-dessus) */
+.fiche .decision button {
+  align-self: stretch;
+}
+
+.fiche button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
