@@ -26,6 +26,11 @@ public class Poste {
         return label;
     }
 
+    /** Personne qui occupe le poste (null si vacant). */
+    public Integer getIdPersonne() {
+        return idPersonne;
+    }
+
     public Integer getIdDepartement() {
         return idDepartement;
     }

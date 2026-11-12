@@ -40,6 +40,20 @@ INSERT INTO poste (label, idDepartement) VALUES
     ('Directeur financier', 3),
     ('Administrateur de l''application', 2);
 
+-- Détenteurs des postes des comptes (poste.idPersonne) : affichés à chaque étape d'une demande
+INSERT INTO personne (nom, prenom, naissance) VALUES
+    ('Rakotomalala', 'Hery',  '1985-03-14'),
+    ('Rasoanaivo',   'Lalao', '1979-07-02'),
+    ('Andrianarivo', 'Fanja', '1968-11-23'),
+    ('Razafindrakoto', 'Mamy', '1975-05-30'),
+    ('Rabearivelo',  'Toky',  '1990-01-09');
+
+UPDATE poste p SET idPersonne = x.id
+FROM (VALUES ('Manager informatique', 'Hery'), ('Responsable RH', 'Lalao'), ('Directeur général', 'Fanja'),
+             ('Directeur financier', 'Mamy'), ('Administrateur de l''application', 'Toky')) AS v (poste, prenom)
+JOIN personne x ON x.prenom = v.prenom
+WHERE p.label = v.poste;
+
 -- Comptes de test, un par rôle. Mots de passe de DEV uniquement (à changer en production) :
 --   manager / manager123   hr / hr123   direction / direction123   finance / finance123   admin / admin123
 -- mdp = hachage BCrypt (Spring Security, BCryptPasswordEncoder), jamais le mot de passe en clair.

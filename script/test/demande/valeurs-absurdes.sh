@@ -155,5 +155,25 @@ verifier "détail de la demande « abc »"      4xx GET "$DEMANDES/abc"
 verifier "détail de la demande 99999999999"  400 GET "$DEMANDES/99999999999"
 verifier "toutes les demandes en tant que HR" 403:ACCES_REFUSE GET "$DEMANDES"
 
+section "Demande — personnel ayant validé (/validateurs)"
+verifier "validateurs de la demande 0"       404:RESSOURCE_INTROUVABLE GET "$DEMANDES/0/validateurs"
+verifier "validateurs de la demande 2147483647" 404:RESSOURCE_INTROUVABLE GET "$DEMANDES/2147483647/validateurs"
+verifier "validateurs de la demande -1"      4xx GET "$DEMANDES/-1/validateurs"
+verifier "validateurs de la demande « abc »" 4xx GET "$DEMANDES/abc/validateurs"
+verifier "validateurs 99999999999"           400 GET "$DEMANDES/99999999999/validateurs"
+verifier "POST sur validateurs"              4xx POST "$DEMANDES/1/validateurs"
+if [ "$CONTROLE" != "0" ]; then
+  verifier "validateurs de la demande refusée (HR)" 200 GET "$DEMANDES/$CONTROLE/validateurs"
+  if grep -q '^\[\]$' "$TMP_TESTS/corps"; then
+    REUSSIS=$((REUSSIS + 1)); echo "  ${VERT}OK${FIN}    refusée par HR : aucun validateur"
+  else
+    ECHECS=$((ECHECS + 1)); echo "  ${ROUGE}ECHEC${FIN} refusée par HR, validateurs attendus vides : $(cat "$TMP_TESTS/corps")"
+  fi
+  connecter finance finance123
+  verifier "validateurs vus par Finance (pas concernée)" 403:ACCES_REFUSE GET "$DEMANDES/$CONTROLE/validateurs"
+  session_anonyme
+  verifier "validateurs sans être connecté"  401:NON_CONNECTE GET "$DEMANDES/$CONTROLE/validateurs"
+fi
+
 nettoyer
 bilan

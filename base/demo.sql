@@ -12,6 +12,17 @@ INSERT INTO poste (label, idDepartement)
 SELECT label, dep FROM (VALUES ('Manager RH', 1), ('Manager finance', 3)) AS v (label, dep)
 WHERE NOT EXISTS (SELECT 1 FROM utilisateur WHERE login = 'manager.rh');
 
+-- Leurs détenteurs (poste.idPersonne)
+INSERT INTO personne (nom, prenom, naissance)
+SELECT nom, prenom, naissance::DATE
+FROM (VALUES ('Ravelojaona', 'Nirina', '1983-09-17'), ('Randrianasolo', 'Fidy', '1987-04-05')) AS v (nom, prenom, naissance)
+WHERE NOT EXISTS (SELECT 1 FROM utilisateur WHERE login = 'manager.rh');
+
+UPDATE poste p SET idPersonne = x.id
+FROM (VALUES ('Manager RH', 'Nirina'), ('Manager finance', 'Fidy')) AS v (poste, prenom)
+JOIN personne x ON x.prenom = v.prenom
+WHERE p.label = v.poste AND p.idPersonne IS NULL;
+
 INSERT INTO utilisateur (login, mdp, role, idPoste)
 SELECT v.login, (SELECT mdp FROM utilisateur WHERE login = 'manager'), 'MANAGER',
        (SELECT max(id) FROM poste WHERE label = v.poste)

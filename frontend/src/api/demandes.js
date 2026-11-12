@@ -7,6 +7,8 @@ export const valider = (id) => appel('POST', `/api/demandes/${id}/valider`)
 export const refuser = (id) => appel('POST', `/api/demandes/${id}/refuser`)
 
 export const detail = (id) => appel('GET', `/api/demandes/${id}`)
+// Personnel ayant validé : [{ date, statut, personnel: { login, roleLibelle, poste, detenteur, … } }]
+export const validateurs = (id) => appel('GET', `/api/demandes/${id}/validateurs`)
 export const mesDemandes = () => appel('GET', '/api/demandes/mes-demandes')
 export const aTraiter = () => appel('GET', '/api/demandes/a-traiter')
 export const traitees = () => appel('GET', '/api/demandes/traitees')

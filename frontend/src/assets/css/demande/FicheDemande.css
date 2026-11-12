@@ -204,6 +204,23 @@
   font-size: 0.9rem;
 }
 
+/* Détenteur du poste (nom en gras) puis poste et rôle */
+.suivi .suivi-personnel {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.suivi .suivi-detenteur {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.suivi .refusee .suivi-personnel,
+.suivi .refusee .suivi-detenteur {
+  color: inherit;
+}
+
 .fiche-actions {
   display: flex;
   flex-wrap: wrap;

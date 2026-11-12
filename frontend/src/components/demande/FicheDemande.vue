@@ -102,7 +102,11 @@ const delai = computed(() => {
               <strong>{{ e.libelle }}</strong>
               <span>
                 {{ e.texte }}<template v-if="e.date"> le <time :datetime="e.date">{{ dateLongue(e.date) }}</time></template>
-                <template v-if="e.utilisateur"> · {{ e.utilisateur }}</template>
+              </span>
+              <!-- Détenteur du poste et son rôle : celui qui a agi, ou ceux qui décideront -->
+              <span v-for="p in e.personnel" :key="p.idUtilisateur" class="suivi-personnel">
+                <span class="suivi-detenteur">{{ p.detenteur ?? p.login }}</span>
+                {{ p.poste }} · {{ p.roleLibelle }}
               </span>
             </li>
           </ol>

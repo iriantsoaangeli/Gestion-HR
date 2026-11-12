@@ -28,6 +28,7 @@ Règles dans `demande/Model/Statut.java` (enum, ids = table `status`) et `demand
 | GET | `/api/demandes/a-traiter` | tous (vide si mon rôle ne valide pas) | demandes qui attendent ma décision, les plus anciennes d'abord |
 | GET | `/api/demandes` | `ADMIN`, `DIRECTION` | toutes les demandes (403 sinon) |
 | GET | `/api/demandes/{id}` | demandeur, ceux qui ont décidé, rôle dont c'est le tour, `ADMIN`, `DIRECTION` | une demande (403 sinon, 404 inconnue) |
+| GET | `/api/demandes/{id}/validateurs` | mêmes droits que la fiche | personnel ayant **validé** (sans les refus) : `[{ date, statut, personnel }]` |
 | GET | `/api/demandes/etapes` | tous | étapes du workflow (progression du formulaire), même forme que `suivi` |
 
 ## Référentiel (`/api/referentiel`, tout utilisateur connecté) → `[{ id, label }]`
@@ -71,15 +72,19 @@ Règles dans `demande/Model/Statut.java` (enum, ids = table `status`) et `demand
   "historique": [{ "utilisateur": "hr", "role": "HR", "statut": "EN_ATTENTE_DIRECTION", "date": "2026-11-12" }],
   "aMoiDeDecider": false,
   "suivi": [
-    { "libelle": "Manager", "etat": "faite", "texte": "Demande créée", "date": "2026-11-11", "utilisateur": "manager" },
-    { "libelle": "HR", "etat": "faite", "texte": "Validée", "date": "2026-11-12", "utilisateur": "hr" },
-    { "libelle": "Direction", "etat": "courante", "texte": "En attente depuis", "date": "2026-11-12", "utilisateur": null },
-    { "libelle": "Finance", "etat": "a-venir", "texte": "À venir", "date": null, "utilisateur": null }
+    { "libelle": "Manager", "etat": "faite", "texte": "Demande créée", "date": "2026-11-11", "utilisateur": "manager",
+      "personnel": [{ "idUtilisateur": 1, "login": "manager", "role": "MANAGER", "roleLibelle": "Manager",
+                      "idPoste": 6, "poste": "Manager informatique", "detenteur": "Hery Rakotomalala" }] },
+    { "libelle": "HR", "etat": "faite", "texte": "Validée", "date": "2026-11-12", "utilisateur": "hr", "personnel": [ … ] },
+    { "libelle": "Direction", "etat": "courante", "texte": "En attente depuis", "date": "2026-11-12", "utilisateur": null, "personnel": [ … ] },
+    { "libelle": "Finance", "etat": "a-venir", "texte": "À venir", "date": null, "utilisateur": null, "personnel": [ … ] }
   ]
 }
 ```
 
 `etapeValideur` est `null` quand la demande est terminée. `aMoiDeDecider` : c'est à l'utilisateur connecté de valider / refuser.
+`personnel` d'une étape : le **détenteur du poste** (`detenteur` = prénom nom de `poste.idPersonne`, null si vacant), son poste et son rôle — celui qui a créé / décidé si l'étape est faite, sinon les comptes du rôle qui décidera.
+
 `suivi` est calculé par le serveur (`etat` : `faite`, `courante`, `refusee`, `a-venir`) : le front l'affiche tel quel (barre de progression et bloc Suivi). `historique` = une ligne par décision (table `histoDemande`), `statut` = statut obtenu.
 
 ## Erreurs (`{ "code", "message" }`)

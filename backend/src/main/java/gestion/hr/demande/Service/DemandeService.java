@@ -30,6 +30,8 @@ import gestion.hr.auth.Model.Role;
 import gestion.hr.auth.Model.Utilisateur;
 import gestion.hr.auth.Repository.UtilisateurRepository;
 import gestion.hr.auth.Service.UtilisateurCourant;
+import gestion.hr.referentiel.Dto.PersonnelResponse;
+import gestion.hr.referentiel.Service.ReferentielService;
 
 /**
  * Règles des demandes de personnel (workflow Manager -> HR -> Direction -> Finance).
@@ -58,11 +60,12 @@ public class DemandeService {
     private final PosteRepository postes;
     private final UtilisateurRepository utilisateurs;
     private final UtilisateurCourant courant;
+    private final ReferentielService referentiel;
 
     public DemandeService(DemandeRepository demandes, DemandeFonctionRepository creations,
             DemandePosteRepository remplacements, HistoDemandeRepository historique,
             DepartementRepository departements, FonctionRepository fonctions, PosteRepository postes,
-            UtilisateurRepository utilisateurs, UtilisateurCourant courant) {
+            UtilisateurRepository utilisateurs, UtilisateurCourant courant, ReferentielService referentiel) {
         this.demandes = demandes;
         this.creations = creations;
         this.remplacements = remplacements;
@@ -72,6 +75,7 @@ public class DemandeService {
         this.postes = postes;
         this.utilisateurs = utilisateurs;
         this.courant = courant;
+        this.referentiel = referentiel;
     }
 
     // ---------- Créer ----------
@@ -188,6 +192,25 @@ public class DemandeService {
     @Transactional(readOnly = true)
     public DemandeResponse detail(Integer id) {
         Utilisateur moi = courant.get();
+        return enReponse(visible(id, moi), moi);
+    }
+
+    /** Personnel ayant validé la demande (les refus n'y sont pas), dans l'ordre du workflow. Même accès que detail. */
+    @Transactional(readOnly = true)
+    public List<DemandeResponse.Validation> validateurs(Integer id) {
+        Demande d = visible(id, courant.get());
+        return historique.findByIdDemandeOrderByDateAscIdAsc(d.getId()).stream()
+                .filter(x -> x.getStatut() != Statut.REFUSEE)
+                .map(x -> new DemandeResponse.Validation(x.getDate(), x.getStatut(),
+                        referentiel.personnel(utilisateurs.findById(x.getIdUtilisateur()).orElse(null))))
+                .toList();
+    }
+
+    /**
+     * La demande, si je peux la voir : son demandeur, ceux qui ont décidé dessus, le rôle dont c'est le tour,
+     * ADMIN et DIRECTION. Sinon 403 (404 si elle n'existe pas).
+     */
+    private Demande visible(Integer id, Utilisateur moi) {
         Demande d = demandes.findById(id)
                 .orElseThrow(() -> ErreurMetier.introuvable("La demande n° " + id + " n'existe pas."));
         boolean visible = d.getIdDemandeur().equals(moi.getId())
@@ -197,7 +220,7 @@ public class DemandeService {
         if (!visible) {
             throw ErreurMetier.accesRefuse("Vous n'avez pas accès à la demande n° " + id + ".");
         }
-        return enReponse(d, moi);
+        return d;
     }
 
     /** Toutes les demandes : ADMIN et DIRECTION seulement. */
@@ -233,11 +256,14 @@ public class DemandeService {
     }
 
     /** Étapes du workflow pour une demande pas encore créée (progression du formulaire). */
+    @Transactional(readOnly = true)
     public List<DemandeResponse.Etape> etapes() {
         List<DemandeResponse.Etape> etapes = new ArrayList<>();
-        etapes.add(new DemandeResponse.Etape(Role.MANAGER.getLibelle(), "courante", "Création de la demande", null, null));
+        etapes.add(new DemandeResponse.Etape(Role.MANAGER.getLibelle(), "courante", "Création de la demande", null, null,
+                seul(referentiel.personnel(courant.get()))));
         for (Statut s : Statut.etapesDeValidation()) {
-            etapes.add(new DemandeResponse.Etape(s.getValideur().getLibelle(), "a-venir", "À venir", null, null));
+            etapes.add(new DemandeResponse.Etape(s.getValideur().getLibelle(), "a-venir", "À venir", null, null,
+                    referentiel.personnelDuRole(s.getValideur())));
         }
         return etapes;
     }
@@ -250,7 +276,8 @@ public class DemandeService {
 
     private DemandeResponse enReponse(Demande d, Utilisateur moi) {
         String departement = departements.findById(d.getIdDepartement()).map(x -> x.getLabel()).orElse(null);
-        String demandeur = utilisateurs.findById(d.getIdDemandeur()).map(Utilisateur::getLogin).orElse(null);
+        Utilisateur demandeurU = utilisateurs.findById(d.getIdDemandeur()).orElse(null);
+        String demandeur = demandeurU == null ? null : demandeurU.getLogin();
 
         List<DemandeResponse.Creation> c = creations.findByIdDemande(d.getId()).stream()
                 .map(x -> new DemandeResponse.Creation(x.getIdFonction(),
@@ -260,46 +287,59 @@ public class DemandeService {
                 .map(x -> new DemandeResponse.Remplacement(x.getIdPoste(),
                         postes.findById(x.getIdPoste()).map(Poste::getLabel).orElse(null)))
                 .toList();
-        List<DemandeResponse.Decision> h = historique.findByIdDemandeOrderByDateAscIdAsc(d.getId()).stream()
-                .map(x -> {
-                    Utilisateur u = utilisateurs.findById(x.getIdUtilisateur()).orElse(null);
-                    return new DemandeResponse.Decision(u == null ? null : u.getLogin(),
-                            u == null ? null : u.getRole().getLibelle(), x.getStatut(), x.getDate());
-                })
-                .toList();
+        // Décisions dans l'ordre, avec le compte de chaque décideur (pour l'historique et le suivi)
+        List<HistoDemande> decisions = historique.findByIdDemandeOrderByDateAscIdAsc(d.getId());
+        List<Utilisateur> decideurs = decisions.stream()
+                .map(x -> utilisateurs.findById(x.getIdUtilisateur()).orElse(null)).toList();
+        List<DemandeResponse.Decision> h = new ArrayList<>();
+        for (int k = 0; k < decisions.size(); k++) {
+            Utilisateur u = decideurs.get(k);
+            h.add(new DemandeResponse.Decision(u == null ? null : u.getLogin(),
+                    u == null ? null : u.getRole().getLibelle(), decisions.get(k).getStatut(), decisions.get(k).getDate()));
+        }
 
         Role valideur = d.getStatut().getValideur();
         return new DemandeResponse(d.getId(), d.getIdDepartement(), departement, d.getStatut(),
                 d.getStatut().getLibelle(), valideur == null ? null : valideur.name(), d.getIdDemandeur(), demandeur,
                 d.getDate(), d.getMotif(), d.getDelai(), c, r, h,
-                valideur != null && valideur == moi.getRole(), suivi(d, demandeur, h));
+                valideur != null && valideur == moi.getRole(), suivi(d, demandeurU, h, decideurs));
     }
 
     /**
      * Une ligne par étape : création, puis chaque étape de validation. Les décisions arrivent dans l'ordre
      * du workflow, donc la k-ième décision correspond à la k-ième étape de validation.
+     * Personnel de l'étape : celui qui a agi si elle est faite, sinon les comptes du rôle qui décidera.
      */
-    private List<DemandeResponse.Etape> suivi(Demande d, String demandeur, List<DemandeResponse.Decision> h) {
+    private List<DemandeResponse.Etape> suivi(Demande d, Utilisateur demandeur, List<DemandeResponse.Decision> h,
+            List<Utilisateur> decideurs) {
         List<DemandeResponse.Etape> suivi = new ArrayList<>();
-        suivi.add(new DemandeResponse.Etape(Role.MANAGER.getLibelle(), "faite", "Demande créée", d.getDate(), demandeur));
+        suivi.add(new DemandeResponse.Etape(Role.MANAGER.getLibelle(), "faite", "Demande créée", d.getDate(),
+                demandeur == null ? null : demandeur.getLogin(), seul(referentiel.personnel(demandeur))));
 
         boolean refusee = d.getStatut() == Statut.REFUSEE;
         LocalDate derniereDate = h.isEmpty() ? d.getDate() : h.get(h.size() - 1).date();
         List<Statut> etapes = Statut.etapesDeValidation();
         for (int k = 0; k < etapes.size(); k++) {
-            String libelle = etapes.get(k).getValideur().getLibelle();
+            Role role = etapes.get(k).getValideur();
+            String libelle = role.getLibelle();
             if (k < h.size()) {
                 DemandeResponse.Decision dec = h.get(k);
                 boolean refus = dec.statut() == Statut.REFUSEE;
                 suivi.add(new DemandeResponse.Etape(libelle, refus ? "refusee" : "faite", refus ? "Refusée" : "Validée",
-                        dec.date(), dec.utilisateur()));
+                        dec.date(), dec.utilisateur(), seul(referentiel.personnel(decideurs.get(k)))));
             } else if (etapes.get(k) == d.getStatut()) {
-                suivi.add(new DemandeResponse.Etape(libelle, "courante", "En attente depuis", derniereDate, null));
+                suivi.add(new DemandeResponse.Etape(libelle, "courante", "En attente depuis", derniereDate, null,
+                        referentiel.personnelDuRole(role)));
             } else {
-                suivi.add(new DemandeResponse.Etape(libelle, "a-venir", refusee ? "Non atteinte" : "À venir", null, null));
+                suivi.add(new DemandeResponse.Etape(libelle, "a-venir", refusee ? "Non atteinte" : "À venir", null, null,
+                        referentiel.personnelDuRole(role)));
             }
         }
         return suivi;
+    }
+
+    private static List<PersonnelResponse> seul(PersonnelResponse p) {
+        return p == null ? List.of() : List.of(p);
     }
 
     private static <T> List<T> liste(List<T> l) {

@@ -25,6 +25,7 @@ import gestion.hr.demande.Service.DemandeService;
  * GET  /api/demandes/a-traiter       demandes qui attendent ma décision
  * GET  /api/demandes                 toutes (ADMIN, DIRECTION)
  * GET  /api/demandes/{id}            une demande (si j'y ai accès)
+ * GET  /api/demandes/{id}/validateurs personnel ayant validé la demande (même accès que la fiche)
  * GET  /api/demandes/etapes          étapes du workflow (progression du formulaire)
  */
 @RestController
@@ -76,6 +77,11 @@ public class DemandeController {
     @GetMapping("/{id:\\d+}")
     public DemandeResponse detail(@PathVariable Integer id) {
         return service.detail(id);
+    }
+
+    @GetMapping("/{id:\\d+}/validateurs")
+    public List<DemandeResponse.Validation> validateurs(@PathVariable Integer id) {
+        return service.validateurs(id);
     }
 
     @GetMapping("/etapes")

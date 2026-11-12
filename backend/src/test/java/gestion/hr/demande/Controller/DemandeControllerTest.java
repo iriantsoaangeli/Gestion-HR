@@ -244,6 +244,39 @@ class DemandeControllerTest {
     }
 
     @Test
+    void validateursSeulementCeuxQuiOntValide() throws Exception {
+        int id = creerDemande();
+        decider("hr", id, "valider");
+        decider("direction", id, "refuser");
+        mvc.perform(get("/api/demandes/" + id + "/validateurs").with(user("manager")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1)) // le refus de direction n'y est pas
+                .andExpect(jsonPath("$[0].statut").value("EN_ATTENTE_DIRECTION"))
+                .andExpect(jsonPath("$[0].personnel.login").value("hr"))
+                .andExpect(jsonPath("$[0].personnel.roleLibelle").value("HR"))
+                .andExpect(jsonPath("$[0].personnel.poste").value("Responsable RH"))
+                .andExpect(jsonPath("$[0].personnel.detenteur").value("Lalao Rasoanaivo"));
+        // Même accès que la fiche : finance n'est pas concernée
+        mvc.perform(get("/api/demandes/" + id + "/validateurs").with(user("finance"))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/demandes/999999/validateurs").with(user("hr"))).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void suiviAfficheLeDetenteurEtLeRoleDeChaqueEtape() throws Exception {
+        int id = creerDemande();
+        decider("hr", id, "valider")
+                // Faite : celui qui a créé / décidé
+                .andExpect(jsonPath("$.suivi[0].personnel[0].detenteur").value("Hery Rakotomalala"))
+                .andExpect(jsonPath("$.suivi[0].personnel[0].poste").value("Manager informatique"))
+                .andExpect(jsonPath("$.suivi[0].personnel[0].roleLibelle").value("Manager"))
+                .andExpect(jsonPath("$.suivi[1].personnel[0].detenteur").value("Lalao Rasoanaivo"))
+                // Courante et à venir : les comptes du rôle qui décidera
+                .andExpect(jsonPath("$.suivi[2].personnel[*].login", hasItem("direction")))
+                .andExpect(jsonPath("$.suivi[2].personnel[0].poste").value("Directeur général"))
+                .andExpect(jsonPath("$.suivi[3].personnel[0].detenteur").value("Mamy Razafindrakoto"));
+    }
+
+    @Test
     void etapesDuWorkflow() throws Exception {
         mvc.perform(get("/api/demandes/etapes").with(user("manager")))
                 .andExpect(jsonPath("$[*].libelle").value(org.hamcrest.Matchers.contains("Manager", "HR", "Direction", "Finance")))
