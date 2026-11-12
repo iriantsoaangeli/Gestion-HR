@@ -1,11 +1,11 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import Erreur from '../ui/Erreur.vue'
-import RechercheSelect from '../ui/RechercheSelect.vue'
+import Tableau from '../ui/Tableau.vue'
 import * as api from '../../api/dossiers'
 import { useChargement } from '../../utils/chargement'
 import { dateLongue, iso } from '../../utils/dates'
-import { normaliser } from '../../utils/texte'
+import { contient, normaliser } from '../../utils/texte'
 
 // Dépôt d'un dossier de candidature (HR) : une offre ouverte, un candidat, des pièces jointes.
 // À gauche : l'offre, puis les fichiers (30 Mo au total). À droite : le candidat,
@@ -20,8 +20,49 @@ const { donnees: offres, erreur: erreurOffres } = useChargement(api.offresOuvert
 
 // ---------- Offre ----------
 
-const idOffre = ref('')
+const idOffre = ref(null)
 const offre = computed(() => offres.value.find((o) => o.id === idOffre.value) ?? null)
+
+const dateCourte = (texte) =>
+  texte ? new Date(`${texte}T00:00:00`).toLocaleDateString('fr-FR') : null
+
+// Colonnes de la table offre (libellés à la place des id) ; la description s'affiche au survol
+const COLONNES_OFFRE = [
+  { cle: 'id', label: 'N°', classe: 'nombre' },
+  { cle: 'poste', label: 'Poste' },
+  { cle: 'departement', label: 'Département' },
+  { cle: 'responsable', label: 'Responsable' },
+  {
+    cle: 'delai',
+    label: 'Date limite',
+    classe: 'etroite',
+    valeur: (o) => dateCourte(o.delai),
+    valeurTri: (o) => o.delai || '9999',
+  }, // sans date limite = en dernier
+  { cle: 'idDemande', label: 'Demande', classe: 'tres-etroite', valeur: (o) => `N° ${o.idDemande}` },
+]
+const libelleOffre = (o) => `N° ${o.id} — ${o.poste} (${o.departement})`
+
+// Départements présents dans une liste (pour la sélection au-dessus du tableau)
+const departementsDe = (liste) =>
+  [...new Set(liste.map((x) => x.departement).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, 'fr'),
+  )
+
+// Filtre au-dessus du tableau : recherche (sans accents, utils/texte.js) + département
+const filtreOffre = reactive({ recherche: '', departement: '' }) // '' = tous les départements
+const departementsOffres = computed(() => departementsDe(offres.value))
+const nombreOffres = (d) => offres.value.filter((o) => !d || o.departement === d).length
+const offresFiltrees = computed(() =>
+  offres.value.filter(
+    (o) =>
+      (!filtreOffre.departement || o.departement === filtreOffre.departement) &&
+      contient(
+        [o.id, o.poste, o.departement, o.responsable, o.description].join(' '),
+        filtreOffre.recherche,
+      ),
+  ),
+)
 
 // ---------- Candidat ----------
 
@@ -30,12 +71,32 @@ const idPersonne = ref(null)
 const personne = computed(() => personnes.value.find((p) => p.id === idPersonne.value) ?? null)
 
 const nomComplet = (p) => `${p.prenom} ${p.nom}`
-// Suggestions de la recherche : on précise tout de suite si la personne est employée
-const options = computed(() =>
-  personnes.value.map((p) => ({
-    id: p.id,
-    label: `${nomComplet(p)} — ${p.poste ? `employé(e) : ${p.poste}` : 'externe'}`,
-  })),
+const statutPersonne = (p) => (p.poste ? 'Employé(e)' : 'Externe') // employé = occupe un poste (table emploi)
+
+// Colonnes de la table personne + son poste (table emploi) ; e-mail et téléphone au survol
+const COLONNES_PERSONNE = [
+  { cle: 'nom', label: 'Nom' },
+  { cle: 'prenom', label: 'Prénom' },
+  {
+    cle: 'naissance',
+    label: 'Naissance',
+    classe: 'etroite',
+    valeur: (p) => dateCourte(p.naissance),
+    valeurTri: (p) => p.naissance,
+  },
+  { cle: 'statut', label: 'Statut', classe: 'etroite', valeur: statutPersonne },
+  { cle: 'poste', label: 'Poste' },
+]
+// Filtre au-dessus du tableau : recherche + département (celui du poste ; les externes n'en ont pas)
+const filtrePersonne = reactive({ recherche: '', departement: '' }) // '' = tous les départements
+const departementsPersonnes = computed(() => departementsDe(personnes.value))
+const nombrePersonnes = (d) => personnes.value.filter((p) => !d || p.departement === d).length
+const personnesFiltrees = computed(() =>
+  personnes.value.filter(
+    (p) =>
+      (!filtrePersonne.departement || p.departement === filtrePersonne.departement) &&
+      contient([p.nom, p.prenom, p.poste, p.email, p.tel].join(' '), filtrePersonne.recherche),
+  ),
 )
 
 const vide = () => ({ nom: '', prenom: '', naissance: '', adresse: '', tel: '', email: '' })
@@ -125,7 +186,7 @@ function deposer() {
   // Pas encore de backend : on affiche seulement le récapitulatif
   const candidat = mode.value === 'existante' ? personne.value : { ...nouvelle, poste: null }
   envoye.value = {
-    offre: offre.value.intitule,
+    offre: libelleOffre(offre.value),
     candidat: nomComplet(candidat),
     employe: Boolean(candidat.poste),
     nouvelle: mode.value === 'nouvelle',
@@ -144,13 +205,42 @@ function deposer() {
     <div class="dossier-colonne">
       <fieldset class="dossier-bloc">
         <legend>Offre</legend>
-        <label for="dossier-offre">Offre ouverte</label>
-        <select id="dossier-offre" v-model="idOffre" required :class="{ 'a-choisir': !idOffre }">
-          <option value="" disabled>Choisir une offre…</option>
-          <option v-for="o in offres" :key="o.id" :value="o.id">
-            {{ o.intitule }} — {{ o.departement }}
-          </option>
-        </select>
+        <p class="dossier-titre-liste">
+          Offre ouverte <span class="help">— cliquez sur une ligne</span>
+        </p>
+        <div class="filtres dossier-filtres">
+          <div class="puces" role="group" aria-label="Département de l'offre">
+            <button
+              v-for="d in ['', ...departementsOffres]"
+              :key="d"
+              type="button"
+              class="puce"
+              :class="{ active: filtreOffre.departement === d }"
+              :aria-pressed="filtreOffre.departement === d"
+              @click="filtreOffre.departement = d"
+            >
+              {{ d || 'Tous' }} <span class="count">{{ nombreOffres(d) }}</span>
+            </button>
+          </div>
+          <input
+            v-model="filtreOffre.recherche"
+            type="search"
+            class="filtre-recherche"
+            placeholder="Rechercher (n°, poste, responsable, description)…"
+            aria-label="Rechercher une offre"
+          />
+        </div>
+        <Tableau
+          v-model:selection="idOffre"
+          :lignes="offresFiltrees"
+          :colonnes="COLONNES_OFFRE"
+          :titre-ligne="(o) => o.description"
+          :vide="offres.length ? 'Aucune offre pour ce filtre' : 'Aucune offre ouverte'"
+          :class="{ 'a-choisir': !idOffre }"
+        />
+        <p class="help dossier-compte">
+          {{ offresFiltrees.length }} offre(s) sur {{ offres.length }}
+        </p>
         <Erreur :message="erreurOffres" />
 
         <dl v-if="offre" class="dossier-rappel">
@@ -158,12 +248,14 @@ function deposer() {
           <dd>{{ offre.poste }}</dd>
           <dt>Département</dt>
           <dd>{{ offre.departement }}</dd>
-          <dt>Contrat</dt>
-          <dd>{{ offre.contrat }}</dd>
+          <dt>Responsable</dt>
+          <dd>{{ offre.responsable }}</dd>
           <dt>Date limite</dt>
           <dd>{{ offre.delai ? dateLongue(offre.delai) : 'Aucune' }}</dd>
           <dt>Demande</dt>
           <dd>N° {{ offre.idDemande }}</dd>
+          <dt>Description</dt>
+          <dd>{{ offre.description }}</dd>
         </dl>
       </fieldset>
 
@@ -236,14 +328,46 @@ function deposer() {
 
         <!-- Personne de la base -->
         <template v-if="mode === 'existante'">
-          <label for="dossier-personne">Rechercher une personne</label>
-          <RechercheSelect
-            id="dossier-personne"
-            :options="options"
-            placeholder="Nom, prénom…"
-            vide="Personne ne correspond : ajoutez une nouvelle personne."
-            @choisir="(o) => (idPersonne = o.id)"
-          />
+          <p class="dossier-titre-liste">
+            Personne <span class="help">— cliquez sur une ligne</span>
+          </p>
+          <div class="filtres dossier-filtres">
+            <div class="puces" role="group" aria-label="Département de la personne">
+              <button
+                v-for="d in ['', ...departementsPersonnes]"
+                :key="d"
+                type="button"
+                class="puce"
+                :class="{ active: filtrePersonne.departement === d }"
+                :aria-pressed="filtrePersonne.departement === d"
+                @click="filtrePersonne.departement = d"
+              >
+                {{ d || 'Tous' }} <span class="count">{{ nombrePersonnes(d) }}</span>
+              </button>
+            </div>
+            <input
+              v-model="filtrePersonne.recherche"
+              type="search"
+              class="filtre-recherche"
+              placeholder="Rechercher (nom, prénom, poste, e-mail, téléphone)…"
+              aria-label="Rechercher une personne"
+            />
+          </div>
+          <Tableau
+            v-model:selection="idPersonne"
+            :lignes="personnesFiltrees"
+            :colonnes="COLONNES_PERSONNE"
+            :titre-ligne="(p) => `${p.email} · ${p.tel}`"
+            vide="Personne ne correspond : ajoutez une nouvelle personne"
+            :class="{ 'a-choisir': !idPersonne }"
+          >
+            <template #statut="{ ligne, valeur }">
+              <span class="badge petit" :class="ligne.poste ? 'ok' : 'attente'">{{ valeur }}</span>
+            </template>
+          </Tableau>
+          <p class="help dossier-compte">
+            {{ personnesFiltrees.length }} personne(s) sur {{ personnes.length }}
+          </p>
           <Erreur :message="erreurPersonnes" />
 
           <div v-if="personne" class="dossier-personne">

@@ -22,6 +22,9 @@
 .dossier-bloc {
   display: flex;
   flex-direction: column;
+  /* Un fieldset s'élargit par défaut à la largeur de son contenu (min-inline-size: min-content) :
+     sans ceci, il déborde de sa colonne et le tableau ne défile jamais en largeur */
+  min-inline-size: 0;
 }
 
 .dossier-bloc legend {
@@ -33,10 +36,62 @@
   margin-bottom: 0.25rem;
 }
 
-/* Liste des offres surlignée tant que rien n'est choisi */
-.dossier select.a-choisir {
+/* Tableaux de choix (offre, personne) : plus courts que dans une page, défilent dans leur hauteur.
+   Chaque ligne tient sur une ligne de texte, à hauteur fixe (--ligne) ; le tableau montre l'en-tête
+   + 5 lignes entières, sans ligne coupée à moitié en bas (+ 2px : la bordure du cadre). */
+.dossier .tableau {
+  --ligne: 2.5rem;
+  max-height: calc(6 * var(--ligne) + 2px);
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+/* Largeur de la colonne, pas plus (pas de défilement en largeur) : colonnes courtes à largeur fixe,
+   les autres se partagent le reste ; un texte trop long finit par « … » */
+.dossier .tableau .table {
+  table-layout: fixed;
+}
+
+.dossier .tableau th,
+.dossier .tableau td {
+  height: var(--ligne);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dossier .tableau .nombre {
+  width: 2.75rem;
+}
+
+.dossier .tableau .tres-etroite {
+  width: 5.5rem;
+}
+
+.dossier .tableau .etroite {
+  width: 6.5rem;
+}
+
+/* Surligné tant que rien n'est choisi */
+.dossier .tableau.a-choisir {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.dossier-titre-liste {
+  margin: 0 0 0.35rem;
+}
+
+/* Filtre au-dessus de chaque tableau : puces de département + recherche,
+   mêmes classes que les tableaux de demandes (.filtres, .puces, .puce : css/demande/DemandesColonne.css) */
+.dossier-filtres {
+  margin-bottom: 0.5rem;
+}
+
+/* Nombre de lignes affichées, sous le tableau */
+.dossier-bloc > .dossier-compte {
+  margin: -0.5rem 0 0.75rem;
 }
 
 /* Rappel de l'offre ou de la personne choisie */
