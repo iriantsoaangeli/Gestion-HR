@@ -8,7 +8,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/** C'est un controller qui attrape les exceptions grossomodo*/
+/** Grossomodo , C"est un listner d'exception sur les controllers*/
 @RestControllerAdvice
 public class GestionErreurs {
 
