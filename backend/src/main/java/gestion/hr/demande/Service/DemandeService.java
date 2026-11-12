@@ -1,348 +1,88 @@
 package gestion.hr.demande.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import gestion.hr.demande.Dto.CreerDemandeRequest;
 import gestion.hr.demande.Dto.DemandeResponse;
-import gestion.hr.commun.Exception.ErreurMetier;
-import gestion.hr.demande.Model.Demande;
-import gestion.hr.demande.Model.DemandeFonction;
-import gestion.hr.demande.Model.DemandePoste;
-import gestion.hr.demande.Model.HistoDemande;
-import gestion.hr.referentiel.Model.Poste;
-import gestion.hr.demande.Model.Statut;
-import gestion.hr.demande.Repository.DemandeFonctionRepository;
-import gestion.hr.demande.Repository.DemandePosteRepository;
-import gestion.hr.demande.Repository.DemandeRepository;
-import gestion.hr.referentiel.Repository.DepartementRepository;
-import gestion.hr.referentiel.Repository.FonctionRepository;
-import gestion.hr.demande.Repository.HistoDemandeRepository;
-import gestion.hr.referentiel.Repository.PosteRepository;
-import gestion.hr.auth.Model.Role;
-import gestion.hr.auth.Model.Utilisateur;
-import gestion.hr.auth.Repository.UtilisateurRepository;
-import gestion.hr.auth.Service.UtilisateurCourant;
-import gestion.hr.referentiel.Dto.PersonnelResponse;
-import gestion.hr.referentiel.Service.ReferentielService;
 
 /**
- * Règles des demandes de personnel (workflow Manager -> HR -> Direction -> Finance).
- * - Seul un MANAGER crée une demande ; elle démarre EN_ATTENTE_HR.
- * - Il la crée uniquement pour son département (celui de son poste).
- * - Il peut demander son propre remplacement, mais pas celui d'un poste tenu par un autre compte
- *   (autres managers, supérieurs).
- * - À chaque étape, seul le rôle de l'étape (Statut.getValideur) valide ou refuse.
- * - Chaque décision est écrite dans histoDemande, dans la même transaction que le changement de statut.
- * - Une demande n'est visible que par son demandeur, ceux qui ont décidé dessus, le rôle dont c'est le tour,
- *   et ADMIN / DIRECTION (toutes les demandes).
+ * Point d'entrée unique des demandes de personnel (workflow Manager -> HR -> Direction -> Finance).
+ * Chaque section est dans sa classe du même package, invisible hors de celui-ci :
+ * - CreationDemande  : créer (MANAGER, son département, pas les postes des autres comptes)
+ * - DecisionDemande  : valider / refuser à son étape, avec l'historique
+ * - LectureDemande   : fiche, listes, validateurs, étapes (qui voit quoi)
+ * - ConversionDemande : Demande -> DemandeResponse (libellés, historique, suivi)
+ * Les transactions sont ouvertes ici.
  */
 @Service
 public class DemandeService {
 
-    /** Le délai doit laisser au moins une semaine. */
-    static final int DELAI_MINIMUM_JOURS = 7;
-    static final int MOTIF_MAX = 200;
+    private final CreationDemande creation;
+    private final DecisionDemande decision;
+    private final LectureDemande lecture;
 
-    private final DemandeRepository demandes;
-    private final DemandeFonctionRepository creations;
-    private final DemandePosteRepository remplacements;
-    private final HistoDemandeRepository historique;
-    private final DepartementRepository departements;
-    private final FonctionRepository fonctions;
-    private final PosteRepository postes;
-    private final UtilisateurRepository utilisateurs;
-    private final UtilisateurCourant courant;
-    private final ReferentielService referentiel;
-
-    public DemandeService(DemandeRepository demandes, DemandeFonctionRepository creations,
-            DemandePosteRepository remplacements, HistoDemandeRepository historique,
-            DepartementRepository departements, FonctionRepository fonctions, PosteRepository postes,
-            UtilisateurRepository utilisateurs, UtilisateurCourant courant, ReferentielService referentiel) {
-        this.demandes = demandes;
-        this.creations = creations;
-        this.remplacements = remplacements;
-        this.historique = historique;
-        this.departements = departements;
-        this.fonctions = fonctions;
-        this.postes = postes;
-        this.utilisateurs = utilisateurs;
-        this.courant = courant;
-        this.referentiel = referentiel;
+    DemandeService(CreationDemande creation, DecisionDemande decision, LectureDemande lecture) {
+        this.creation = creation;
+        this.decision = decision;
+        this.lecture = lecture;
     }
 
     // ---------- Créer ----------
 
     @Transactional
     public DemandeResponse creer(CreerDemandeRequest req) {
-        Utilisateur moi = courant.get();
-        if (!moi.getRole().peutCreerDemande()) {
-            throw ErreurMetier.accesRefuse("Seul un manager peut créer une demande.");
-        }
-        verifier(req, moi);
-
-        Demande d = demandes.save(new Demande(req.idDepartement(), moi.getId(), req.motif().trim(), req.delai()));
-        for (CreerDemandeRequest.Creation c : liste(req.creations())) {
-            creations.save(new DemandeFonction(d.getId(), c.idFonction(), c.effectif()));
-        }
-        for (Integer idPoste : liste(req.remplacements())) {
-            remplacements.save(new DemandePoste(d.getId(), idPoste));
-        }
-        return enReponse(d, moi);
-    }
-
-    private void verifier(CreerDemandeRequest req, Utilisateur moi) {
-        if (req.idDepartement() == null || !departements.existsById(req.idDepartement())) {
-            throw ErreurMetier.validation("Choisissez un département.");
-        }
-        if (!req.idDepartement().equals(postes.departementDe(moi.getId()).orElse(null))) {
-            throw ErreurMetier.accesRefuse("Vous ne pouvez faire une demande que pour votre département.");
-        }
-        if (req.motif() == null || req.motif().isBlank()) {
-            throw ErreurMetier.validation("Le motif est obligatoire.");
-        }
-        if (req.motif().trim().length() > MOTIF_MAX) {
-            throw ErreurMetier.validation("Le motif ne doit pas dépasser " + MOTIF_MAX + " caractères.");
-        }
-        if (req.delai() != null && req.delai().isBefore(LocalDate.now().plusDays(DELAI_MINIMUM_JOURS))) {
-            throw ErreurMetier.validation("Le délai doit être d'au moins une semaine.");
-        }
-
-        List<CreerDemandeRequest.Creation> aCreer = liste(req.creations());
-        List<Integer> aRemplacer = liste(req.remplacements());
-        if (aCreer.isEmpty() && aRemplacer.isEmpty()) {
-            throw ErreurMetier.validation("Ajoutez ou remplacez au moins un poste.");
-        }
-
-        Set<Integer> vues = new HashSet<>();
-        for (CreerDemandeRequest.Creation c : aCreer) {
-            if (c == null || c.idFonction() == null || !fonctions.existsById(c.idFonction())) {
-                throw ErreurMetier.validation("Fonction inconnue.");
-            }
-            if (c.effectif() == null || c.effectif() < 1) {
-                throw ErreurMetier.validation("L'effectif d'une création doit être d'au moins 1.");
-            }
-            if (!vues.add(c.idFonction())) {
-                throw ErreurMetier.validation("Une même fonction ne peut être demandée qu'une fois (augmentez l'effectif).");
-            }
-        }
-
-        vues.clear();
-        for (Integer idPoste : aRemplacer) {
-            Poste p = idPoste == null ? null : postes.findById(idPoste).orElse(null);
-            if (p == null) {
-                throw ErreurMetier.validation("Poste à remplacer inconnu.");
-            }
-            if (!p.getIdDepartement().equals(req.idDepartement())) {
-                throw ErreurMetier.validation("Le poste « " + p.getLabel() + " » n'est pas dans ce département.");
-            }
-            if (!vues.add(idPoste)) {
-                throw ErreurMetier.validation("Le poste « " + p.getLabel() + " » est demandé deux fois.");
-            }
-            if (utilisateurs.existsByIdPosteAndIdNot(idPoste, moi.getId())) {
-                throw ErreurMetier.accesRefuse("Le poste « " + p.getLabel()
-                        + " » est tenu par un autre compte (manager ou supérieur) : vous ne pouvez pas demander son remplacement.");
-            }
-        }
+        return creation.creer(req);
     }
 
     // ---------- Valider / refuser ----------
 
     @Transactional
     public DemandeResponse valider(Integer id) {
-        return decider(id, true);
+        return decision.decider(id, true);
     }
 
     @Transactional
     public DemandeResponse refuser(Integer id) {
-        return decider(id, false);
-    }
-
-    private DemandeResponse decider(Integer id, boolean valide) {
-        Utilisateur moi = courant.get();
-        Demande d = demandes.findById(id)
-                .orElseThrow(() -> ErreurMetier.introuvable("La demande n° " + id + " n'existe pas."));
-
-        Statut actuel = d.getStatut();
-        if (!actuel.estEnAttente()) {
-            throw new ErreurMetier(HttpStatus.CONFLICT, "TRANSITION_INTERDITE",
-                    "La demande n° " + id + " est déjà traitée (" + actuel.getLibelle() + ").");
-        }
-        if (actuel.getValideur() != moi.getRole()) {
-            throw ErreurMetier.accesRefuse("Cette demande attend la décision de l'étape "
-                    + actuel.getValideur().getLibelle() + ".");
-        }
-
-        Statut nouveau = valide ? actuel.apresValidation() : Statut.REFUSEE;
-        d.setStatut(nouveau);
-        historique.save(new HistoDemande(d.getId(), moi.getId(), nouveau));
-        return enReponse(d, moi);
+        return decision.decider(id, false);
     }
 
     // ---------- Lire ----------
 
-    /** Une demande, si je peux la voir (sinon 403). */
     @Transactional(readOnly = true)
     public DemandeResponse detail(Integer id) {
-        Utilisateur moi = courant.get();
-        return enReponse(visible(id, moi), moi);
+        return lecture.detail(id);
     }
 
-    /** Personnel ayant validé la demande (les refus n'y sont pas), dans l'ordre du workflow. Même accès que detail. */
     @Transactional(readOnly = true)
     public List<DemandeResponse.Validation> validateurs(Integer id) {
-        Demande d = visible(id, courant.get());
-        return historique.findByIdDemandeOrderByDateAscIdAsc(d.getId()).stream()
-                .filter(x -> x.getStatut() != Statut.REFUSEE)
-                .map(x -> new DemandeResponse.Validation(x.getDate(), x.getStatut(),
-                        referentiel.personnel(utilisateurs.findById(x.getIdUtilisateur()).orElse(null))))
-                .toList();
+        return lecture.validateurs(id);
     }
 
-    /**
-     * La demande, si je peux la voir : son demandeur, ceux qui ont décidé dessus, le rôle dont c'est le tour,
-     * ADMIN et DIRECTION. Sinon 403 (404 si elle n'existe pas).
-     */
-    private Demande visible(Integer id, Utilisateur moi) {
-        Demande d = demandes.findById(id)
-                .orElseThrow(() -> ErreurMetier.introuvable("La demande n° " + id + " n'existe pas."));
-        boolean visible = d.getIdDemandeur().equals(moi.getId())
-                || moi.getRole().voitToutesLesDemandes()
-                || d.getStatut().getValideur() == moi.getRole()
-                || historique.existsByIdDemandeAndIdUtilisateur(d.getId(), moi.getId());
-        if (!visible) {
-            throw ErreurMetier.accesRefuse("Vous n'avez pas accès à la demande n° " + id + ".");
-        }
-        return d;
-    }
-
-    /** Toutes les demandes : ADMIN et DIRECTION seulement. */
     @Transactional(readOnly = true)
     public List<DemandeResponse> toutes() {
-        Utilisateur moi = courant.get();
-        if (!moi.getRole().voitToutesLesDemandes()) {
-            throw ErreurMetier.accesRefuse("Seules l'administration et la direction voient toutes les demandes.");
-        }
-        return enReponses(demandes.findAllByOrderByDateDescIdDesc(), moi);
+        return lecture.toutes();
     }
 
-    /** Demandes que j'ai créées. */
     @Transactional(readOnly = true)
     public List<DemandeResponse> mesDemandes() {
-        Utilisateur moi = courant.get();
-        return enReponses(demandes.findByIdDemandeurOrderByDateDescIdDesc(moi.getId()), moi);
+        return lecture.mesDemandes();
     }
 
-    /** Demandes qui attendent ma décision (les plus anciennes d'abord). Vide si mon rôle ne valide pas. */
     @Transactional(readOnly = true)
     public List<DemandeResponse> aTraiter() {
-        Utilisateur moi = courant.get();
-        List<Statut> statuts = Statut.enAttenteDe(moi.getRole());
-        return statuts.isEmpty() ? List.of() : enReponses(demandes.findByStatutInOrderByDateAscIdAsc(statuts), moi);
+        return lecture.aTraiter();
     }
 
-    /** Demandes sur lesquelles j'ai pris une décision (validée ou refusée). */
     @Transactional(readOnly = true)
     public List<DemandeResponse> traitees() {
-        Utilisateur moi = courant.get();
-        return enReponses(demandes.findTraiteesPar(moi.getId()), moi);
+        return lecture.traitees();
     }
 
-    /** Étapes du workflow pour une demande pas encore créée (progression du formulaire). */
     @Transactional(readOnly = true)
     public List<DemandeResponse.Etape> etapes() {
-        List<DemandeResponse.Etape> etapes = new ArrayList<>();
-        etapes.add(new DemandeResponse.Etape(Role.MANAGER.getLibelle(), "courante", "Création de la demande", null, null,
-                seul(referentiel.personnel(courant.get()))));
-        for (Statut s : Statut.etapesDeValidation()) {
-            etapes.add(new DemandeResponse.Etape(s.getValideur().getLibelle(), "a-venir", "À venir", null, null,
-                    referentiel.personnelDuRole(s.getValideur())));
-        }
-        return etapes;
-    }
-
-    // ---------- Conversion ----------
-
-    private List<DemandeResponse> enReponses(List<Demande> liste, Utilisateur moi) {
-        return liste.stream().map(d -> enReponse(d, moi)).toList();
-    }
-
-    private DemandeResponse enReponse(Demande d, Utilisateur moi) {
-        String departement = departements.findById(d.getIdDepartement()).map(x -> x.getLabel()).orElse(null);
-        Utilisateur demandeurU = utilisateurs.findById(d.getIdDemandeur()).orElse(null);
-        String demandeur = demandeurU == null ? null : demandeurU.getLogin();
-
-        List<DemandeResponse.Creation> c = creations.findByIdDemande(d.getId()).stream()
-                .map(x -> new DemandeResponse.Creation(x.getIdFonction(),
-                        fonctions.findById(x.getIdFonction()).map(f -> f.getLabel()).orElse(null), x.getEffectif()))
-                .toList();
-        List<DemandeResponse.Remplacement> r = remplacements.findByIdDemande(d.getId()).stream()
-                .map(x -> new DemandeResponse.Remplacement(x.getIdPoste(),
-                        postes.findById(x.getIdPoste()).map(Poste::getLabel).orElse(null)))
-                .toList();
-        // Décisions dans l'ordre, avec le compte de chaque décideur (pour l'historique et le suivi)
-        List<HistoDemande> decisions = historique.findByIdDemandeOrderByDateAscIdAsc(d.getId());
-        List<Utilisateur> decideurs = decisions.stream()
-                .map(x -> utilisateurs.findById(x.getIdUtilisateur()).orElse(null)).toList();
-        List<DemandeResponse.Decision> h = new ArrayList<>();
-        for (int k = 0; k < decisions.size(); k++) {
-            Utilisateur u = decideurs.get(k);
-            h.add(new DemandeResponse.Decision(u == null ? null : u.getLogin(),
-                    u == null ? null : u.getRole().getLibelle(), decisions.get(k).getStatut(), decisions.get(k).getDate()));
-        }
-
-        Role valideur = d.getStatut().getValideur();
-        return new DemandeResponse(d.getId(), d.getIdDepartement(), departement, d.getStatut(),
-                d.getStatut().getLibelle(), valideur == null ? null : valideur.name(), d.getIdDemandeur(), demandeur,
-                d.getDate(), d.getMotif(), d.getDelai(), c, r, h,
-                valideur != null && valideur == moi.getRole(), suivi(d, demandeurU, h, decideurs));
-    }
-
-    /**
-     * Une ligne par étape : création, puis chaque étape de validation. Les décisions arrivent dans l'ordre
-     * du workflow, donc la k-ième décision correspond à la k-ième étape de validation.
-     * Personnel de l'étape : celui qui a agi si elle est faite, sinon les comptes du rôle qui décidera.
-     */
-    private List<DemandeResponse.Etape> suivi(Demande d, Utilisateur demandeur, List<DemandeResponse.Decision> h,
-            List<Utilisateur> decideurs) {
-        List<DemandeResponse.Etape> suivi = new ArrayList<>();
-        suivi.add(new DemandeResponse.Etape(Role.MANAGER.getLibelle(), "faite", "Demande créée", d.getDate(),
-                demandeur == null ? null : demandeur.getLogin(), seul(referentiel.personnel(demandeur))));
-
-        boolean refusee = d.getStatut() == Statut.REFUSEE;
-        LocalDate derniereDate = h.isEmpty() ? d.getDate() : h.get(h.size() - 1).date();
-        List<Statut> etapes = Statut.etapesDeValidation();
-        for (int k = 0; k < etapes.size(); k++) {
-            Role role = etapes.get(k).getValideur();
-            String libelle = role.getLibelle();
-            if (k < h.size()) {
-                DemandeResponse.Decision dec = h.get(k);
-                boolean refus = dec.statut() == Statut.REFUSEE;
-                suivi.add(new DemandeResponse.Etape(libelle, refus ? "refusee" : "faite", refus ? "Refusée" : "Validée",
-                        dec.date(), dec.utilisateur(), seul(referentiel.personnel(decideurs.get(k)))));
-            } else if (etapes.get(k) == d.getStatut()) {
-                suivi.add(new DemandeResponse.Etape(libelle, "courante", "En attente depuis", derniereDate, null,
-                        referentiel.personnelDuRole(role)));
-            } else {
-                suivi.add(new DemandeResponse.Etape(libelle, "a-venir", refusee ? "Non atteinte" : "À venir", null, null,
-                        referentiel.personnelDuRole(role)));
-            }
-        }
-        return suivi;
-    }
-
-    private static List<PersonnelResponse> seul(PersonnelResponse p) {
-        return p == null ? List.of() : List.of(p);
-    }
-
-    private static <T> List<T> liste(List<T> l) {
-        return l == null ? List.of() : l;
+        return lecture.etapes();
     }
 }

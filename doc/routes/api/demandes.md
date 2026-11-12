@@ -100,8 +100,13 @@ Règles dans `demande/Model/Statut.java` (enum, ids = table `status`) et `demand
 
 ## Code
 
-`backend/src/main/java/gestion/hr/` : `Controller/DemandeController`, `Controller/ReferentielController`, `Service/DemandeService`,
-`Model/` (Demande, DemandeFonction, DemandePoste, HistoDemande, Statut, …), `Repository/`, `Dto/`, `Exception/`.
+`backend/src/main/java/gestion/hr/` (une fonctionnalité = un dossier, puis une couche par sous-dossier) :
+- `demande/` : `Controller/DemandeController` → `Service/DemandeService` (seul point d'entrée, transactions), qui appelle
+  les classes du même package, invisibles ailleurs : `CreationDemande`, `DecisionDemande`, `LectureDemande`,
+  `ConversionDemande` (Demande → `DemandeResponse`, suivi). `Model/` (Demande, DemandeFonction, DemandePoste,
+  HistoDemande, Statut, …), `Repository/`, `Dto/`.
+- `referentiel/` : `ReferentielController` → `ReferentielService` (listes, postes remplaçables, personnel).
+- `auth/` (connexion, comptes), `commun/Exception/` (erreurs JSON).
 Tests : `src/test/java/gestion/hr/demande/Controller/DemandeControllerTest` (sur la base locale, annulés à la fin).
 
 ## Front
