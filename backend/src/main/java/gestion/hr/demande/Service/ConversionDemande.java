@@ -1,6 +1,6 @@
 package gestion.hr.demande.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,7 +99,7 @@ class ConversionDemande {
                 demandeur == null ? null : demandeur.getLogin(), seul(referentiel.personnel(demandeur))));
 
         boolean refusee = d.getStatut() == Statut.REFUSEE;
-        LocalDate derniereDate = h.isEmpty() ? d.getDate() : h.get(h.size() - 1).date();
+        LocalDateTime derniereDate = h.isEmpty() ? d.getDate() : h.get(h.size() - 1).date();
         List<Statut> etapes = Statut.etapesDeValidation();
         for (int k = 0; k < etapes.size(); k++) {
             Role role = etapes.get(k).getValideur();

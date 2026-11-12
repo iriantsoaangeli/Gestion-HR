@@ -1,6 +1,7 @@
 package gestion.hr.demande.Model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -29,7 +30,7 @@ public class Demande {
     private Statut statut;
 
     private Integer idDemandeur;
-    private LocalDate date;
+    private LocalDateTime date;
     private String motif;
     private LocalDate delai;
 
@@ -42,7 +43,7 @@ public class Demande {
         this.motif = motif;
         this.delai = delai;
         this.statut = Statut.EN_ATTENTE_HR;
-        this.date = LocalDate.now();
+        this.date = LocalDateTime.now();
     }
 
     public Integer getId() {
@@ -65,7 +66,7 @@ public class Demande {
         return idDemandeur;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 

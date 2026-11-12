@@ -1,0 +1,205 @@
+/* Dépôt de dossier (components/dossier/DossierForm.vue) : offre + pièces jointes à gauche, candidat à droite */
+
+.dossier {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .dossier {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.dossier-colonne {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dossier-bloc {
+  display: flex;
+  flex-direction: column;
+}
+
+.dossier-bloc legend {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.dossier-bloc label {
+  margin-bottom: 0.25rem;
+}
+
+/* Liste des offres surlignée tant que rien n'est choisi */
+.dossier select.a-choisir {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+/* Rappel de l'offre ou de la personne choisie */
+.dossier-rappel {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0 0 0.5rem;
+  padding: 0.75rem;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-background-soft);
+  font-size: 0.9rem;
+}
+
+.dossier-rappel dt {
+  font-weight: 600;
+}
+
+.dossier-rappel dd {
+  margin: 0;
+}
+
+/* Deux champs côte à côte (nom + prénom, naissance + téléphone) */
+.dossier-ligne {
+  display: flex;
+  gap: 1rem;
+}
+
+.dossier-ligne > div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Choix : personne de la base ou nouvelle personne */
+.dossier-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.dossier-modes .choice {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Personne choisie */
+.dossier-personne {
+  margin-top: 0.25rem;
+}
+
+.dossier-personne-titre {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.dossier-personne .help {
+  margin: 0 0 0.5rem;
+}
+
+.dossier-aide {
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-primary-soft);
+  font-size: 0.9rem;
+}
+
+/* Bouton qui ressemble à un lien */
+.dossier-lien {
+  padding: 0;
+  background: none;
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Zone de dépôt des fichiers */
+.dossier-depot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  padding: 1.5rem 1rem;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-background-soft);
+  text-align: center;
+  cursor: pointer;
+}
+
+.dossier-depot:hover,
+.dossier-depot:focus-visible,
+.dossier-depot.survol {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  outline: none;
+}
+
+/* Le vrai champ fichier est caché : la zone de dépôt l'ouvre */
+.dossier-champ {
+  display: none;
+}
+
+/* Jauge des 30 Mo */
+.dossier-jauge {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-background-mute);
+}
+
+.dossier-jauge-barre {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.2s;
+}
+
+.dossier-jauge.pleine .dossier-jauge-barre {
+  background: var(--color-danger);
+}
+
+.dossier-bloc > .help {
+  margin: 0.35rem 0 0.75rem;
+}
+
+/* Liste des fichiers joints, défilante si elle est longue */
+.dossier-fichiers {
+  max-height: 14rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.dossier-fichiers li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.dossier-fichiers li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+.dossier-fichier-nom {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dossier-retirer {
+  align-self: center;
+  padding: 0.1rem 0.45rem;
+  background: none;
+  color: var(--color-danger);
+}

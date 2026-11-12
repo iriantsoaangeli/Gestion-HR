@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/** Individu de la base (table personne) : le détenteur d'un poste (poste.idPersonne). Lecture seule ici. */
+/** Individu de la base (table personne) : le détenteur d'un poste (emploi.idPersonne). Lecture seule ici. */
 @Entity
 @Table(name = "personne")
 public class Personne {

@@ -24,7 +24,7 @@ INSERT INTO fonction (label) VALUES
     ('Comptable'),
     ('Contrôleur de gestion');
 
--- Postes existants (sièges), vacants : idPersonne NULL
+-- Postes existants (sièges), vacants (emploi.idPersonne NULL, plus bas)
 INSERT INTO poste (label, idDepartement) VALUES
     ('Chargé de recrutement', 1),
     ('Gestionnaire paie', 1),
@@ -40,19 +40,23 @@ INSERT INTO poste (label, idDepartement) VALUES
     ('Directeur financier', 3),
     ('Administrateur de l''application', 2);
 
--- Détenteurs des postes des comptes (poste.idPersonne) : affichés à chaque étape d'une demande
-INSERT INTO personne (nom, prenom, naissance) VALUES
-    ('Rakotomalala', 'Hery',  '1985-03-14'),
-    ('Rasoanaivo',   'Lalao', '1979-07-02'),
-    ('Andrianarivo', 'Fanja', '1968-11-23'),
-    ('Razafindrakoto', 'Mamy', '1975-05-30'),
-    ('Rabearivelo',  'Toky',  '1990-01-09');
+-- Détenteurs des postes des comptes (emploi.idPersonne) : affichés à chaque étape d'une demande
+INSERT INTO personne (nom, prenom, naissance, adresse, tel, email) VALUES
+    ('Rakotomalala',   'Hery',  '1985-03-14', 'Lot II M 45 Analakely, Antananarivo',    '034 12 345 67', 'hery.rakotomalala@exemple.mg'),
+    ('Rasoanaivo',     'Lalao', '1979-07-02', 'Lot IVG 12 Ambohijatovo, Antananarivo',  '033 23 456 78', 'lalao.rasoanaivo@exemple.mg'),
+    ('Andrianarivo',   'Fanja', '1968-11-23', 'Lot VA 8 Ivandry, Antananarivo',         '032 34 567 89', 'fanja.andrianarivo@exemple.mg'),
+    ('Razafindrakoto', 'Mamy',  '1975-05-30', 'Lot III K 21 Ankorondrano, Antananarivo', '034 45 678 90', 'mamy.razafindrakoto@exemple.mg'),
+    ('Rabearivelo',    'Toky',  '1990-01-09', 'Lot I B 3 Andravoahangy, Antananarivo',  '038 56 789 01', 'toky.rabearivelo@exemple.mg');
 
-UPDATE poste p SET idPersonne = x.id
-FROM (VALUES ('Manager informatique', 'Hery'), ('Responsable RH', 'Lalao'), ('Directeur général', 'Fanja'),
-             ('Directeur financier', 'Mamy'), ('Administrateur de l''application', 'Toky')) AS v (poste, prenom)
-JOIN personne x ON x.prenom = v.prenom
-WHERE p.label = v.poste;
+-- Un emploi par poste (poste = siège) : idPersonne NULL si le poste est vacant
+INSERT INTO emploi (idPoste, idPersonne)
+SELECT p.id, x.id
+FROM poste p
+LEFT JOIN (VALUES ('Manager informatique', 'Hery'), ('Responsable RH', 'Lalao'), ('Directeur général', 'Fanja'),
+                  ('Directeur financier', 'Mamy'), ('Administrateur de l''application', 'Toky')) AS v (poste, prenom)
+       ON v.poste = p.label
+LEFT JOIN personne x ON x.prenom = v.prenom
+ORDER BY p.id;
 
 -- Comptes de test, un par rôle. Mots de passe de DEV uniquement (à changer en production) :
 --   manager / manager123   hr / hr123   direction / direction123   finance / finance123   admin / admin123

@@ -11,14 +11,17 @@ export function dansLe({ jours = 0, mois = 0 } = {}) {
   return iso(d)
 }
 
+// Partie AAAA-MM-JJ d'une date ou d'une date-heure de l'API (« 2026-11-11T10:23:45 » → « 2026-11-11 »)
+export const jour = (texte) => (texte ? String(texte).slice(0, 10) : texte)
+
 // « 11 novembre 2026 »
 export const dateLongue = (texte) =>
-  new Date(`${texte}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  new Date(`${jour(texte)}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 
 // Jours restants avant une date (négatif si dépassée), null sans date
 export function joursAvant(texte) {
   if (!texte) return null
   const aujourdhui = new Date()
   aujourdhui.setHours(0, 0, 0, 0)
-  return Math.round((new Date(`${texte}T00:00:00`) - aujourdhui) / 86400000)
+  return Math.round((new Date(`${jour(texte)}T00:00:00`) - aujourdhui) / 86400000)
 }

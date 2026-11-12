@@ -2,17 +2,17 @@
 
 ## Organisation
 
-**Un poste est comme un siege, idPersonne nulle si ce n'est pas occupe (la redondance est voulue)**  
-poste(**id**, label, #idPersonne?,#idDepartment)
+**Un poste est comme un siege, son detenteur est dans emploi (idPersonne nulle si ce n'est pas occupe)**  
+poste(**id**, label, #idDepartment)
 
 **Le departement d'un poste**  
 departement(**id**, label, nb)
 
 **Historique de status d'un poste**    
-histoPoste(**id**, #idPoste, status:true/false,date)
+histoPoste(**id**, #idPoste, status:true/false,datetime)
 
 **Historique de creationd de poste , redondance avec histoposte**  
-creationPoste(**id**,#idPoste,date)  
+creationPoste(**id**,#idPoste,datetime)  
 
 ## Fonctions et qualifications
 
@@ -22,16 +22,13 @@ fonction(**id**, label)
 **Une fonction associee a un poste, le poste est comme un siege**  
 fonctionPoste(**id**, #idPoste, #idFonction)
 
-**Qualification d'un poste**  
-clearance(**id**, label)
-
-**Table de liaison**  
-clearancePoste(**id**, #idPoste,#idClearance)
-
 ## Personnes et emplois
 
 **Un individu dans la base de donnees**  
-personne(**id**, nom, prenom, naissance)
+personne(**id**, nom, prenom, naissance,adresse,tel,email)
+
+**Un  historique des changement d'un utilisateurs tout ce qui ne chang pas reste null**  
+historiquePersonne(**id**,#idPersonne,nom?,prenom?,naissance?,adresse?,tel?,mail?,datetime)  
 
 **On emploie une personne pour un poste sinon l'id est null**  
 emploi(**id**, #idPoste, #idPersonne?)
@@ -39,11 +36,9 @@ emploi(**id**, #idPoste, #idPersonne?)
 **Les types de mouvements : entree/sortie**  
 mouvement(**id**, label)
 
-**Historique d'affectation des personnes au postes**  
-histoAffectation(**id**, #idPersonne, #idMouvement, date)
-
 **Un historique des mouvement entree/sortie des employees**  
-historiqueEmploi(**id**, date, #idMouvement, #idPersonne)
+historiqueEmploi(**id**, datetime, #idMouvement, #idPersonne, #idPoste)  
+> idPoste = poste dans lequel la personne entre ou dont elle sort
 
 ## Demandes de personnel
 
@@ -51,7 +46,7 @@ historiqueEmploi(**id**, date, #idMouvement, #idPersonne)
 status(**id**, label)
 
 **Demande de personnel**  
-demande(**id**, #idDepartement, #idStatus, #idDemandeur, date, motif, delai?)  
+demande(**id**, #idDepartement, #idStatus, #idDemandeur, datetime, motif, delai?)  
 > idDemandeur = utilisateur (manager) qui a créé la demande
 
 
@@ -62,7 +57,7 @@ demandePoste(**id**, #idPoste, #idDemande)
 demandeFonction(**id**, #idFonction, #idDemande, effectif)
 
 **Historique des décisions** (qui a validé / refusé, quand, statut obtenu)  
-histoDemande(**id**, #idDemande, #idUtilisateur, #idStatus, date)  
+histoDemande(**id**, #idDemande, #idUtilisateur, #idStatus, datetime)  
 > status : 1 EN_ATTENTE_HR, 2 EN_ATTENTE_DIRECTION, 3 EN_ATTENTE_FINANCE, 4 APPROUVEE, 5 REFUSEE (base/data.sql)
 
 
@@ -72,17 +67,17 @@ histoDemande(**id**, #idDemande, #idUtilisateur, #idStatus, date)
 utilisateur(**id**, login, mdp, role, #idPoste, status:true/false, creation)  
 > mdp = hachage BCrypt ; role ∈ MANAGER, HR, DIRECTION, FINANCE, ADMIN (comptes de test : base/data.sql)  
 > idPoste obligatoire et unique : chaque compte a un poste, un poste a au plus un compte  
-> status = compte actif (true) ou désactivé (false) ; creation = date de création du compte
+> status = compte actif (true) ou désactivé (false) ; creation = datetime de création du compte
 
 **Historique des comptes** (une ligne à la création, à chaque activation / désactivation ou changement de poste)  
-historiqueUtilisateurs(**id**, #idUtilisateur, #idPoste, status:true/false, date)  
+historiqueUtilisateurs(**id**, #idUtilisateur, #idPoste, status:true/false, datetime)  
 > idPoste et status = état du compte après le changement
 
 
 ## Creation d'offre d'emploi 
 
 **Une offre d'emploi**  
-offre(**id**,delai?,#idPoste,#idPosteResponsable,description)  
+offre(**id**,delai?,#idPoste,#idPosteResponsable,description,status:ouvert/clos,#idDemande,#idEmetteur)  
 
 **Ceux qui vont faire l'entretien et les evalutations , du many to one**  
 interviewer(**id**,#idPoste,#idOffre)
@@ -90,7 +85,10 @@ interviewer(**id**,#idPoste,#idOffre)
 ## Recrutement et entretien
 
 **L'entretien**  
-entretien(**id**,date,#idOffre)  
+entretien(**id**,datetime,#idOffre,#idStatusOffre)      
 
 **L'evaluation d'un entretien**  
-evaluation(**id**,#idEntretien,Note/100,Remarques  )
+evaluation(**id**,#idEntretien,Note/100,Remarques  )  
+
+**Le status de l'offre**
+statusOffre(**id**,label)  

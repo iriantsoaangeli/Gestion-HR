@@ -12,16 +12,21 @@ INSERT INTO poste (label, idDepartement)
 SELECT label, dep FROM (VALUES ('Manager RH', 1), ('Manager finance', 3)) AS v (label, dep)
 WHERE NOT EXISTS (SELECT 1 FROM utilisateur WHERE login = 'manager.rh');
 
--- Leurs détenteurs (poste.idPersonne)
-INSERT INTO personne (nom, prenom, naissance)
-SELECT nom, prenom, naissance::DATE
-FROM (VALUES ('Ravelojaona', 'Nirina', '1983-09-17'), ('Randrianasolo', 'Fidy', '1987-04-05')) AS v (nom, prenom, naissance)
+-- Leurs détenteurs (emploi.idPersonne)
+INSERT INTO personne (nom, prenom, naissance, adresse, tel, email)
+SELECT nom, prenom, naissance::DATE, adresse, tel, email
+FROM (VALUES
+    ('Ravelojaona',   'Nirina', '1983-09-17', 'Lot II J 7 Isotry, Antananarivo',      '034 67 890 12', 'nirina.ravelojaona@exemple.mg'),
+    ('Randrianasolo', 'Fidy',   '1987-04-05', 'Lot IVF 30 Ampefiloha, Antananarivo', '033 78 901 23', 'fidy.randrianasolo@exemple.mg')
+) AS v (nom, prenom, naissance, adresse, tel, email)
 WHERE NOT EXISTS (SELECT 1 FROM utilisateur WHERE login = 'manager.rh');
 
-UPDATE poste p SET idPersonne = x.id
+INSERT INTO emploi (idPoste, idPersonne)
+SELECT p.id, x.id
 FROM (VALUES ('Manager RH', 'Nirina'), ('Manager finance', 'Fidy')) AS v (poste, prenom)
+JOIN poste p ON p.label = v.poste
 JOIN personne x ON x.prenom = v.prenom
-WHERE p.label = v.poste AND p.idPersonne IS NULL;
+WHERE NOT EXISTS (SELECT 1 FROM emploi e WHERE e.idPoste = p.id);
 
 INSERT INTO utilisateur (login, mdp, role, idPoste)
 SELECT v.login, (SELECT mdp FROM utilisateur WHERE login = 'manager'), 'MANAGER',

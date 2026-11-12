@@ -9,7 +9,6 @@ Bloc 1 : demandes de personnel (Manager → HR → Direction → Finance). Bloc 
 | `frontend/` | Vue 3 (`<script setup>`), Vue Router, Vite |
 | `base/` | PostgreSQL |
 
-> **Rappel** : mettre à jour `doc/conception/base/schema.md` (sode adino).
 
 ---
 

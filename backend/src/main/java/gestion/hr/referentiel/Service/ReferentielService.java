@@ -79,8 +79,8 @@ public class ReferentielService {
             return null;
         }
         Poste poste = postes.findById(u.getIdPoste()).orElse(null);
-        String detenteur = poste == null || poste.getIdPersonne() == null ? null
-                : personnes.findById(poste.getIdPersonne()).map(Personne::getNomComplet).orElse(null);
+        String detenteur = poste == null ? null
+                : personnes.detenteurDuPoste(poste.getId()).map(Personne::getNomComplet).orElse(null);
         return new PersonnelResponse(u.getId(), u.getLogin(), u.getRole().name(), u.getRole().getLibelle(),
                 u.getIdPoste(), poste == null ? null : poste.getLabel(), detenteur);
     }

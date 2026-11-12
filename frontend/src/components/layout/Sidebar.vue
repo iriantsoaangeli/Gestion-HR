@@ -31,6 +31,7 @@ async function deconnexion() {
         <p class="section">Offres</p>
         <ul>
           <li><RouterLink to="/offres/nouvelle">Création d'offre</RouterLink></li>
+          <li><RouterLink to="/dossiers/nouveau">Dépôt de dossier</RouterLink></li>
         </ul>
       </template>
     </nav>

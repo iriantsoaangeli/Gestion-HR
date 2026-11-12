@@ -67,10 +67,26 @@ const offre = [
   },
 ]
 
+const dossier = [
+  {
+    // Dépôt de dossier (bloc 2 : « Dépôt de dossier : hr »). Données statiques pour l'instant (api/dossiers.js)
+    path: '/dossiers/nouveau',
+    name: 'depot-dossier',
+    meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
+    component: () => import('../views/dossier/DepotDossierView.vue'),
+  },
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   // La page d'accueil est choisie dans beforeEach (il faut d'abord connaître l'utilisateur)
-  routes: [{ path: '/', name: 'accueil', component: { render: () => null } }, ...auth, ...demande, ...offre],
+  routes: [
+    { path: '/', name: 'accueil', component: { render: () => null } },
+    ...auth,
+    ...demande,
+    ...offre,
+    ...dossier,
+  ],
 })
 
 // Il faut être connecté partout, sauf sur les pages meta.public ; une page réservée renvoie à l'accueil
@@ -80,7 +96,10 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
   }
   if (!utilisateur.value) return
-  const versAccueil = to.name === 'login' || to.name === 'accueil' || (to.meta.acces && !to.meta.acces(utilisateur.value))
+  const versAccueil =
+    to.name === 'login' ||
+    to.name === 'accueil' ||
+    (to.meta.acces && !to.meta.acces(utilisateur.value))
   // Comparaison au chemin : un rôle sans page (accueil = /login) reste sur le login au lieu de boucler
   if (versAccueil && accueil(utilisateur.value) !== to.path) return accueil(utilisateur.value)
 })

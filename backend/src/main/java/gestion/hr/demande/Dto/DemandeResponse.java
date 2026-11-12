@@ -1,6 +1,7 @@
 package gestion.hr.demande.Dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import gestion.hr.demande.Model.Statut;
@@ -22,7 +23,7 @@ public record DemandeResponse(
         String etapeValideur,
         Integer idDemandeur,
         String demandeur,
-        LocalDate date,
+        LocalDateTime date,
         String motif,
         LocalDate delai,
         List<Creation> creations,
@@ -42,15 +43,15 @@ public record DemandeResponse(
      * utilisateur : login de celui qui a agi (null si l'étape n'est pas faite).
      * personnel : étape faite = celui qui a créé / décidé ; sinon les comptes du rôle qui décidera.
      */
-    public record Etape(String libelle, String etat, String texte, LocalDate date, String utilisateur,
+    public record Etape(String libelle, String etat, String texte, LocalDateTime date, String utilisateur,
             List<PersonnelResponse> personnel) {
     }
 
     /** Une validation (GET /api/demandes/{id}/validateurs) : qui a validé, et quand. */
-    public record Validation(LocalDate date, Statut statut, PersonnelResponse personnel) {
+    public record Validation(LocalDateTime date, Statut statut, PersonnelResponse personnel) {
     }
 
     /** statut = statut obtenu après la décision (étape suivante, APPROUVEE ou REFUSEE). */
-    public record Decision(String utilisateur, String role, Statut statut, LocalDate date) {
+    public record Decision(String utilisateur, String role, Statut statut, LocalDateTime date) {
     }
 }

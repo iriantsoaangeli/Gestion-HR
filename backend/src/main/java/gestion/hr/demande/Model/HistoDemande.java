@@ -1,6 +1,6 @@
 package gestion.hr.demande.Model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -26,7 +26,7 @@ public class HistoDemande {
     @Convert(converter = StatutConverter.class)
     private Statut statut;
 
-    private LocalDate date;
+    private LocalDateTime date;
 
     protected HistoDemande() {
     }
@@ -35,7 +35,7 @@ public class HistoDemande {
         this.idDemande = idDemande;
         this.idUtilisateur = idUtilisateur;
         this.statut = statut;
-        this.date = LocalDate.now();
+        this.date = LocalDateTime.now();
     }
 
     public Integer getIdUtilisateur() {
@@ -46,7 +46,7 @@ public class HistoDemande {
         return statut;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 }

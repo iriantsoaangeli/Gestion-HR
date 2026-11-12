@@ -1,18 +1,21 @@
 -- Schéma relationnel (référence : doc/conception/base/schema.md)
 -- SGBD : PostgreSQL
 -- Les tables sont créées dans l'ordre des dépendances (clés étrangères).
+-- « datetime » du schéma = colonne date de type TIMESTAMP (date + heure) ; delai et naissance restent des DATE.
 
 -- =====================================================================
 -- Tables de référence
 -- =====================================================================
 
 -- Un individu dans la base de donnees
-
 CREATE TABLE personne (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
-    naissance DATE NOT NULL
+    naissance DATE NOT NULL,
+    adresse VARCHAR(200) NOT NULL,
+    tel VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL
 );
 
 -- Le departement d'un poste
@@ -34,14 +37,14 @@ CREATE TABLE mouvement (
     label VARCHAR(50) NOT NULL
 );
 
--- Qualification d'un poste
-CREATE TABLE clearance (
-    id SERIAL PRIMARY KEY,
-    label VARCHAR(100) NOT NULL
-);
-
 -- Des status des demandes
 CREATE TABLE status (
+    id SERIAL PRIMARY KEY,
+    label VARCHAR(50) NOT NULL
+);
+
+-- Le status de l'offre (repris par un entretien)
+CREATE TABLE statusOffre (
     id SERIAL PRIMARY KEY,
     label VARCHAR(50) NOT NULL
 );
@@ -50,33 +53,30 @@ CREATE TABLE status (
 -- Organisation
 -- =====================================================================
 
--- Un poste est comme un siege, idPersonne nulle si ce n'est pas occupe
--- (la redondance est voulue)
+-- Un poste est comme un siege ; son detenteur est dans emploi
 CREATE TABLE poste (
     id SERIAL PRIMARY KEY,
     label VARCHAR(100) NOT NULL,
-    idPersonne INTEGER REFERENCES personne (id),
     idDepartement INTEGER NOT NULL REFERENCES departement (id)
 );
-
 
 -- Historique de status d'un poste
 CREATE TABLE histoPoste (
     id SERIAL PRIMARY KEY,
     idPoste INTEGER NOT NULL REFERENCES poste (id),
-    date DATE NOT NULL DEFAULT NOW(),
-    status BOOLEAN NOT NULL
+    status BOOLEAN NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- Historique de creation de poste, redondance avec histoPoste
 CREATE TABLE creationPoste (
     id SERIAL PRIMARY KEY,
     idPoste INTEGER NOT NULL REFERENCES poste (id),
-    date DATE NOT NULL DEFAULT NOW()
+    date TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- =====================================================================
--- Fonctions et qualifications
+-- Fonctions
 -- =====================================================================
 
 -- Une fonction associee a un poste, le poste est comme un siege
@@ -86,38 +86,40 @@ CREATE TABLE fonctionPoste (
     idFonction INTEGER NOT NULL REFERENCES fonction (id)
 );
 
--- Table de liaison entre poste et clearance
-CREATE TABLE clearancePoste (
-    id SERIAL PRIMARY KEY,
-    idPoste INTEGER NOT NULL REFERENCES poste (id),
-    idClearance INTEGER NOT NULL REFERENCES clearance (id)
-);
-
 -- =====================================================================
 -- Personnes et emplois
 -- =====================================================================
 
--- On emploie une personne pour un poste sinon l'id est null
+-- Historique des changements d'une personne : une ligne par changement,
+-- ce qui ne change pas reste null
+CREATE TABLE historiquePersonne (
+    id SERIAL PRIMARY KEY,
+    idPersonne INTEGER NOT NULL REFERENCES personne (id),
+    nom VARCHAR(100) DEFAULT NULL,
+    prenom VARCHAR(100) DEFAULT NULL,
+    naissance DATE DEFAULT NULL,
+    adresse VARCHAR(200) DEFAULT NULL,
+    tel VARCHAR(20) DEFAULT NULL,
+    mail VARCHAR(100) DEFAULT NULL,
+    date TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- On emploie une personne pour un poste sinon l'id est null (poste vacant)
+-- Un poste = un siege : une seule ligne par poste (UNIQUE)
 CREATE TABLE emploi (
     id SERIAL PRIMARY KEY,
-    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    idPoste INTEGER NOT NULL UNIQUE REFERENCES poste (id),
     idPersonne INTEGER REFERENCES personne (id)
 );
 
--- Historique d'affectation des personnes au postes
-CREATE TABLE histoAffectation (
-    id SERIAL PRIMARY KEY,
-    idPersonne INTEGER NOT NULL REFERENCES personne (id),
-    idMouvement INTEGER NOT NULL REFERENCES mouvement (id),
-    date DATE NOT NULL
-);
-
 -- Un historique des mouvement entree/sortie des employees
+-- idPoste = poste dans lequel la personne entre ou dont elle sort
 CREATE TABLE historiqueEmploi (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT NOW(),
     idMouvement INTEGER NOT NULL REFERENCES mouvement (id),
-    idPersonne INTEGER NOT NULL REFERENCES personne (id)
+    idPersonne INTEGER NOT NULL REFERENCES personne (id),
+    idPoste INTEGER NOT NULL REFERENCES poste (id)
 );
 
 -- =====================================================================
@@ -126,7 +128,7 @@ CREATE TABLE historiqueEmploi (
 
 -- Utilisateurs de l'application (mdp = hachage BCrypt, role = enum gestion.hr.auth.Model.Role)
 -- Un compte = 1 poste d'importance : idPoste obligatoire, et un poste a au plus un compte (UNIQUE)
--- status : compte actif (true) ou desactive (false) ; creation : date de creation du compte
+-- status : compte actif (true) ou desactive (false) ; creation : date et heure de creation du compte
 CREATE TABLE utilisateur (
     id SERIAL PRIMARY KEY,
     login VARCHAR(50) NOT NULL UNIQUE,
@@ -134,7 +136,7 @@ CREATE TABLE utilisateur (
     role VARCHAR(20) NOT NULL,
     idPoste INTEGER NOT NULL UNIQUE REFERENCES poste (id),
     status BOOLEAN NOT NULL DEFAULT TRUE,
-    creation DATE NOT NULL DEFAULT NOW()
+    creation TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- Historique d'un compte : creation, activation / desactivation, changement de poste
@@ -144,7 +146,7 @@ CREATE TABLE historiqueUtilisateurs (
     idUtilisateur INTEGER NOT NULL REFERENCES utilisateur (id),
     idPoste INTEGER NOT NULL REFERENCES poste (id),
     status BOOLEAN NOT NULL,
-    date DATE NOT NULL DEFAULT NOW()
+    date TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- =====================================================================
@@ -157,7 +159,7 @@ CREATE TABLE demande (
     idDepartement INTEGER NOT NULL REFERENCES departement (id),
     idStatus INTEGER NOT NULL REFERENCES status (id),
     idDemandeur INTEGER NOT NULL REFERENCES utilisateur (id),
-    date DATE NOT NULL DEFAULT NOW(),
+    date TIMESTAMP NOT NULL DEFAULT NOW(),
     motif VARCHAR(200) NOT NULL,
     delai DATE DEFAULT NULL
 );
@@ -184,5 +186,50 @@ CREATE TABLE histoDemande (
     idDemande INTEGER NOT NULL REFERENCES demande (id),
     idUtilisateur INTEGER NOT NULL REFERENCES utilisateur (id),
     idStatus INTEGER NOT NULL REFERENCES status (id),
-    date DATE NOT NULL DEFAULT NOW()
+    date TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- =====================================================================
+-- Offres d'emploi
+-- =====================================================================
+
+-- Offre d'emploi pour un poste, issue d'une demande approuvee (idDemande)
+-- idPosteResponsable = poste qui suit le recrutement ; idEmetteur = compte qui a publie l'offre
+-- delai : date limite de candidature (facultative) ; status : offre ouverte ou close
+CREATE TABLE offre (
+    id SERIAL PRIMARY KEY,
+    delai DATE DEFAULT NULL,
+    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    idPosteResponsable INTEGER NOT NULL REFERENCES poste (id),
+    description TEXT NOT NULL,
+    status VARCHAR(10) NOT NULL DEFAULT 'OUVERT' CHECK (status IN ('OUVERT', 'CLOS')),
+    idDemande INTEGER NOT NULL REFERENCES demande (id),
+    idEmetteur INTEGER NOT NULL REFERENCES utilisateur (id)
+);
+
+-- Ceux qui font les entretiens et les evaluations d'une offre (plusieurs postes par offre)
+CREATE TABLE interviewer (
+    id SERIAL PRIMARY KEY,
+    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    idOffre INTEGER NOT NULL REFERENCES offre (id)
+);
+
+-- =====================================================================
+-- Recrutement et entretien
+-- =====================================================================
+
+-- Un entretien pour une offre
+CREATE TABLE entretien (
+    id SERIAL PRIMARY KEY,
+    date TIMESTAMP NOT NULL,
+    idOffre INTEGER NOT NULL REFERENCES offre (id),
+    idStatusOffre INTEGER NOT NULL REFERENCES statusOffre (id)
+);
+
+-- Evaluation d'un entretien : note sur 100 et remarques
+CREATE TABLE evaluation (
+    id SERIAL PRIMARY KEY,
+    idEntretien INTEGER NOT NULL REFERENCES entretien (id),
+    note INTEGER NOT NULL CHECK (note BETWEEN 0 AND 100),
+    remarques TEXT DEFAULT NULL
 );

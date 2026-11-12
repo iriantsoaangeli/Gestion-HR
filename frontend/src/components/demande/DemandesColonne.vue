@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import Tableau from '../ui/Tableau.vue'
 import { labelPostes, totalPostes, texteStatut, classeStatut } from '../../utils/demande'
 import { contient } from '../../utils/texte'
+import { jour } from '../../utils/dates'
 
 // Carte « demandes » (DemandeResponse de l'API) : titre, filtre (puces + recherche) et tableau.
 // Le tri, le défilement et la sélection viennent du tableau générique (components/ui/Tableau.vue).
@@ -23,7 +24,7 @@ const tri = defineModel('tri', { default: () => ({ cle: 'date', sens: -1 }) }) /
 
 const COLONNES = [
   { cle: 'id', label: 'N°' },
-  { cle: 'date', label: 'Date' },
+  { cle: 'date', label: 'Date', valeur: (d) => jour(d.date), valeurTri: (d) => d.date }, // tri à l'heure près
   { cle: 'departement', label: 'Département' },
   { cle: 'postes', label: 'Postes', valeur: labelPostes },
   { cle: 'nombre', label: 'Nb', valeur: totalPostes, classe: 'nombre' },

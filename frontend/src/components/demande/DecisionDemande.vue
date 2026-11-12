@@ -4,6 +4,7 @@ import Erreur from '../ui/Erreur.vue'
 import * as api from '../../api/demandes'
 import { useChargement } from '../../utils/chargement'
 import { totalPostes } from '../../utils/demande'
+import { jour } from '../../utils/dates'
 
 // Panneau de décision, affiché dans la fiche quand c'est à moi de décider (demande.aMoiDeDecider) :
 // Valider / Refuser (le backend vérifie que c'est bien mon étape), puis la file des autres demandes
@@ -67,7 +68,7 @@ async function decider(action) {
       <li v-for="x in autres" :key="x.id">
         <RouterLink :to="`/demandes/${x.id}`">
           <strong>N° {{ x.id }}</strong> {{ x.departement }}
-          <span class="help">{{ x.date }} · {{ totalPostes(x) }} poste(s)</span>
+          <span class="help">{{ jour(x.date) }} · {{ totalPostes(x) }} poste(s)</span>
         </RouterLink>
       </li>
     </ul>
