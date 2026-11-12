@@ -86,3 +86,11 @@ offre(**id**,delai?,#idPoste,#idPosteResponsable,description)
 
 **Ceux qui vont faire l'entretien et les evalutations , du many to one**  
 interviewer(**id**,#idPoste,#idOffre)
+
+## Recrutement et entretien
+
+**L'entretien**  
+entretien(**id**,date,#idOffre)  
+
+**L'evaluation d'un entretien**  
+evaluation(**id**,#idEntretien,Note/100,Remarques  )
