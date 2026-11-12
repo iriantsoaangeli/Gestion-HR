@@ -74,46 +74,14 @@ fieldset:disabled * {
   padding: 0.3rem 0.6rem;
 }
 
-/* Boutons − / + autour de l'effectif */
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.stepper button {
-  display: grid;
-  place-items: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-}
-
-.stepper button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.stepper svg {
-  width: 1rem;
-  height: 1rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
+/* Effectif (components/ui/ChampNombre.vue) : les règles .poste-ligne input / button ci-dessus
+   ne doivent pas s'appliquer à ses boutons ni à son champ */
 .poste-ligne .stepper input {
   width: 3.5rem;
-  text-align: center;
-  appearance: textfield;
-  -moz-appearance: textfield;
 }
 
-.stepper input::-webkit-inner-spin-button,
-.stepper input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.poste-ligne .stepper button {
+  padding: 0;
 }
 
 /* Postes choisis (DemandeForm) */

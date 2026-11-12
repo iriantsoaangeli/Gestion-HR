@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import ChampNombre from '../ui/ChampNombre.vue'
 import RechercheSelect from '../ui/RechercheSelect.vue'
 import Erreur from '../ui/Erreur.vue'
 import * as referentiel from '../../api/referentiel'
@@ -91,11 +92,15 @@ async function envoyer() {
       <!-- Pas de choix : un manager ne fait de demande que pour son département -->
       <input
         id="departement"
-        :value="departement.donnees.value?.label ?? (departement.chargement.value ? 'Chargement…' : '')"
+        :value="
+          departement.donnees.value?.label ?? (departement.chargement.value ? 'Chargement…' : '')
+        "
         readonly
         aria-describedby="departement-aide"
       />
-      <p id="departement-aide" class="help">Votre département : vos demandes ne concernent que lui.</p>
+      <p id="departement-aide" class="help">
+        Votre département : vos demandes ne concernent que lui.
+      </p>
 
       <Erreur :message="departement.erreur.value || erreurFonctions" />
 
@@ -112,21 +117,19 @@ async function envoyer() {
         <div v-for="(a, i) in form.creations" :key="a.idFonction" class="poste-ligne">
           <span>{{ a.label }}</span>
           <label :for="`effectif-${i}`">Effectif</label>
-          <div class="stepper">
-            <button
-              type="button"
-              :disabled="a.effectif <= 1"
-              :aria-label="`Diminuer l'effectif de ${a.label}`"
-              @click="a.effectif--"
-            >
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg>
-            </button>
-            <input :id="`effectif-${i}`" v-model.number="a.effectif" type="number" min="1" required />
-            <button type="button" :aria-label="`Augmenter l'effectif de ${a.label}`" @click="a.effectif++">
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M8 3v10" /></svg>
-            </button>
-          </div>
-          <button type="button" class="btn-danger" :aria-label="`Retirer ${a.label}`" @click="form.creations.splice(i, 1)">
+          <ChampNombre
+            :id="`effectif-${i}`"
+            v-model="a.effectif"
+            :min="1"
+            :libelle="`l'effectif de ${a.label}`"
+            required
+          />
+          <button
+            type="button"
+            class="btn-danger"
+            :aria-label="`Retirer ${a.label}`"
+            @click="form.creations.splice(i, 1)"
+          >
             ✕
           </button>
         </div>
@@ -145,7 +148,11 @@ async function envoyer() {
         <ul v-if="form.remplacements.length" class="selection">
           <li v-for="(p, i) in form.remplacements" :key="p.id">
             {{ p.label }}
-            <button type="button" :aria-label="`Retirer ${p.label}`" @click="form.remplacements.splice(i, 1)">
+            <button
+              type="button"
+              :aria-label="`Retirer ${p.label}`"
+              @click="form.remplacements.splice(i, 1)"
+            >
               ✕
             </button>
           </li>
