@@ -101,6 +101,13 @@ const entretien = [
     component: () => import('../views/entretien/EntretiensView.vue'),
   },
   {
+    // Mes évaluations : à faire (je suis interviewer, pas encore évalué) / déjà faites
+    path: '/evaluations',
+    name: 'evaluations-a-faire',
+    meta: { acces: (u) => ['DIRECTION', 'MANAGER', 'HR'].includes(u.role) },
+    component: () => import('../views/entretien/EvaluationsAFaireView.vue'),
+  },
+  {
     // Fiche d'une évaluation : note, remarques, entretien évalué, autres évaluations
     path: '/evaluations/:id(\\d+)',
     name: 'fiche-evaluation',

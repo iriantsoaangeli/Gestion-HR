@@ -39,6 +39,7 @@ async function deconnexion() {
       <template v-if="['DIRECTION', 'MANAGER', 'HR'].includes(utilisateur?.role)">
         <p class="section">Recrutement</p>
         <ul>
+          <li><RouterLink to="/evaluations">Évaluations à faire</RouterLink></li>
           <li><RouterLink to="/entretiens">Entretiens</RouterLink></li>
           <li v-if="utilisateur?.role === 'HR'">
             <RouterLink to="/entretiens/nouveau">Préparer un entretien</RouterLink>
