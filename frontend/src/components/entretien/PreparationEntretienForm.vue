@@ -166,7 +166,6 @@ const minimum = maintenant()
 
 const choisis = ref([]) // idPoste des interviewers retenus
 const COLONNES_INTERVIEWER = [
-  { cle: 'choisi', label: '', classe: 'case', triable: false },
   { cle: 'poste', label: 'Poste' },
   { cle: 'detenteur', label: 'Tenu par' },
   { cle: 'role', label: '', classe: 'large', triable: false },
@@ -177,10 +176,6 @@ const interviewersFiltres = computed(() =>
     [i.poste, i.detenteur, i.login, i.departement].join(' '),
   ),
 )
-const basculer = (i) =>
-  (choisis.value = choisis.value.includes(i.idPoste)
-    ? choisis.value.filter((id) => id !== i.idPoste)
-    : [...choisis.value, i.idPoste])
 const estResponsable = (i) => offre.value?.idPosteResponsable === i.idPoste
 const nomsChoisis = computed(() =>
   interviewers.value.filter((i) => choisis.value.includes(i.idPoste)).map((i) => i.poste),
@@ -341,22 +336,13 @@ async function valider() {
         <Tableau
           :lignes="interviewersFiltres"
           :colonnes="COLONNES_INTERVIEWER"
+          v-model:selection="choisis"
+          choix="case"
+          :libelle-choix="(i) => `Choisir ${i.poste}`"
           cle-ligne="idPoste"
-          cliquable
           vide="Aucun interviewer pour ce filtre"
           :class="{ 'a-choisir': !choisis.length }"
-          @ouvrir="basculer"
         >
-          <!-- Case d'affichage : le clic sur la ligne coche / décoche -->
-          <template #choisi="{ ligne }">
-            <input
-              type="checkbox"
-              :checked="choisis.includes(ligne.idPoste)"
-              :aria-label="`Choisir ${ligne.poste}`"
-              tabindex="-1"
-              @click.prevent
-            />
-          </template>
           <template #role="{ ligne }">
             <span v-if="estResponsable(ligne)" class="badge petit ok" title="Responsable de l'offre"
               >Responsable</span
