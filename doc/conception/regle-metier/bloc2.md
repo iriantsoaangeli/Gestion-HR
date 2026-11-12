@@ -13,4 +13,4 @@ Fonctionnalite future
 
 
 ## Entretien et evaluation 
-Un interviewers redige une evaluation apres un entretien 
+Un interviewer redige une evaluation apres un entretien 
