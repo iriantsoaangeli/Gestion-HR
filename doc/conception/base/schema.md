@@ -84,8 +84,12 @@ interviewer(**id**,#idPoste,#idOffre)
 
 ## Recrutement et entretien
 
-**L'entretien**  
-entretien(**id**,datetime,#idOffre,#idStatusOffre)      
+**Le dossier de candidature** : une personne (employé ou externe) candidate à une offre, déposé par HR  
+dossier(**id**,datetime,#idOffre,#idPersonne)  
+> une personne dépose au plus un dossier par offre (UNIQUE idOffre, idPersonne)
+
+**L'entretien d'un candidat** : l'offre et le candidat se retrouvent par le dossier  
+entretien(**id**,datetime,#idDossier,#idStatusOffre)      
 
 **L'evaluation d'un entretien**  
 evaluation(**id**,#idEntretien,Note/100,Remarques  )  
