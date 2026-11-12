@@ -1,0 +1,9 @@
+/* Champ de recherche au-dessus d'un tableau (components/ui/BarreRecherche.vue), à côté des puces */
+
+.filtres .filtre-recherche {
+  flex: 1;
+  min-width: 12rem;
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9rem;
+}

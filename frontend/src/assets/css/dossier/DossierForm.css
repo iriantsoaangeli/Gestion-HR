@@ -84,7 +84,7 @@
 }
 
 /* Filtre au-dessus de chaque tableau : puces de département + recherche,
-   mêmes classes que les tableaux de demandes (.filtres, .puces, .puce : css/demande/DemandesColonne.css) */
+   composants ui/FiltrePuces et ui/BarreRecherche (css/ui/FiltrePuces.css, BarreRecherche.css) */
 .dossier-filtres {
   margin-bottom: 0.5rem;
 }

@@ -125,7 +125,8 @@ viennent des consignes (photos de `doc/cours/`) et des décisions écrites dans 
 ### 5. Frontend
 
 - **Pages** dans `views/`, **morceaux** dans `components/` ; un composant réutilisable dans plusieurs fonctionnalités
-  va dans `components/ui/` (`Tableau`, `Erreur`, `RechercheSelect`, `Progression`). Avant d'en écrire un, regarder
+  va dans `components/ui/` (`Tableau`, `Erreur`, `RechercheSelect`, `Progression`,
+  `ChampNombre`, `FiltrePuces`, `BarreRecherche`). Avant d'en écrire un, regarder
   s'il existe déjà, et le généraliser plutôt que le copier.
 - **Appels HTTP** uniquement dans `api/`, via `appel()` de `api/client.js` (cookies + CSRF + `ErreurApi`).
   Une vue n'appelle jamais `fetch` directement.
@@ -140,7 +141,7 @@ viennent des consignes (photos de `doc/cours/`) et des décisions écrites dans 
   plutôt que caché, les tableaux trient au clic sur l'en-tête et défilent dans le composant.
 - **Tout tableau a au-dessus une barre de recherche** (insensible aux accents : `contient` de `utils/texte.js`)
   **et des boutons de filtre par département** (puces « Tous » + un bouton par département, avec leur nombre,
-  comme dans `DemandesColonne.vue` ; pas de liste déroulante ni de cases à cocher). C'est la norme, même pour un petit tableau de choix dans un formulaire.
+  avec les composants `FiltrePuces` et `BarreRecherche` de `components/ui/` ; pas de liste déroulante ni de cases à cocher). C'est la norme, même pour un petit tableau de choix dans un formulaire.
 - Formatage : `npm run format` (Prettier : sans point-virgule, guillemets simples, 100 colonnes) avant de committer.
 
 ### 6. Tests

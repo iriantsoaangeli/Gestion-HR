@@ -2,6 +2,8 @@
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Tableau from '../ui/Tableau.vue'
+import FiltrePuces from '../ui/FiltrePuces.vue'
+import BarreRecherche from '../ui/BarreRecherche.vue'
 import { contient } from '../../utils/texte'
 
 // Carte « entretiens » : titre, filtre (puces de département + recherche) et tableau,
@@ -50,10 +52,6 @@ const tri = ref({ cle: 'date', sens: props.recentsDabord ? -1 : 1 })
 
 // Filtre au-dessus du tableau : département ('' = tous) + recherche (sans accents, utils/texte.js)
 const filtre = reactive({ recherche: '', departement: '' })
-const departements = computed(() =>
-  [...new Set(props.entretiens.map((e) => e.departement))].sort((a, b) => a.localeCompare(b, 'fr')),
-)
-const nombre = (d) => props.entretiens.filter((e) => !d || e.departement === d).length
 const lignes = computed(() =>
   props.entretiens.filter(
     (e) =>
@@ -70,23 +68,13 @@ const lignes = computed(() =>
     </h2>
 
     <div class="filtres">
-      <div class="puces" role="group" :aria-label="`Département : ${titre}`">
-        <button
-          v-for="d in ['', ...departements]"
-          :key="d"
-          type="button"
-          class="puce"
-          :class="{ active: filtre.departement === d }"
-          :aria-pressed="filtre.departement === d"
-          @click="filtre.departement = d"
-        >
-          {{ d || 'Tous' }} <span class="count">{{ nombre(d) }}</span>
-        </button>
-      </div>
-      <input
+      <FiltrePuces
+        v-model="filtre.departement"
+        :elements="entretiens"
+        :aria-label="`Département : ${titre}`"
+      />
+      <BarreRecherche
         v-model="filtre.recherche"
-        type="search"
-        class="filtre-recherche"
         placeholder="Rechercher (n°, candidat, poste)…"
         :aria-label="`Rechercher dans ${titre}`"
       />

@@ -2,6 +2,8 @@
 import { computed, reactive, ref, watch } from 'vue'
 import Erreur from '../ui/Erreur.vue'
 import Tableau from '../ui/Tableau.vue'
+import FiltrePuces from '../ui/FiltrePuces.vue'
+import BarreRecherche from '../ui/BarreRecherche.vue'
 import * as apiDossiers from '../../api/dossiers'
 import * as apiEntretiens from '../../api/entretiens'
 import { useChargement } from '../../utils/chargement'
@@ -32,12 +34,6 @@ const dateCourte = (texte) =>
 const dateHeure = (texte) =>
   new Date(texte).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
 
-// Départements présents dans une liste (puces au-dessus des tableaux)
-const departementsDe = (liste) =>
-  [...new Set(liste.map((x) => x.departement).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, 'fr'),
-  )
-
 // Filtre d'un tableau : recherche (sans accents) + département ('' = tous)
 function filtrer(liste, filtre, texte) {
   return liste.filter(
@@ -66,8 +62,6 @@ const COLONNES_OFFRE = [
   },
 ]
 const filtreOffre = reactive({ recherche: '', departement: '' })
-const departementsOffres = computed(() => departementsDe(offres.value))
-const nombreOffres = (d) => offres.value.filter((o) => !d || o.departement === d).length
 const offresFiltrees = computed(() =>
   filtrer(offres.value, filtreOffre, (o) =>
     [o.id, o.poste, o.departement, o.responsable, o.description].join(' '),
@@ -115,8 +109,6 @@ const COLONNES_CANDIDAT = [
   },
 ]
 const filtreCandidat = reactive({ recherche: '', departement: '' })
-const departementsCandidats = computed(() => departementsDe(candidats.value))
-const nombreCandidats = (d) => candidats.value.filter((c) => !d || c.departement === d).length
 const candidatsFiltres = computed(() =>
   filtrer(candidats.value, filtreCandidat, (c) =>
     [c.candidat, c.email, c.tel, c.departement, ...c.fichiers].join(' '),
@@ -179,10 +171,7 @@ const COLONNES_INTERVIEWER = [
   { cle: 'detenteur', label: 'Tenu par' },
   { cle: 'role', label: '', classe: 'large', triable: false },
 ]
-// interviewersPossibles() ne renvoie pas encore le département : les puces se limitent alors à « Tous »
 const filtreInterviewer = reactive({ recherche: '', departement: '' })
-const departementsInterviewers = computed(() => departementsDe(interviewers.value))
-const nombreInterviewers = (d) => interviewers.value.filter((i) => !d || i.departement === d).length
 const interviewersFiltres = computed(() =>
   filtrer(interviewers.value, filtreInterviewer, (i) =>
     [i.poste, i.detenteur, i.login, i.departement].join(' '),
@@ -246,23 +235,13 @@ async function valider() {
           Offre ouverte <span class="help">— cliquez sur une ligne</span>
         </p>
         <div class="filtres preparation-filtres">
-          <div class="puces" role="group" aria-label="Département de l'offre">
-            <button
-              v-for="d in ['', ...departementsOffres]"
-              :key="d"
-              type="button"
-              class="puce"
-              :class="{ active: filtreOffre.departement === d }"
-              :aria-pressed="filtreOffre.departement === d"
-              @click="filtreOffre.departement = d"
-            >
-              {{ d || 'Tous' }} <span class="count">{{ nombreOffres(d) }}</span>
-            </button>
-          </div>
-          <input
+          <FiltrePuces
+            v-model="filtreOffre.departement"
+            :elements="offres"
+            aria-label="Département de l'offre"
+          />
+          <BarreRecherche
             v-model="filtreOffre.recherche"
-            type="search"
-            class="filtre-recherche"
             placeholder="Rechercher (n°, poste, responsable, description)…"
             aria-label="Rechercher une offre"
           />
@@ -292,23 +271,13 @@ async function valider() {
           >
         </p>
         <div class="filtres preparation-filtres">
-          <div class="puces" role="group" aria-label="Département du candidat">
-            <button
-              v-for="d in ['', ...departementsCandidats]"
-              :key="d"
-              type="button"
-              class="puce"
-              :class="{ active: filtreCandidat.departement === d }"
-              :aria-pressed="filtreCandidat.departement === d"
-              @click="filtreCandidat.departement = d"
-            >
-              {{ d || 'Tous' }} <span class="count">{{ nombreCandidats(d) }}</span>
-            </button>
-          </div>
-          <input
+          <FiltrePuces
+            v-model="filtreCandidat.departement"
+            :elements="candidats"
+            aria-label="Département du candidat"
+          />
+          <BarreRecherche
             v-model="filtreCandidat.recherche"
-            type="search"
-            class="filtre-recherche"
             placeholder="Rechercher (nom, e-mail, téléphone, fichier)…"
             aria-label="Rechercher un candidat"
           />
@@ -358,23 +327,13 @@ async function valider() {
           Interviewers <span class="help">— un ou plusieurs, cliquez pour cocher</span>
         </p>
         <div class="filtres preparation-filtres">
-          <div class="puces" role="group" aria-label="Département de l'interviewer">
-            <button
-              v-for="d in ['', ...departementsInterviewers]"
-              :key="d"
-              type="button"
-              class="puce"
-              :class="{ active: filtreInterviewer.departement === d }"
-              :aria-pressed="filtreInterviewer.departement === d"
-              @click="filtreInterviewer.departement = d"
-            >
-              {{ d || 'Tous' }} <span class="count">{{ nombreInterviewers(d) }}</span>
-            </button>
-          </div>
-          <input
+          <FiltrePuces
+            v-model="filtreInterviewer.departement"
+            :elements="interviewers"
+            aria-label="Département de l'interviewer"
+          />
+          <BarreRecherche
             v-model="filtreInterviewer.recherche"
-            type="search"
-            class="filtre-recherche"
             placeholder="Rechercher (poste, nom)…"
             aria-label="Rechercher un interviewer"
           />

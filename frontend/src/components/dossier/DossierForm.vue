@@ -2,6 +2,8 @@
 import { computed, reactive, ref } from 'vue'
 import Erreur from '../ui/Erreur.vue'
 import Tableau from '../ui/Tableau.vue'
+import FiltrePuces from '../ui/FiltrePuces.vue'
+import BarreRecherche from '../ui/BarreRecherche.vue'
 import * as api from '../../api/dossiers'
 import { useChargement } from '../../utils/chargement'
 import { dateLongue, iso } from '../../utils/dates'
@@ -39,20 +41,17 @@ const COLONNES_OFFRE = [
     valeur: (o) => dateCourte(o.delai),
     valeurTri: (o) => o.delai || '9999',
   }, // sans date limite = en dernier
-  { cle: 'idDemande', label: 'Demande', classe: 'tres-etroite', valeur: (o) => `N° ${o.idDemande}` },
+  {
+    cle: 'idDemande',
+    label: 'Demande',
+    classe: 'tres-etroite',
+    valeur: (o) => `N° ${o.idDemande}`,
+  },
 ]
 const libelleOffre = (o) => `N° ${o.id} — ${o.poste} (${o.departement})`
 
-// Départements présents dans une liste (pour la sélection au-dessus du tableau)
-const departementsDe = (liste) =>
-  [...new Set(liste.map((x) => x.departement).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, 'fr'),
-  )
-
 // Filtre au-dessus du tableau : recherche (sans accents, utils/texte.js) + département
 const filtreOffre = reactive({ recherche: '', departement: '' }) // '' = tous les départements
-const departementsOffres = computed(() => departementsDe(offres.value))
-const nombreOffres = (d) => offres.value.filter((o) => !d || o.departement === d).length
 const offresFiltrees = computed(() =>
   offres.value.filter(
     (o) =>
@@ -89,8 +88,6 @@ const COLONNES_PERSONNE = [
 ]
 // Filtre au-dessus du tableau : recherche + département (celui du poste ; les externes n'en ont pas)
 const filtrePersonne = reactive({ recherche: '', departement: '' }) // '' = tous les départements
-const departementsPersonnes = computed(() => departementsDe(personnes.value))
-const nombrePersonnes = (d) => personnes.value.filter((p) => !d || p.departement === d).length
 const personnesFiltrees = computed(() =>
   personnes.value.filter(
     (p) =>
@@ -209,23 +206,13 @@ function deposer() {
           Offre ouverte <span class="help">— cliquez sur une ligne</span>
         </p>
         <div class="filtres dossier-filtres">
-          <div class="puces" role="group" aria-label="Département de l'offre">
-            <button
-              v-for="d in ['', ...departementsOffres]"
-              :key="d"
-              type="button"
-              class="puce"
-              :class="{ active: filtreOffre.departement === d }"
-              :aria-pressed="filtreOffre.departement === d"
-              @click="filtreOffre.departement = d"
-            >
-              {{ d || 'Tous' }} <span class="count">{{ nombreOffres(d) }}</span>
-            </button>
-          </div>
-          <input
+          <FiltrePuces
+            v-model="filtreOffre.departement"
+            :elements="offres"
+            aria-label="Département de l'offre"
+          />
+          <BarreRecherche
             v-model="filtreOffre.recherche"
-            type="search"
-            class="filtre-recherche"
             placeholder="Rechercher (n°, poste, responsable, description)…"
             aria-label="Rechercher une offre"
           />
@@ -332,23 +319,13 @@ function deposer() {
             Personne <span class="help">— cliquez sur une ligne</span>
           </p>
           <div class="filtres dossier-filtres">
-            <div class="puces" role="group" aria-label="Département de la personne">
-              <button
-                v-for="d in ['', ...departementsPersonnes]"
-                :key="d"
-                type="button"
-                class="puce"
-                :class="{ active: filtrePersonne.departement === d }"
-                :aria-pressed="filtrePersonne.departement === d"
-                @click="filtrePersonne.departement = d"
-              >
-                {{ d || 'Tous' }} <span class="count">{{ nombrePersonnes(d) }}</span>
-              </button>
-            </div>
-            <input
+            <FiltrePuces
+              v-model="filtrePersonne.departement"
+              :elements="personnes"
+              aria-label="Département de la personne"
+            />
+            <BarreRecherche
               v-model="filtrePersonne.recherche"
-              type="search"
-              class="filtre-recherche"
               placeholder="Rechercher (nom, prénom, poste, e-mail, téléphone)…"
               aria-label="Rechercher une personne"
             />

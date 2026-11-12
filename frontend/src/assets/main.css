@@ -7,7 +7,8 @@
  *   layout/   cadre de toutes les pages (menu, contenu)
  *   ui/       petits composants réutilisables partout (message d'erreur, liste avec recherche, progression,
  *             tableau trié et défilant,
- *             champ nombre − / +)
+ *             champ nombre − / +,
+ *             puces de filtre, barre de recherche)
  *   demande/  composants des demandes de personnel
  *   offre/    composants des offres d'emploi
  *   dossier/  composants des dossiers de candidature
@@ -30,6 +31,8 @@
 @import './css/ui/Progression.css';
 @import './css/ui/Tableau.css';
 @import './css/ui/ChampNombre.css';
+@import './css/ui/FiltrePuces.css';
+@import './css/ui/BarreRecherche.css';
 
 /* Pages */
 @import './css/views/auth/LoginView.css';

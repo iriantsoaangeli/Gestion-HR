@@ -93,7 +93,7 @@
   margin: 0 0 0.35rem;
 }
 
-/* Puces de département + recherche : classes .filtres/.puces/.puce de css/demande/DemandesColonne.css */
+/* Puces de département + recherche : composants ui/FiltrePuces et ui/BarreRecherche */
 .preparation-filtres {
   margin-bottom: 0.5rem;
 }

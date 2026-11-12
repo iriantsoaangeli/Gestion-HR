@@ -2,6 +2,8 @@
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Tableau from '../ui/Tableau.vue'
+import FiltrePuces from '../ui/FiltrePuces.vue'
+import BarreRecherche from '../ui/BarreRecherche.vue'
 import { contient } from '../../utils/texte'
 import { dateLongue, joursAvant } from '../../utils/dates'
 
@@ -61,13 +63,11 @@ const COLONNES_CANDIDATS = [
 const triCandidats = ref({ cle: 'date', sens: 1 })
 // Puces : avec / sans entretien (tous les candidats sont du même département, celui de l'offre)
 const PUCES_CANDIDATS = [
-  { code: '', label: 'Tous' },
   { code: 'sans', label: 'Sans entretien' },
   { code: 'avec', label: 'Avec entretien' },
 ]
 const filtreCandidats = reactive({ recherche: '', puce: '' })
 const garde = (d, code) => !code || (code === 'avec') === d.entretiens.length > 0
-const nombreCandidats = (code) => candidats.value.filter((d) => garde(d, code)).length
 const lignesCandidats = computed(() =>
   candidats.value.filter(
     (d) =>
@@ -92,14 +92,7 @@ const COLONNES_ENTRETIENS = [
   },
 ]
 const triEntretiens = ref({ cle: 'date', sens: 1 })
-// Puces : une par statut présent (libellés de l'API)
-const statuts = computed(() => {
-  const vus = new Map()
-  props.entretiens.forEach((e) => vus.set(e.statut, e.statutLibelle))
-  return [...vus].map(([code, label]) => ({ code, label }))
-})
 const filtreEntretiens = reactive({ recherche: '', statut: '' })
-const nombreEntretiens = (code) => props.entretiens.filter((e) => !code || e.statut === code).length
 const lignesEntretiens = computed(() =>
   props.entretiens.filter(
     (e) =>
@@ -172,23 +165,15 @@ const lignesEntretiens = computed(() =>
           Candidats <span class="count">{{ dossiers.length }}</span>
         </h2>
         <div class="filtres">
-          <div class="puces" role="group" aria-label="Filtrer les candidats">
-            <button
-              v-for="p in PUCES_CANDIDATS"
-              :key="p.code"
-              type="button"
-              class="puce"
-              :class="{ active: filtreCandidats.puce === p.code }"
-              :aria-pressed="filtreCandidats.puce === p.code"
-              @click="filtreCandidats.puce = p.code"
-            >
-              {{ p.label }} <span class="count">{{ nombreCandidats(p.code) }}</span>
-            </button>
-          </div>
-          <input
+          <FiltrePuces
+            v-model="filtreCandidats.puce"
+            :elements="candidats"
+            :code="(d) => (d.entretiens.length ? 'avec' : 'sans')"
+            :options="PUCES_CANDIDATS"
+            aria-label="Filtrer les candidats"
+          />
+          <BarreRecherche
             v-model="filtreCandidats.recherche"
-            type="search"
-            class="filtre-recherche"
             placeholder="Rechercher (nom, e-mail, pièce)…"
             aria-label="Rechercher dans les candidats"
           />
@@ -232,23 +217,16 @@ const lignesEntretiens = computed(() =>
           Entretiens <span class="count">{{ entretiens.length }}</span>
         </h2>
         <div class="filtres">
-          <div class="puces" role="group" aria-label="Filtrer les entretiens">
-            <button
-              v-for="s in [{ code: '', label: 'Tous' }, ...statuts]"
-              :key="s.code"
-              type="button"
-              class="puce"
-              :class="{ active: filtreEntretiens.statut === s.code }"
-              :aria-pressed="filtreEntretiens.statut === s.code"
-              @click="filtreEntretiens.statut = s.code"
-            >
-              {{ s.label }} <span class="count">{{ nombreEntretiens(s.code) }}</span>
-            </button>
-          </div>
-          <input
+          <FiltrePuces
+            v-model="filtreEntretiens.statut"
+            :elements="entretiens"
+            :code="(e) => e.statut"
+            :libelle="(e) => e.statutLibelle"
+            :ordre-alphabetique="false"
+            aria-label="Filtrer les entretiens"
+          />
+          <BarreRecherche
             v-model="filtreEntretiens.recherche"
-            type="search"
-            class="filtre-recherche"
             placeholder="Rechercher (n°, candidat, interviewer)…"
             aria-label="Rechercher dans les entretiens"
           />

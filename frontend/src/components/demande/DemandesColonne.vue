@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Tableau from '../ui/Tableau.vue'
+import FiltrePuces from '../ui/FiltrePuces.vue'
+import BarreRecherche from '../ui/BarreRecherche.vue'
 import { labelPostes, totalPostes, texteStatut, classeStatut } from '../../utils/demande'
 import { contient } from '../../utils/texte'
 import { jour } from '../../utils/dates'
@@ -41,44 +43,34 @@ const ouvrir = (d) => router.push(props.lien(d))
 const filtre = ref('')
 const recherche = ref('')
 
-// Une puce par statut présent dans la liste
-const filtres = computed(() => {
-  const vus = new Map()
-  props.demandes.forEach((d) => vus.set(d.statut, d.statutLibelle))
-  return [...vus].map(([code, label]) => ({ code, label }))
-})
-const nombreParFiltre = (code) => props.demandes.filter((d) => !code || d.statut === code).length
-
 // Recherche insensible à la casse et aux accents (utils/texte.js)
 const lignes = computed(() =>
   props.demandes
     .filter((d) => !filtre.value || d.statut === filtre.value)
-    .filter((d) => contient([d.id, d.departement, labelPostes(d), d.motif].join(' '), recherche.value)),
+    .filter((d) =>
+      contient([d.id, d.departement, labelPostes(d), d.motif].join(' '), recherche.value),
+    ),
 )
 </script>
 
 <template>
   <section class="colonne">
-    <h2>{{ titre }} <span class="count">{{ demandes.length }}</span></h2>
+    <h2>
+      {{ titre }} <span class="count">{{ demandes.length }}</span>
+    </h2>
 
     <div class="filtres">
-      <div v-if="filtres.length > 1" class="puces" role="group" :aria-label="`Filtrer : ${titre}`">
-        <button
-          v-for="f in [{ code: '', label: 'Toutes' }, ...filtres]"
-          :key="f.code"
-          type="button"
-          class="puce"
-          :class="{ active: filtre === f.code }"
-          :aria-pressed="filtre === f.code"
-          @click="filtre = f.code"
-        >
-          {{ f.label }} <span class="count">{{ nombreParFiltre(f.code) }}</span>
-        </button>
-      </div>
-      <input
+      <FiltrePuces
+        v-model="filtre"
+        :elements="demandes"
+        :code="(d) => d.statut"
+        :libelle="(d) => d.statutLibelle"
+        :ordre-alphabetique="false"
+        tous="Toutes"
+        :aria-label="`Filtrer : ${titre}`"
+      />
+      <BarreRecherche
         v-model="recherche"
-        type="search"
-        class="filtre-recherche"
         placeholder="Rechercher (n°, département, poste, motif)…"
         :aria-label="`Rechercher dans ${titre}`"
       />

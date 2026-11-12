@@ -1,0 +1,33 @@
+/* Boutons de filtre au-dessus d'un tableau (components/ui/FiltrePuces.vue).
+   .filtres : la ligne qui porte les puces et la barre de recherche (BarreRecherche) */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.puce {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.85rem;
+}
+
+.puce.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.puce.active .count {
+  background: rgb(255 255 255 / 0.25);
+}
