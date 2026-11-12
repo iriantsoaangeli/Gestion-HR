@@ -1,0 +1,71 @@
+/* Barre de progression des étapes d'une demande (components/ui/Progression.vue) */
+
+.progression {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  max-width: 960px;
+  margin-bottom: 2rem;
+}
+
+.progression li {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Ligne horizontale entre deux points */
+.progression li + li::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--color-border);
+}
+
+.progression .point {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-hover);
+  background: var(--color-background);
+}
+
+.progression .faite .point,
+.progression .faite + li::before,
+.progression .courante::before {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.progression .courante .point {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-soft);
+}
+
+.progression .courante .label {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.progression .a-venir .label {
+  opacity: 0.6;
+}
+
+.progression .refusee .point {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  box-shadow: 0 0 0 4px var(--color-danger-soft);
+}
+
+.progression .refusee .label {
+  font-weight: 600;
+  color: var(--color-danger);
+}

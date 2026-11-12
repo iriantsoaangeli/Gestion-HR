@@ -10,6 +10,12 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  // Les appels /api partent vers le backend Spring (même origine pour le navigateur : cookies de session OK)
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8080',
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

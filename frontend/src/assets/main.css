@@ -1,35 +1,35 @@
-@import './base.css';
+/*
+ * Point d'entrée des styles (importé par main.js). L'ordre compte : du plus général au plus précis.
+ *
+ * css/global/  styles SANS composant, valables partout : couleurs, balises HTML (button, input, table…)
+ *              et classes utilitaires (.badge, .help, .error…). Le modifier change toute l'application.
+ * css/<dossier>/<Nom>.css  styles DU composant components/<dossier>/<Nom>.vue (même dossier, même nom) :
+ *   layout/   cadre de toutes les pages (menu, contenu)
+ *   ui/       petits composants réutilisables partout (message d'erreur, liste avec recherche, progression)
+ *   demande/  composants des demandes de personnel
+ *   views/<dossier>/  pages (views/<dossier>/<Nom>.vue) qui ont leurs propres styles
+ */
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
-}
+/* Global : couleurs, balises HTML et classes utilitaires (aucun composant) */
+@import './css/global/palette.css';
+@import './css/global/variables.css';
+@import './css/global/elements.css';
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
+/* Mise en page */
+@import './css/layout/AppLayout.css';
+@import './css/layout/Sidebar.css';
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
+/* UI : petits composants réutilisables */
+@import './css/ui/Erreur.css';
+@import './css/ui/RechercheSelect.css';
+@import './css/ui/Progression.css';
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+/* Pages */
+@import './css/views/auth/LoginView.css';
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
-}
+/* Demandes de personnel */
+@import './css/demande/DemandeForm.css';
+@import './css/demande/DemandesBoard.css';
+@import './css/demande/DemandesColonne.css';
+@import './css/demande/FicheDemande.css';
+@import './css/demande/DecisionDemande.css';
