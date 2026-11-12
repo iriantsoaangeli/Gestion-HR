@@ -1,5 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
+import CaseOption from '../ui/CaseOption.vue'
 import Erreur from '../ui/Erreur.vue'
 import DemandesColonne from '../demande/DemandesColonne.vue'
 import * as api from '../../api/offres'
@@ -175,14 +176,10 @@ function publier() {
           <label for="offre-profil">Profil recherché</label>
           <textarea id="offre-profil" v-model="offre.profil" rows="3" maxlength="1000"></textarea>
 
-          <label class="choice choice-grande">
-            <input v-model="offre.avecDateLimite" type="checkbox" />
-            Ajouter une date limite de candidature
-          </label>
-          <template v-if="offre.avecDateLimite">
+          <CaseOption v-model="offre.avecDateLimite" libelle="Ajouter une date limite de candidature">
             <label for="offre-limite">Date limite de candidature</label>
             <input id="offre-limite" v-model="offre.dateLimite" type="date" :min="DATE_LIMITE_MIN" required />
-          </template>
+          </CaseOption>
 
           <Erreur :message="erreur" fermable @fermer="erreur = ''" />
           <button type="submit">Publier l'offre</button>

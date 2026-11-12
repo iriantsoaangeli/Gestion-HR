@@ -126,7 +126,7 @@ viennent des consignes (photos de `doc/cours/`) et des décisions écrites dans 
 
 - **Pages** dans `views/`, **morceaux** dans `components/` ; un composant réutilisable dans plusieurs fonctionnalités
   va dans `components/ui/` (`Tableau`, `Erreur`, `RechercheSelect`, `Progression`,
-  `ChampNombre`, `FiltrePuces`, `BarreRecherche`). Avant d'en écrire un, regarder
+  `ChampNombre`, `FiltrePuces`, `BarreRecherche`, `CaseOption`). Avant d'en écrire un, regarder
   s'il existe déjà, et le généraliser plutôt que le copier.
 - **Appels HTTP** uniquement dans `api/`, via `appel()` de `api/client.js` (cookies + CSRF + `ErreurApi`).
   Une vue n'appelle jamais `fetch` directement.

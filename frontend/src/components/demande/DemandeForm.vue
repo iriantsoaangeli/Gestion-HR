@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import CaseOption from '../ui/CaseOption.vue'
 import ChampNombre from '../ui/ChampNombre.vue'
 import RechercheSelect from '../ui/RechercheSelect.vue'
 import Erreur from '../ui/Erreur.vue'
@@ -164,15 +165,11 @@ async function envoyer() {
       <label for="motif">Motif</label>
       <textarea id="motif" v-model.trim="form.motif" rows="8" maxlength="200" required></textarea>
 
-      <label class="choice choice-grande">
-        <input v-model="form.avecDelai" type="checkbox" />
-        Ajouter un délai
-      </label>
-      <template v-if="form.avecDelai">
+      <CaseOption v-model="form.avecDelai" libelle="Ajouter un délai">
         <label for="delai">Date limite</label>
         <input id="delai" v-model="form.delai" type="date" :min="DELAI_MIN" required />
         <p class="help">3 mois par défaut, au moins une semaine.</p>
-      </template>
+      </CaseOption>
 
       <Erreur :message="erreur" fermable @fermer="erreur = ''" />
       <button type="submit" :disabled="envoi">{{ envoi ? 'Envoi…' : 'Envoyer la demande' }}</button>
