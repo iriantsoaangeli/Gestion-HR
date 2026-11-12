@@ -138,6 +138,9 @@ viennent des consignes (photos de `doc/cours/`) et des décisions écrites dans 
 - Erreurs affichées avec le composant `Erreur`, chargements avec `useChargement` (`utils/chargement.js`).
 - Ergonomie voulue : la page est remplie (pas de grand vide), un champ pas encore utilisable est **grisé**
   plutôt que caché, les tableaux trient au clic sur l'en-tête et défilent dans le composant.
+- **Tout tableau a au-dessus une barre de recherche** (insensible aux accents : `contient` de `utils/texte.js`)
+  **et des boutons de filtre par département** (puces « Tous » + un bouton par département, avec leur nombre,
+  comme dans `DemandesColonne.vue` ; pas de liste déroulante ni de cases à cocher). C'est la norme, même pour un petit tableau de choix dans un formulaire.
 - Formatage : `npm run format` (Prettier : sans point-virgule, guillemets simples, 100 colonnes) avant de committer.
 
 ### 6. Tests
