@@ -1,0 +1,169 @@
+/* Création d'une offre (components/offre/OffreForm.vue) : offre à gauche, tableau des demandes à droite */
+
+.offre {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .offre {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.offre-choix {
+  display: flex;
+  flex-direction: column;
+}
+
+.offre-choix h2 {
+  margin-bottom: 0.75rem;
+}
+
+/* Filtres au-dessus du tableau des demandes : manager, puis tri + sens (partagé avec le tableau) */
+.offre-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  padding: 0.75rem 0.75rem 0;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-background-soft);
+}
+
+.offre-filtre {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 12rem;
+}
+
+.offre-filtre label {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.offre-tri {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.offre-tri select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Bouton croissant / décroissant, à côté du tri */
+.offre-sens {
+  margin-bottom: 1rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.offre-sens:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Tableau des demandes plus court ici : laisse la place aux filtres au-dessus */
+.offre-choix .colonne {
+  max-height: calc(100dvh - 16rem);
+}
+
+/* Tableau des demandes surligné tant que rien n'est choisi */
+.colonne.a-choisir {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.offre-choix .help {
+  margin: 0.5rem 0 1rem;
+}
+
+/* Colonne de gauche : rappel de la demande au-dessus de l'offre */
+.offre-gauche {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* Rappel de la demande choisie */
+.offre-rappel {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  padding: 0.75rem;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-background-soft);
+  font-size: 0.9rem;
+}
+
+.offre-rappel dt {
+  font-weight: 600;
+}
+
+.offre-rappel dd {
+  margin: 0;
+}
+
+/* L'offre */
+.form.offre-form {
+  max-width: none;
+}
+
+.offre-form fieldset {
+  display: flex;
+  flex-direction: column;
+}
+
+.offre-form legend {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.offre-form label {
+  margin-bottom: 0.25rem;
+}
+
+.offre-form .choice {
+  margin-bottom: 0.75rem;
+}
+
+/* Deux champs côte à côte (intitulé + nombre, contrat + durée) */
+.offre-ligne {
+  display: flex;
+  gap: 1rem;
+}
+
+.offre-ligne > div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.offre-ligne > .offre-court {
+  flex: 0 0 7rem;
+}
+
+.offre-form input[readonly] {
+  background: var(--color-background-mute);
+}
+
+/* Message tant qu'aucune demande n'est choisie */
+.offre-aide {
+  margin: 0 0 0.75rem;
+  padding: 0.4rem 0.6rem;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-primary-soft);
+  font-size: 0.9rem;
+}

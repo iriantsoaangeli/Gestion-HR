@@ -77,3 +77,12 @@ utilisateur(**id**, login, mdp, role, #idPoste, status:true/false, creation)
 **Historique des comptes** (une ligne à la création, à chaque activation / désactivation ou changement de poste)  
 historiqueUtilisateurs(**id**, #idUtilisateur, #idPoste, status:true/false, date)  
 > idPoste et status = état du compte après le changement
+
+
+## Creation d'offre d'emploi 
+
+**Une offre d'emploi**  
+offre(**id**,delai?,#idPoste,#idPosteResponsable,description)  
+
+**Ceux qui vont faire l'entretien et les evalutations , du many to one**  
+interviewer(**id**,#idPoste,#idOffre)

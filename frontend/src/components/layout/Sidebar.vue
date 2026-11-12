@@ -26,6 +26,13 @@ async function deconnexion() {
           <RouterLink to="/toutes-les-demandes">Toutes les demandes</RouterLink>
         </li>
       </ul>
+
+      <template v-if="utilisateur?.role === 'HR'">
+        <p class="section">Offres</p>
+        <ul>
+          <li><RouterLink to="/offres/nouvelle">Création d'offre</RouterLink></li>
+        </ul>
+      </template>
     </nav>
 
     <!-- Utilisateur connecté -->

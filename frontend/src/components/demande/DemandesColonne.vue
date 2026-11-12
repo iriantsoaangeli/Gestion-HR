@@ -13,6 +13,14 @@ const props = defineProps({
   vide: { type: String, default: 'Pas de demande' },
 })
 
+// Sélection activée par l'usage : si le parent lie v-model:selection (id ou null), un clic sur une ligne
+// la choisit (re-clic = désélection) au lieu d'ouvrir la fiche. Sans liaison, le tableau ne change pas.
+const selection = defineModel('selection', { default: undefined })
+const selectionnable = computed(() => selection.value !== undefined)
+
+// Tri { cle, sens } : interne par défaut, pilotable depuis le parent avec v-model:tri
+const tri = defineModel('tri', { default: () => ({ cle: 'date', sens: -1 }) }) // plus récentes d'abord
+
 // Colonnes triables : valeur utilisée pour le tri
 const COLONNES = [
   { cle: 'id', label: 'N°', valeur: (d) => d.id },
@@ -26,11 +34,13 @@ const COLONNES = [
 
 const router = useRouter()
 // Toute la ligne ouvre la page (le n° reste un vrai lien pour le clavier et le clic molette)
-const ouvrir = (d) => router.push(props.lien(d))
+function ouvrir(d) {
+  if (!selectionnable.value) return router.push(props.lien(d))
+  selection.value = selection.value === d.id ? null : d.id
+}
 
 const filtre = ref('')
 const recherche = ref('')
-const tri = ref({ cle: 'date', sens: -1 }) // plus récentes d'abord
 
 function trier(cle) {
   tri.value = tri.value.cle === cle ? { cle, sens: -tri.value.sens } : { cle, sens: 1 }
@@ -104,7 +114,15 @@ const ariaTri = (cle) => (tri.value.cle !== cle ? 'none' : tri.value.sens === 1 
           </tr>
         </thead>
         <tbody>
-          <tr v-for="d in lignes" :key="d.id" class="ligne-cliquable" :title="d.motif" @click="ouvrir(d)">
+          <tr
+            v-for="d in lignes"
+            :key="d.id"
+            class="ligne-cliquable"
+            :class="{ selectionnee: selectionnable && d.id === selection }"
+            :title="d.motif"
+            :aria-selected="selectionnable ? d.id === selection : undefined"
+            @click="ouvrir(d)"
+          >
             <td><RouterLink :to="lien(d)" @click.stop>{{ d.id }}</RouterLink></td>
             <td>{{ d.date }}</td>
             <td>{{ d.departement }}</td>

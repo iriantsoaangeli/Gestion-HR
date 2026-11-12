@@ -9,14 +9,11 @@
   gap: 1rem;
 }
 
-/* Écran étroit : tableaux l'un sous l'autre, chacun défile dans sa hauteur max, la page défile entre les deux */
+/* Écran étroit : tableaux l'un sous l'autre, chacun défile dans sa hauteur max (DemandesColonne.css),
+   la page défile entre les deux */
 @media (max-width: 1024px) {
   .board {
     flex: none;
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .board .colonne {
-    max-height: 70vh;
   }
 }

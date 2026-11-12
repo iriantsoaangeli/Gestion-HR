@@ -57,10 +57,20 @@ function accueil(u) {
   return '/login'
 }
 
+const offre = [
+  {
+    // Données statiques pour l'instant (api/offres.js). Rôle lu en direct : le backend n'a pas encore de droit « offres »
+    path: '/offres/nouvelle',
+    name: 'creation-offre',
+    meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
+    component: () => import('../views/offre/CreationOffreView.vue'),
+  },
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   // La page d'accueil est choisie dans beforeEach (il faut d'abord connaître l'utilisateur)
-  routes: [{ path: '/', name: 'accueil', component: { render: () => null } }, ...auth, ...demande],
+  routes: [{ path: '/', name: 'accueil', component: { render: () => null } }, ...auth, ...demande, ...offre],
 })
 
 // Il faut être connecté partout, sauf sur les pages meta.public ; une page réservée renvoie à l'accueil
