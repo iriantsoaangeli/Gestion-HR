@@ -42,6 +42,8 @@
 
 /* Offres d'emploi */
 @import './css/offre/OffreForm.css';
+@import './css/offre/OffresColonne.css';
+@import './css/offre/FicheOffre.css';
 
 /* Dossiers de candidature */
 @import './css/dossier/DossierForm.css';

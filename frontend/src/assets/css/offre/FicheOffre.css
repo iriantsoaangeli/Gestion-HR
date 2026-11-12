@@ -1,0 +1,48 @@
+/* Fiche d'une offre (components/offre/FicheOffre.vue). En-tête, blocs et infos : css/demande/FicheDemande.css ;
+   tableaux côte à côte : .board et .colonne (css/demande/DemandesBoard.css, DemandesColonne.css) */
+
+/* Statut + bouton « Préparer un entretien » à droite de l'en-tête */
+.fiche-offre-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Informations | description */
+.fiche-offre-haut {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+/* Les deux tableaux prennent la hauteur restante, sans descendre sous une hauteur lisible */
+.fiche-offre .board {
+  min-height: 18rem;
+}
+
+/* Bouton pas encore utilisable (offre close) : grisé */
+.fiche-offre button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Bouton dans une cellule de tableau */
+.table .bouton-petit {
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .fiche-offre-haut {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Entretiens d'un candidat (il peut en avoir plusieurs) : un par ligne, puis le bouton « Préparer » */
+.cellule-entretien {
+  display: block;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+}

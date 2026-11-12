@@ -65,6 +65,21 @@ const offre = [
     meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
     component: () => import('../views/offre/CreationOffreView.vue'),
   },
+  {
+    // Offres ouvertes / closes. Données statiques pour l'instant (api/offres.js, dossiers.js, entretiens.js)
+    path: '/offres',
+    name: 'offres',
+    meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
+    component: () => import('../views/offre/OffresView.vue'),
+  },
+  {
+    // Fiche d'une offre : candidats (dossiers) et entretiens
+    path: '/offres/:id(\\d+)',
+    name: 'fiche-offre',
+    props: true,
+    meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
+    component: () => import('../views/offre/FicheOffreView.vue'),
+  },
 ]
 
 const dossier = [
