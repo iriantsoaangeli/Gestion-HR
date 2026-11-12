@@ -1,0 +1,122 @@
+/* Préparation d'un entretien (components/entretien/PreparationEntretienForm.vue) :
+   offre + candidat à gauche, date + interviewers + envoi à droite (même mise en page que css/dossier/DossierForm.css) */
+
+.preparation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .preparation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.preparation-colonne {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.preparation-bloc {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0; /* sinon le fieldset s'élargit à son contenu et déborde de la colonne */
+}
+
+.preparation-bloc legend {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.preparation-bloc label {
+  margin-bottom: 0.25rem;
+}
+
+.preparation-bloc > input:last-child {
+  margin-bottom: 0;
+}
+
+/* Bloc pas encore utilisable (candidat sans offre) : grisé, pas caché */
+.preparation-bloc.grise {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Tableaux de choix : en-tête + 5 lignes de hauteur fixe, une ligne de texte chacune, défilent au-delà */
+.preparation .tableau {
+  --ligne: 2.5rem;
+  max-height: calc(6 * var(--ligne) + 2px);
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.preparation .tableau .table {
+  table-layout: fixed;
+}
+
+.preparation .tableau th,
+.preparation .tableau td {
+  height: var(--ligne);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preparation .tableau .nombre {
+  width: 2.75rem;
+}
+
+.preparation .tableau .case {
+  width: 2.5rem;
+  text-align: center;
+}
+
+.preparation .tableau .etroite {
+  width: 6.5rem;
+}
+
+.preparation .tableau .large {
+  width: 9rem;
+}
+
+/* Surligné tant que rien n'est choisi */
+.preparation .tableau.a-choisir {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.preparation-titre-liste {
+  margin: 0 0 0.35rem;
+}
+
+/* Puces de département + recherche : classes .filtres/.puces/.puce de css/demande/DemandesColonne.css */
+.preparation-filtres {
+  margin-bottom: 0.5rem;
+}
+
+.preparation-bloc > .preparation-compte {
+  margin: -0.25rem 0 0;
+}
+
+/* Rappel de l'offre choisie, avertissement sur le candidat */
+.preparation-rappel,
+.preparation-aide {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-background-soft);
+  font-size: 0.9rem;
+}
+
+.preparation-aide {
+  background: var(--color-primary-soft);
+}
+
+.preparation-recap a {
+  margin-left: 0.25rem;
+  font-weight: 600;
+}

@@ -11,6 +11,7 @@
  *   demande/  composants des demandes de personnel
  *   offre/    composants des offres d'emploi
  *   dossier/  composants des dossiers de candidature
+ *   entretien/  composants des entretiens (liste, préparation, fiche, évaluation)
  *   views/<dossier>/  pages (views/<dossier>/<Nom>.vue) qui ont leurs propres styles
  */
 
@@ -47,3 +48,6 @@
 
 /* Dossiers de candidature */
 @import './css/dossier/DossierForm.css';
+
+/* Entretiens (EvaluationForm réutilise des classes de FicheEntretien : garder cet ordre) */
+@import './css/entretien/PreparationEntretienForm.css';

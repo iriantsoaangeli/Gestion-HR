@@ -92,6 +92,25 @@ const dossier = [
   },
 ]
 
+const entretien = [
+  {
+    // Liste des entretiens : en attente / finis. Données statiques pour l'instant (api/entretiens.js)
+    path: '/entretiens',
+    name: 'entretiens',
+    meta: { acces: (u) => ['DIRECTION', 'MANAGER', 'HR'].includes(u.role) },
+    component: () => import('../views/entretien/EntretiensView.vue'),
+  },
+  {
+    // Préparer un entretien (HR) : offre ouverte, candidat (dossier), date, interviewers.
+    // ?offre=<id>&dossier=<id> : choix déjà faits. Données statiques pour l'instant (api/entretiens.js)
+    path: '/entretiens/nouveau',
+    name: 'preparation-entretien',
+    meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
+    props: (route) => ({ offre: route.query.offre ?? null, dossier: route.query.dossier ?? null }),
+    component: () => import('../views/entretien/PreparationEntretienView.vue'),
+  },
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   // La page d'accueil est choisie dans beforeEach (il faut d'abord connaître l'utilisateur)
@@ -101,6 +120,7 @@ const router = createRouter({
     ...demande,
     ...offre,
     ...dossier,
+    ...entretien,
   ],
 })
 
