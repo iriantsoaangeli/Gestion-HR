@@ -1,3 +1,5 @@
+import { offres } from './offres'
+
 // Dépôt de dossier de candidature — DONNÉES STATIQUES : pas encore de backend.
 // Les fonctions renvoient une promesse comme un vrai appel : pour brancher l'API plus tard,
 // remplacer leur corps par appel('GET', '/api/...') (voir api/client.js) sans toucher aux composants.
@@ -162,63 +164,82 @@ const PERSONNES = [
   },
 ]
 
-// Offres ouvertes (table offre, status OUVERT) : seules celles-ci reçoivent des dossiers
-const OFFRES_OUVERTES = [
+export const personnes = () => Promise.resolve(structuredClone(PERSONNES))
+export const offresOuvertes = () =>
+  offres().then((liste) => liste.filter((o) => o.status === 'OUVERT'))
+
+// Dossiers de candidature (table dossier : id, date, idOffre, idPersonne), plus le candidat et les
+// pièces jointes (pas encore de table pour les fichiers). Les dossiers 1 à 8 ont un entretien
+// (api/entretiens.js), les autres pas encore.
+const DOSSIERS = [
   {
     id: 1,
-    intitule: 'Comptable confirmé(e)',
-    poste: 'Comptable',
-    departement: 'Finance',
-    contrat: 'CDI',
-    delai: '2026-12-15',
-    idDemande: 74,
+    date: '2026-11-02T10:15:00',
+    idOffre: 1,
+    idPersonne: 8,
+    fichiers: ['CV.pdf', 'Lettre.pdf'],
   },
-  {
-    id: 2,
-    intitule: 'Développeur(se) web',
-    poste: 'Développeur',
-    departement: 'Informatique',
-    contrat: 'CDI',
-    delai: null,
-    idDemande: 75,
-  },
+  { id: 2, date: '2026-11-03T09:40:00', idOffre: 1, idPersonne: 9, fichiers: ['CV.pdf'] },
   {
     id: 3,
-    intitule: 'Gestionnaire paie',
-    poste: 'Gestionnaire paie',
-    departement: 'Ressources humaines',
-    contrat: 'CDD',
-    delai: '2026-12-01',
-    idDemande: 76,
+    date: '2026-11-04T14:05:00',
+    idOffre: 2,
+    idPersonne: 10,
+    fichiers: ['CV.pdf', 'Portfolio.pdf'],
   },
-  {
-    id: 4,
-    intitule: 'Administrateur(trice) système et réseaux',
-    poste: 'Administrateur système',
-    departement: 'Informatique',
-    contrat: 'CDI',
-    delai: '2027-01-10',
-    idDemande: 81,
-  },
+  { id: 4, date: '2026-11-05T11:20:00', idOffre: 4, idPersonne: 11, fichiers: ['CV.pdf'] },
   {
     id: 5,
-    intitule: 'Chargé(e) de recrutement',
-    poste: 'Chargé de recrutement',
-    departement: 'Ressources humaines',
-    contrat: 'TEMPORAIRE',
-    delai: '2026-11-30',
-    idDemande: 83,
+    date: '2026-11-06T16:30:00',
+    idOffre: 5,
+    idPersonne: 12,
+    fichiers: ['CV.pdf', 'Lettre.pdf'],
   },
   {
     id: 6,
-    intitule: 'Contrôleur(se) de gestion',
-    poste: 'Contrôleur de gestion',
-    departement: 'Finance',
-    contrat: 'CDD',
-    delai: null,
-    idDemande: 88,
+    date: '2026-10-28T08:50:00',
+    idOffre: 3,
+    idPersonne: 13,
+    fichiers: ['CV.pdf', 'Diplôme.pdf'],
+  },
+  { id: 7, date: '2026-10-29T13:10:00', idOffre: 3, idPersonne: 14, fichiers: ['CV.pdf'] },
+  {
+    id: 8,
+    date: '2026-10-30T10:00:00',
+    idOffre: 2,
+    idPersonne: 8,
+    fichiers: ['CV.pdf', 'Lettre.pdf'],
+  },
+  { id: 9, date: '2026-11-08T09:00:00', idOffre: 1, idPersonne: 10, fichiers: ['CV.pdf'] },
+  {
+    id: 10,
+    date: '2026-11-09T15:45:00',
+    idOffre: 2,
+    idPersonne: 12,
+    fichiers: ['CV.pdf', 'Lettre.pdf'],
+  },
+  { id: 11, date: '2026-11-10T10:30:00', idOffre: 4, idPersonne: 5, fichiers: ['CV.pdf'] },
+  {
+    id: 12,
+    date: '2026-11-11T11:00:00',
+    idOffre: 6,
+    idPersonne: 9,
+    fichiers: ['CV.pdf', 'Lettre.pdf'],
   },
 ]
 
-export const personnes = () => Promise.resolve(structuredClone(PERSONNES))
-export const offresOuvertes = () => Promise.resolve(structuredClone(OFFRES_OUVERTES))
+// Dossier tel que l'API le renverra : avec le candidat (nom complet, employé ou externe)
+const versReponse = (d) => {
+  const p = PERSONNES.find((x) => x.id === d.idPersonne)
+  return {
+    ...d,
+    candidat: `${p.prenom} ${p.nom}`,
+    email: p.email,
+    tel: p.tel,
+    employe: Boolean(p.poste),
+  }
+}
+
+export const dossiers = () => Promise.resolve(DOSSIERS.map(versReponse))
+export const dossiersDeLOffre = (idOffre) =>
+  dossiers().then((liste) => liste.filter((d) => d.idOffre === Number(idOffre)))

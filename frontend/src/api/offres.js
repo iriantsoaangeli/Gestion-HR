@@ -163,7 +163,10 @@ const DEMANDES_APPROUVEES = [
     demandeur: { login: 'manager.commercial', detenteur: 'Tiana Rasoanaivo' },
     motif: 'Remplacement de deux commerciaux partis chez un concurrent',
     creations: [],
-    remplacements: [{ idPoste: 7, poste: 'Commercial terrain' }, { idPoste: 11, poste: 'Chef de produit' }],
+    remplacements: [
+      { idPoste: 7, poste: 'Commercial terrain' },
+      { idPoste: 11, poste: 'Chef de produit' },
+    ],
   },
   {
     id: 99,
@@ -172,7 +175,10 @@ const DEMANDES_APPROUVEES = [
     departement: 'Logistique',
     demandeur: { login: 'manager.logistique', detenteur: 'Rado Andriamanana' },
     motif: 'Nouvel entrepôt à Antsirabe',
-    creations: [{ idFonction: 13, fonction: 'Responsable logistique', effectif: 1 }, { idFonction: 11, fonction: 'Magasinier', effectif: 2 }],
+    creations: [
+      { idFonction: 13, fonction: 'Responsable logistique', effectif: 1 },
+      { idFonction: 11, fonction: 'Magasinier', effectif: 2 },
+    ],
     remplacements: [],
   },
   {
@@ -282,7 +288,10 @@ const DEMANDES_APPROUVEES = [
     departement: 'Logistique',
     demandeur: { login: 'manager.logistique', detenteur: 'Rado Andriamanana' },
     motif: 'Équipe de nuit à l’entrepôt',
-    creations: [{ idFonction: 11, fonction: 'Magasinier', effectif: 3 }, { idFonction: 12, fonction: 'Chauffeur livreur', effectif: 1 }],
+    creations: [
+      { idFonction: 11, fonction: 'Magasinier', effectif: 3 },
+      { idFonction: 12, fonction: 'Chauffeur livreur', effectif: 1 },
+    ],
     remplacements: [],
   },
   {
@@ -307,6 +316,118 @@ const DEMANDES_APPROUVEES = [
   },
 ]
 
+// Offres d'emploi : colonnes de la table offre (status OUVERT ou CLOS ; seules les ouvertes reçoivent des
+// dossiers), plus les libellés que l'API renverra à côté des id (poste, département, poste responsable).
+const OFFRES = [
+  {
+    id: 1,
+    idPoste: 5,
+    poste: 'Comptable',
+    departement: 'Finance',
+    idPosteResponsable: 9,
+    responsable: 'Directeur financier',
+    description:
+      'Comptable confirmé(e) pour la clôture annuelle : saisie, rapprochements bancaires, déclarations fiscales.',
+    status: 'OUVERT',
+    delai: '2026-12-15',
+    idDemande: 74,
+    idEmetteur: 2,
+  },
+  {
+    id: 2,
+    idPoste: 3,
+    poste: 'Développeur',
+    departement: 'Informatique',
+    idPosteResponsable: 6,
+    responsable: 'Manager informatique',
+    description: 'Développeur(se) web Vue.js / Spring Boot pour remplacer un départ en mutation.',
+    status: 'OUVERT',
+    delai: null,
+    idDemande: 75,
+    idEmetteur: 2,
+  },
+  {
+    id: 3,
+    idPoste: 2,
+    poste: 'Gestionnaire paie',
+    departement: 'Ressources humaines',
+    idPosteResponsable: 7,
+    responsable: 'Responsable RH',
+    description:
+      'Reprise de la paie en interne : bulletins, déclarations sociales, suivi des absences.',
+    status: 'OUVERT',
+    delai: '2026-12-01',
+    idDemande: 76,
+    idEmetteur: 2,
+  },
+  {
+    id: 4,
+    idPoste: 4,
+    poste: 'Administrateur système',
+    departement: 'Informatique',
+    idPosteResponsable: 6,
+    responsable: 'Manager informatique',
+    description: 'Administration des serveurs Linux, sauvegardes et réseau du siège.',
+    status: 'OUVERT',
+    delai: '2027-01-10',
+    idDemande: 81,
+    idEmetteur: 2,
+  },
+  {
+    id: 5,
+    idPoste: 1,
+    poste: 'Chargé de recrutement',
+    departement: 'Ressources humaines',
+    idPosteResponsable: 7,
+    responsable: 'Responsable RH',
+    description:
+      'Renfort temporaire pour la campagne de recrutement : tri des dossiers, planification des entretiens.',
+    status: 'OUVERT',
+    delai: '2026-11-30',
+    idDemande: 83,
+    idEmetteur: 2,
+  },
+  {
+    id: 6,
+    idPoste: 13,
+    poste: 'Contrôleur de gestion',
+    departement: 'Finance',
+    idPosteResponsable: 9,
+    responsable: 'Directeur financier',
+    description: 'Suivi budgétaire mensuel et tableaux de bord de la direction.',
+    status: 'OUVERT',
+    delai: null,
+    idDemande: 88,
+    idEmetteur: 2,
+  },
+  {
+    id: 7,
+    idPoste: 1,
+    poste: 'Chargé de recrutement',
+    departement: 'Ressources humaines',
+    idPosteResponsable: 7,
+    responsable: 'Responsable RH',
+    description: 'Recrutement pourvu : campagne de septembre terminée.',
+    status: 'CLOS',
+    delai: '2026-09-30',
+    idDemande: 83,
+    idEmetteur: 2,
+  },
+  {
+    id: 8,
+    idPoste: 4,
+    poste: 'Administrateur système',
+    departement: 'Informatique',
+    idPosteResponsable: 6,
+    responsable: 'Manager informatique',
+    description: 'Offre close après la décision finale du manager.',
+    status: 'CLOS',
+    delai: '2026-10-15',
+    idDemande: 81,
+    idEmetteur: 2,
+  },
+]
+
 // Types de contrat proposés (modèles : doc/conception/exemple-contrats)
 const TYPES_CONTRAT = [
   { id: 'CDI', label: 'CDI — contrat à durée indéterminée' },
@@ -316,3 +437,14 @@ const TYPES_CONTRAT = [
 
 export const demandesApprouvees = () => Promise.resolve(structuredClone(DEMANDES_APPROUVEES))
 export const typesContrat = () => Promise.resolve(structuredClone(TYPES_CONTRAT))
+// Libellé du statut renvoyé par l'API à côté du code (la vue n'écrit pas les libellés en dur)
+const LIBELLES_STATUS = { OUVERT: 'Ouverte', CLOS: 'Close' }
+export const offres = () =>
+  Promise.resolve(
+    OFFRES.map((o) => ({ ...structuredClone(o), statusLibelle: LIBELLES_STATUS[o.status] })),
+  )
+export const offre = (id) =>
+  offres().then(
+    (liste) =>
+      liste.find((o) => o.id === Number(id)) ?? Promise.reject(new Error('Offre introuvable')),
+  )
