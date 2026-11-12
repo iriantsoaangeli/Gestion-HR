@@ -197,7 +197,7 @@ Ce qui suit vient des conversations déjà menées sur ce projet : ce qui a bien
 
 - Ne jamais coller de vraies données de salariés (noms, CIN, salaires, contrats signés) dans une conversation :
   utiliser les données de `demo.sql`.
-
+k
 ---
 
 ## À ne pas faire
