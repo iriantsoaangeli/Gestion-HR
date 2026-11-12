@@ -218,11 +218,21 @@ CREATE TABLE interviewer (
 -- Recrutement et entretien
 -- =====================================================================
 
--- Un entretien pour une offre
+-- Dossier de candidature : une personne (employe ou externe) candidate a une offre, depose par HR
+-- Une personne depose au plus un dossier par offre
+CREATE TABLE dossier (
+    id SERIAL PRIMARY KEY,
+    date TIMESTAMP NOT NULL DEFAULT NOW(),
+    idOffre INTEGER NOT NULL REFERENCES offre (id),
+    idPersonne INTEGER NOT NULL REFERENCES personne (id),
+    UNIQUE (idOffre, idPersonne)
+);
+
+-- Entretien d'un candidat : l'offre et le candidat se retrouvent par le dossier
 CREATE TABLE entretien (
     id SERIAL PRIMARY KEY,
     date TIMESTAMP NOT NULL,
-    idOffre INTEGER NOT NULL REFERENCES offre (id),
+    idDossier INTEGER NOT NULL REFERENCES dossier (id),
     idStatusOffre INTEGER NOT NULL REFERENCES statusOffre (id)
 );
 
