@@ -8,46 +8,42 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import gestion.hr.referentiel.Dto.ReferentielResponse;
-import gestion.hr.referentiel.Repository.DepartementRepository;
-import gestion.hr.referentiel.Repository.FonctionRepository;
-import gestion.hr.referentiel.Repository.PosteRepository;
+import gestion.hr.referentiel.Service.ReferentielService;
 
 /**
- * Listes de choix pour les formulaires (lecture seule, tout utilisateur connecté).
+ * Listes de choix pour les formulaires (lecture seule, tout utilisateur connecté ; règles dans ReferentielService).
  * GET /api/referentiel/departements
- * GET /api/referentiel/fonctions                    (création de postes)
- * GET /api/referentiel/postes?departement={id}      (postes existants à remplacer)
+ * GET /api/referentiel/mon-departement             (département du compte connecté = celui de son poste)
+ * GET /api/referentiel/fonctions                   (création de postes)
+ * GET /api/referentiel/postes?departement={id}     (postes que je peux faire remplacer)
  */
 @RestController
 @RequestMapping("/api/referentiel")
 public class ReferentielController {
 
-    private final DepartementRepository departements;
-    private final FonctionRepository fonctions;
-    private final PosteRepository postes;
+    private final ReferentielService service;
 
-    public ReferentielController(DepartementRepository departements, FonctionRepository fonctions,
-            PosteRepository postes) {
-        this.departements = departements;
-        this.fonctions = fonctions;
-        this.postes = postes;
+    public ReferentielController(ReferentielService service) {
+        this.service = service;
     }
 
     @GetMapping("/departements")
     public List<ReferentielResponse> departements() {
-        return departements.findAllByOrderByLabel().stream()
-                .map(d -> new ReferentielResponse(d.getId(), d.getLabel())).toList();
+        return service.departements();
+    }
+
+    @GetMapping("/mon-departement")
+    public ReferentielResponse monDepartement() {
+        return service.monDepartement();
     }
 
     @GetMapping("/fonctions")
     public List<ReferentielResponse> fonctions() {
-        return fonctions.findAllByOrderByLabel().stream()
-                .map(f -> new ReferentielResponse(f.getId(), f.getLabel())).toList();
+        return service.fonctions();
     }
 
     @GetMapping("/postes")
     public List<ReferentielResponse> postes(@RequestParam("departement") Integer idDepartement) {
-        return postes.findByIdDepartementOrderByLabel(idDepartement).stream()
-                .map(p -> new ReferentielResponse(p.getId(), p.getLabel())).toList();
+        return service.postesRemplacables(idDepartement);
     }
 }

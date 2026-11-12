@@ -125,11 +125,26 @@ CREATE TABLE historiqueEmploi (
 -- =====================================================================
 
 -- Utilisateurs de l'application (mdp = hachage BCrypt, role = enum gestion.hr.auth.Model.Role)
+-- Un compte = 1 poste d'importance : idPoste obligatoire, et un poste a au plus un compte (UNIQUE)
+-- status : compte actif (true) ou desactive (false) ; creation : date de creation du compte
 CREATE TABLE utilisateur (
     id SERIAL PRIMARY KEY,
     login VARCHAR(50) NOT NULL UNIQUE,
     mdp VARCHAR(100) NOT NULL,
-    role VARCHAR(20) NOT NULL
+    role VARCHAR(20) NOT NULL,
+    idPoste INTEGER NOT NULL UNIQUE REFERENCES poste (id),
+    status BOOLEAN NOT NULL DEFAULT TRUE,
+    creation DATE NOT NULL DEFAULT NOW()
+);
+
+-- Historique d'un compte : creation, activation / desactivation, changement de poste
+-- idPoste et status = etat du compte apres le changement
+CREATE TABLE historiqueUtilisateurs (
+    id SERIAL PRIMARY KEY,
+    idUtilisateur INTEGER NOT NULL REFERENCES utilisateur (id),
+    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    status BOOLEAN NOT NULL,
+    date DATE NOT NULL DEFAULT NOW()
 );
 
 -- =====================================================================

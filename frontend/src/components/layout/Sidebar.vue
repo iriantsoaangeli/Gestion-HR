@@ -17,7 +17,8 @@ async function deconnexion() {
       <p class="section">Demandes</p>
       <ul>
         <li v-if="utilisateur?.peutCreerDemande"><RouterLink to="/demande">Nouvelle demande</RouterLink></li>
-        <li><RouterLink to="/mes-demandes">Mes demandes</RouterLink></li>
+        <!-- Rôle MANAGER : le seul qui crée des demandes, donc le seul qui a « ses » demandes -->
+        <li v-if="utilisateur?.peutCreerDemande"><RouterLink to="/mes-demandes">Mes demandes</RouterLink></li>
         <li v-if="utilisateur?.valideDesDemandes">
           <RouterLink to="/demandes-a-traiter">Demandes à traiter</RouterLink>
         </li>

@@ -26,7 +26,7 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * Workflow complet des demandes sur la base locale (base/init.sql + base/data.sql).
  * Chaque test est annulé à la fin (@Transactional) : la base n'est pas modifiée.
- * Comptes utilisés : manager, hr, direction, finance (data.sql) ; départements 1-3, fonctions 1-6, postes 1-5.
+ * Comptes utilisés : manager, hr, direction, finance (data.sql) ; départements 1-4, fonctions 1-6, postes 1-5 (6 et plus : postes des comptes).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -92,6 +92,33 @@ class DemandeControllerTest {
                 {"idDepartement": 2, "motif": "x", "remplacements": [5]}""")
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION"));
+    }
+
+    // Postes des comptes (data.sql) : 6 Manager informatique (manager, Informatique), 7 Responsable RH (hr, RH),
+    // 10 Administrateur de l'application (admin, Informatique)
+
+    @Test
+    void demandeHorsDeSonDepartementRefusee() throws Exception {
+        creer("manager", """
+                {"idDepartement": 1, "motif": "x", "remplacements": [1]}""")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCES_REFUSE"));
+    }
+
+    @Test
+    void managerPeutDemanderSonPropreRemplacement() throws Exception {
+        creer("manager", """
+                {"idDepartement": 2, "motif": "Départ", "remplacements": [6]}""")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.remplacements[0].poste").value("Manager informatique"));
+    }
+
+    @Test
+    void posteDUnAutreCompteNonRemplacable() throws Exception {
+        creer("manager", """
+                {"idDepartement": 2, "motif": "x", "remplacements": [10]}""")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCES_REFUSE"));
     }
 
     @Test
@@ -229,8 +256,11 @@ class DemandeControllerTest {
                 .andExpect(jsonPath("$[*].label", hasItem("Informatique")));
         mvc.perform(get("/api/referentiel/fonctions").with(user("manager")))
                 .andExpect(jsonPath("$[*].label", hasItem("Développeur")));
+        // Postes remplaçables par manager : ceux du département + son propre poste (6), pas celui de admin (10)
         mvc.perform(get("/api/referentiel/postes").param("departement", "2").with(user("manager")))
-                .andExpect(jsonPath("$[*].id", org.hamcrest.Matchers.containsInAnyOrder(3, 4)));
+                .andExpect(jsonPath("$[*].id", org.hamcrest.Matchers.containsInAnyOrder(3, 4, 6)));
+        mvc.perform(get("/api/referentiel/mon-departement").with(user("manager")))
+                .andExpect(jsonPath("$.label").value("Informatique"));
     }
 
     @Test

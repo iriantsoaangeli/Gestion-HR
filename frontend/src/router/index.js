@@ -22,9 +22,10 @@ const demande = [
     component: () => import('../views/demande/NouvelleDemandeView.vue'),
   },
   {
-    // Demandes créées par l'utilisateur connecté (c'est aussi l'accueil)
+    // Demandes créées par l'utilisateur connecté (accueil du MANAGER)
     path: '/mes-demandes',
     name: 'mes-demandes',
+    meta: { acces: (u) => u.peutCreerDemande }, // MANAGER
     component: () => import('../views/demande/MesDemandesView.vue'),
   },
   {
@@ -48,9 +49,18 @@ const demande = [
   },
 ]
 
+// Accueil selon le rôle : MANAGER ses demandes, HR / DIRECTION / FINANCE ce qu'ils ont à traiter, ADMIN tout
+function accueil(u) {
+  if (u.peutCreerDemande) return '/mes-demandes'
+  if (u.valideDesDemandes) return '/demandes-a-traiter'
+  if (u.voitToutesLesDemandes) return '/toutes-les-demandes'
+  return '/login'
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [{ path: '/', name: 'accueil', redirect: '/mes-demandes' }, ...auth, ...demande],
+  // La page d'accueil est choisie dans beforeEach (il faut d'abord connaître l'utilisateur)
+  routes: [{ path: '/', name: 'accueil', component: { render: () => null } }, ...auth, ...demande],
 })
 
 // Il faut être connecté partout, sauf sur les pages meta.public ; une page réservée renvoie à l'accueil
@@ -59,8 +69,10 @@ router.beforeEach(async (to) => {
   if (!utilisateur.value && !to.meta.public) {
     return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
   }
-  if (utilisateur.value && to.name === 'login') return '/'
-  if (to.meta.acces && !to.meta.acces(utilisateur.value)) return '/'
+  if (!utilisateur.value) return
+  const versAccueil = to.name === 'login' || to.name === 'accueil' || (to.meta.acces && !to.meta.acces(utilisateur.value))
+  // Comparaison au chemin : un rôle sans page (accueil = /login) reste sur le login au lieu de boucler
+  if (versAccueil && accueil(utilisateur.value) !== to.path) return accueil(utilisateur.value)
 })
 
 export default router

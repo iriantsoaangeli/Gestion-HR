@@ -66,6 +66,14 @@ histoDemande(**id**, #idDemande, #idUtilisateur, #idStatus, date)
 > status : 1 EN_ATTENTE_HR, 2 EN_ATTENTE_DIRECTION, 3 EN_ATTENTE_FINANCE, 4 APPROUVEE, 5 REFUSEE (base/data.sql)
 
 
-**Les utilisateurs de l'application**  
-utilisateur(**id**,login,mdp,role)  
+## Utilisateurs
+
+**Les utilisateurs de l'application : un compte = 1 poste d'importance qui utilise l'application**  
+utilisateur(**id**, login, mdp, role, #idPoste, status:true/false, creation)  
 > mdp = hachage BCrypt ; role ∈ MANAGER, HR, DIRECTION, FINANCE, ADMIN (comptes de test : base/data.sql)  
+> idPoste obligatoire et unique : chaque compte a un poste, un poste a au plus un compte  
+> status = compte actif (true) ou désactivé (false) ; creation = date de création du compte
+
+**Historique des comptes** (une ligne à la création, à chaque activation / désactivation ou changement de poste)  
+historiqueUtilisateurs(**id**, #idUtilisateur, #idPoste, status:true/false, date)  
+> idPoste et status = état du compte après le changement

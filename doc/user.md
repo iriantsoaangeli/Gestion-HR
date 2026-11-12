@@ -34,11 +34,14 @@ Le front n'en garde aucune copie, il affiche le `roleLibelle` renvoyé par l'API
 Côté Spring Security, chaque rôle devient l'autorité `ROLE_<code>` (ex. `ROLE_HR`).
 
 **Menu selon le rôle** (calculé par le backend, jamais en dur dans le front) : `peutCreerDemande` (MANAGER) →
-« Nouvelle demande » ; `valideDesDemandes` (HR, DIRECTION, FINANCE, d'après `Statut`) → « Demandes à traiter ».
+« Nouvelle demande » et « Mes demandes » ; `valideDesDemandes` (HR, DIRECTION, FINANCE, d'après `Statut`) → « Demandes à traiter ».
 
 **Toutes les demandes** : seuls `ADMIN` et `DIRECTION` les voient (`Role.voitToutesLesDemandes()`),
 les autres ne voient que les leurs. L'API renvoie ce droit dans `voitToutesLesDemandes` ; le front masque
 le lien et renvoie vers l'accueil si on tape l'adresse `/toutes-les-demandes`.
+
+**Accueil selon le rôle** (`/`, `router/index.js`) : MANAGER → Mes demandes ; HR, DIRECTION, FINANCE →
+Demandes à traiter ; ADMIN → Toutes les demandes.
 
 Le backend refuse aussi (403) la liste complète `GET /api/demandes` aux autres rôles : voir `doc/routes/api/demandes.md`.
 
@@ -53,11 +56,20 @@ Mots de passe **de développement uniquement**.
 | direction | direction123 | DIRECTION |
 | finance | finance123 | FINANCE |
 | admin | admin123 | ADMIN |
+| manager.rh, manager.finance | manager123 | MANAGER (données de démo, `base/demo.sql`) |
 
-Charger la base :
+Remettre la base à zéro (supprime tout, recrée, charge init + data + demo ; `--sans-demo`, `-y` sans confirmation) :
+
+```bash
+base/reset.sh
+```
+
+Ou charger la base à la main :
 
 ```bash
 psql -U postgres -d gestion_hr -f base/init.sql -f base/data.sql
+# Facultatif : demandes de démonstration dans tous les statuts (une seule fois)
+psql -U postgres -d gestion_hr -f base/demo.sql
 ```
 
 ## API (`/api/auth`)

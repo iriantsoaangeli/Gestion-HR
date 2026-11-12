@@ -10,8 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * Compte de l'application : table {@code utilisateur(id, login, mdp, role)} de base/init.sql.
+ * Compte de l'application : table {@code utilisateur} de base/init.sql.
  * {@code mdp} contient le hachage BCrypt, jamais le mot de passe en clair.
+ * Un compte = 1 poste d'importance ({@code idPoste}) : son département est celui de ce poste.
  */
 @Entity
 @Table(name = "utilisateur")
@@ -31,15 +32,19 @@ public class Utilisateur {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(nullable = false, unique = true)
+    private Integer idPoste;
+
     protected Utilisateur() {
         // pour JPA
     }
 
-    public Utilisateur(Integer id, String login, String mdp, Role role) {
+    public Utilisateur(Integer id, String login, String mdp, Role role, Integer idPoste) {
         this.id = id;
         this.login = login;
         this.mdp = mdp;
         this.role = role;
+        this.idPoste = idPoste;
     }
 
     public Integer getId() {
@@ -56,5 +61,9 @@ public class Utilisateur {
 
     public Role getRole() {
         return role;
+    }
+
+    public Integer getIdPoste() {
+        return idPoste;
     }
 }

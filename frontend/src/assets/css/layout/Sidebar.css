@@ -5,6 +5,14 @@
   flex-direction: column;
   width: 240px;
   flex-shrink: 0;
+  /* Toujours la hauteur de l'écran, fixée en haut : seul le contenu défile, le compte reste visible */
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   padding: 1.5rem 1rem;
   border-right: 1px solid var(--color-border);
   background: var(--color-background-soft);

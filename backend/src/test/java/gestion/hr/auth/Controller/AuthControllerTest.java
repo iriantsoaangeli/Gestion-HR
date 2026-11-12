@@ -45,7 +45,7 @@ class AuthControllerTest {
 
     @BeforeEach
     void compte() {
-        Utilisateur manager = new Utilisateur(1, "manager", new BCryptPasswordEncoder().encode("secret"), Role.MANAGER);
+        Utilisateur manager = new Utilisateur(1, "manager", new BCryptPasswordEncoder().encode("secret"), Role.MANAGER, 6);
         when(utilisateurs.findByLogin(anyString())).thenReturn(Optional.empty());
         when(utilisateurs.findByLogin("manager")).thenReturn(Optional.of(manager));
     }

@@ -1,6 +1,6 @@
 -- Données de départ (développement) — à exécuter après base/init.sql
 
--- Statuts d'une demande : les id sont repris par l'enum gestion.hr.Model.Statut (ne pas les changer)
+-- Statuts d'une demande : les id sont repris par l'enum gestion.hr.demande.Model.Statut (ne pas les changer)
 INSERT INTO status (id, label) VALUES
     (1, 'EN_ATTENTE_HR'),
     (2, 'EN_ATTENTE_DIRECTION'),
@@ -13,7 +13,8 @@ SELECT setval('status_id_seq', 5);
 INSERT INTO departement (label) VALUES
     ('Ressources humaines'),
     ('Informatique'),
-    ('Finance');
+    ('Finance'),
+    ('Direction générale');
 
 INSERT INTO fonction (label) VALUES
     ('Chargé de recrutement'),
@@ -31,14 +32,33 @@ INSERT INTO poste (label, idDepartement) VALUES
     ('Administrateur système', 2),
     ('Comptable', 3);
 
+-- Postes d'importance tenus par les comptes de l'application (un compte = 1 poste, voir utilisateur)
+INSERT INTO poste (label, idDepartement) VALUES
+    ('Manager informatique', 2),
+    ('Responsable RH', 1),
+    ('Directeur général', 4),
+    ('Directeur financier', 3),
+    ('Administrateur de l''application', 2);
+
 -- Comptes de test, un par rôle. Mots de passe de DEV uniquement (à changer en production) :
 --   manager / manager123   hr / hr123   direction / direction123   finance / finance123   admin / admin123
 -- mdp = hachage BCrypt (Spring Security, BCryptPasswordEncoder), jamais le mot de passe en clair.
 -- role : MANAGER, HR, DIRECTION, FINANCE, ADMIN (enum gestion.hr.auth.Model.Role)
 
-INSERT INTO utilisateur (login, mdp, role) VALUES
-    ('manager',   '$2a$10$0uukbton6kPkDX7qA77yT.hzAYPbcwc5yzIzA/1Xl0m3E9V78LEo.', 'MANAGER'),
-    ('hr',        '$2a$10$P3w.N01qa/JA0IycPDqxD.oPXmbIPDi8EQ8g9PVL1WSsDaEKAoHWC', 'HR'),
-    ('direction', '$2a$10$5oTOCwDKbw0nYV5i7fnwc.1i.93EyX7i.9aRJFM0ji8X3xmJ4ZSYC', 'DIRECTION'),
-    ('finance',   '$2a$10$3dmF2c.sRpF9fOZ0dbf9GOmQuzZB1ne.TzaufSm41Pz.g1xPxGvCO', 'FINANCE'),
-    ('admin',     '$2a$10$fO8Ag4rjlsOrwoRgeSShLO92kh7ucU6SzMg3gZ0tsVWeQ2gQQ70SW', 'ADMIN');
+-- idPoste : le poste d'importance du compte (créé juste au-dessus) ; status et creation par défaut (actif, aujourd'hui)
+
+INSERT INTO utilisateur (login, mdp, role, idPoste)
+SELECT v.login, v.mdp, v.role, p.id
+FROM (VALUES
+    ('manager',   '$2a$10$0uukbton6kPkDX7qA77yT.hzAYPbcwc5yzIzA/1Xl0m3E9V78LEo.', 'MANAGER',   'Manager informatique', 1),
+    ('hr',        '$2a$10$P3w.N01qa/JA0IycPDqxD.oPXmbIPDi8EQ8g9PVL1WSsDaEKAoHWC', 'HR',        'Responsable RH', 2),
+    ('direction', '$2a$10$5oTOCwDKbw0nYV5i7fnwc.1i.93EyX7i.9aRJFM0ji8X3xmJ4ZSYC', 'DIRECTION', 'Directeur général', 3),
+    ('finance',   '$2a$10$3dmF2c.sRpF9fOZ0dbf9GOmQuzZB1ne.TzaufSm41Pz.g1xPxGvCO', 'FINANCE',   'Directeur financier', 4),
+    ('admin',     '$2a$10$fO8Ag4rjlsOrwoRgeSShLO92kh7ucU6SzMg3gZ0tsVWeQ2gQQ70SW', 'ADMIN',     'Administrateur de l''application', 5)
+) AS v (login, mdp, role, poste, ordre)
+JOIN poste p ON p.label = v.poste
+ORDER BY v.ordre; -- mêmes id qu'avant : manager 1, hr 2, direction 3, finance 4, admin 5
+
+-- Création de chaque compte dans son historique
+INSERT INTO historiqueUtilisateurs (idUtilisateur, idPoste, status, date)
+SELECT id, idPoste, status, creation FROM utilisateur;

@@ -34,6 +34,9 @@ import gestion.hr.auth.Service.UtilisateurCourant;
 /**
  * Règles des demandes de personnel (workflow Manager -> HR -> Direction -> Finance).
  * - Seul un MANAGER crée une demande ; elle démarre EN_ATTENTE_HR.
+ * - Il la crée uniquement pour son département (celui de son poste).
+ * - Il peut demander son propre remplacement, mais pas celui d'un poste tenu par un autre compte
+ *   (autres managers, supérieurs).
  * - À chaque étape, seul le rôle de l'étape (Statut.getValideur) valide ou refuse.
  * - Chaque décision est écrite dans histoDemande, dans la même transaction que le changement de statut.
  * - Une demande n'est visible que par son demandeur, ceux qui ont décidé dessus, le rôle dont c'est le tour,
@@ -79,7 +82,7 @@ public class DemandeService {
         if (!moi.getRole().peutCreerDemande()) {
             throw ErreurMetier.accesRefuse("Seul un manager peut créer une demande.");
         }
-        verifier(req);
+        verifier(req, moi);
 
         Demande d = demandes.save(new Demande(req.idDepartement(), moi.getId(), req.motif().trim(), req.delai()));
         for (CreerDemandeRequest.Creation c : liste(req.creations())) {
@@ -91,9 +94,12 @@ public class DemandeService {
         return enReponse(d, moi);
     }
 
-    private void verifier(CreerDemandeRequest req) {
+    private void verifier(CreerDemandeRequest req, Utilisateur moi) {
         if (req.idDepartement() == null || !departements.existsById(req.idDepartement())) {
             throw ErreurMetier.validation("Choisissez un département.");
+        }
+        if (!req.idDepartement().equals(postes.departementDe(moi.getId()).orElse(null))) {
+            throw ErreurMetier.accesRefuse("Vous ne pouvez faire une demande que pour votre département.");
         }
         if (req.motif() == null || req.motif().isBlank()) {
             throw ErreurMetier.validation("Le motif est obligatoire.");
@@ -135,6 +141,10 @@ public class DemandeService {
             }
             if (!vues.add(idPoste)) {
                 throw ErreurMetier.validation("Le poste « " + p.getLabel() + " » est demandé deux fois.");
+            }
+            if (utilisateurs.existsByIdPosteAndIdNot(idPoste, moi.getId())) {
+                throw ErreurMetier.accesRefuse("Le poste « " + p.getLabel()
+                        + " » est tenu par un autre compte (manager ou supérieur) : vous ne pouvez pas demander son remplacement.");
             }
         }
     }

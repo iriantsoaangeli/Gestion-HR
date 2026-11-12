@@ -14,7 +14,7 @@ Le demandeur et le valideur ne sont **jamais** dans le JSON : c'est l'utilisateu
 | `EN_ATTENTE_FINANCE` (3) | rôle `FINANCE` |
 | `APPROUVEE` (4), `REFUSEE` (5) | personne : terminée |
 
-Règles dans `Model/Statut.java` (enum, ids = table `status`) et `Service/DemandeService.java`.
+Règles dans `demande/Model/Statut.java` (enum, ids = table `status`) et `demande/Service/DemandeService.java`.
 
 ## Routes
 
@@ -35,8 +35,9 @@ Règles dans `Model/Statut.java` (enum, ids = table `status`) et `Service/Demand
 | Route | Contenu |
 |---|---|
 | `GET /api/referentiel/departements` | départements |
+| `GET /api/referentiel/mon-departement` | `{ id, label }` : département du compte connecté (celui de son poste) |
 | `GET /api/referentiel/fonctions` | fonctions (pour les créations) |
-| `GET /api/referentiel/postes?departement={id}` | postes existants du département (pour les remplacements) |
+| `GET /api/referentiel/postes?departement={id}` | postes du département que **je** peux faire remplacer : sans les postes des autres comptes, avec le mien |
 
 ### Créer
 
@@ -52,6 +53,9 @@ Règles dans `Model/Statut.java` (enum, ids = table `status`) et `Service/Demand
 
 - `creations` : postes à **créer**. Le poste n'existe pas encore : on désigne sa **fonction** et l'**effectif** (≥ 1). → table `demandeFonction`.
 - `remplacements` : id de postes **existants** du département, sans effectif (1 poste = 1 siège). → table `demandePoste`.
+- `idDepartement` : **le département du manager** (celui de son poste, voir `mon-departement`), sinon 403 `ACCES_REFUSE`.
+- Un manager peut demander **son propre remplacement**, mais pas celui d'un poste tenu par un autre compte
+  (autres managers, supérieurs) : 403 `ACCES_REFUSE`.
 - Au moins un poste en tout. `delai` facultatif, au moins 7 jours après aujourd'hui. `motif` obligatoire, 200 caractères max.
 
 ### `DemandeResponse`

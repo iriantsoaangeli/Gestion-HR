@@ -23,21 +23,13 @@
   }
 }
 
-/* Département à choisir en premier : surligné tant qu'il est vide */
-select.a-remplir {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-soft);
+/* Département imposé (celui du manager) : affiché, pas modifiable */
+#departement[readonly] {
+  background: var(--color-background-mute);
+  cursor: default;
 }
 
-.a-remplir-aide {
-  margin: -0.5rem 0 1rem;
-  padding: 0.4rem 0.6rem;
-  border-left: 3px solid var(--color-primary);
-  background: var(--color-primary-soft);
-  font-size: 0.9rem;
-}
-
-/* Postes grisés et inutilisables tant qu'aucun département n'est choisi */
+/* Postes grisés et inutilisables tant que le département n'est pas chargé */
 fieldset:disabled {
   opacity: 0.5;
   cursor: not-allowed;

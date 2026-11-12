@@ -14,8 +14,9 @@ CREEES=()
 corps() {
   printf '{"idDepartement":%s,"motif":%s,"delai":%s,"creations":%s,"remplacements":%s}' "$1" "$2" "$3" "$4" "$5"
 }
-# Corps valide de référence (département 1, fonction 1, poste 1 du département 1)
-DEP=1; MOTIF='"Test valeurs absurdes"'; DELAI="\"$(date_dans 30)\""; CRE='[{"idFonction":1,"effectif":2}]'; REM='[1]'
+# Corps valide de référence : département 2 = celui de manager (poste « Manager informatique »), poste 3 de ce département
+# Postes des comptes (base/data.sql) : 6 manager (Info), 7 hr (RH), 10 admin (Info)
+DEP=2; MOTIF='"Test valeurs absurdes"'; DELAI="\"$(date_dans 30)\""; CRE='[{"idFonction":1,"effectif":2}]'; REM='[3]'
 
 # Comme verifier, mais retient l'id de la demande si elle a été créée (pour la supprimer à la fin).
 creer() {
@@ -115,9 +116,16 @@ section "Demande — postes à remplacer"
 for v in '[null]' '[-1]' '[0]' '[999999]'; do
   creer "remplacements = $v"                 400:VALIDATION        POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' "$v")"
 done
-creer "poste d'un autre département (3)"     400:VALIDATION        POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '[3]')"
-creer "même poste deux fois"                 400:VALIDATION        POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '[1,1]')"
+creer "poste d'un autre département (1)"     400:VALIDATION        POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '[1]')"
+creer "même poste deux fois"                 400:VALIDATION        POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '[3,3]')"
 creer "remplacements = [\"abc\"]"            400:REQUETE_ILLISIBLE POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '["abc"]')"
+
+section "Demande — son département, son poste, pas ceux des autres comptes"
+creer "demande pour un autre département (1)" 403:ACCES_REFUSE    POST $DEMANDES "$(corps 1 "$MOTIF" "$DELAI" '[]' '[1]')"
+creer "demande pour un autre département (3)" 403:ACCES_REFUSE    POST $DEMANDES "$(corps 3 "$MOTIF" "$DELAI" "$CRE" '[]')"
+creer "remplacer le poste d'admin (10)"      403:ACCES_REFUSE     POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '[10]')"
+creer "remplacer le poste de hr (7, autre dép.)" 400:VALIDATION   POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '[7]')"
+creer "remplacer son propre poste (6)"       201                  POST $DEMANDES "$(corps $DEP "$MOTIF" "$DELAI" '[]' '[6]')"
 
 section "Demande — valider / refuser (id dans l'URL)"
 connecter hr hr123

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import RechercheSelect from '../ui/RechercheSelect.vue'
 import Erreur from '../ui/Erreur.vue'
@@ -8,9 +8,11 @@ import * as api from '../../api/demandes'
 import { useChargement } from '../../utils/chargement'
 import { dansLe } from '../../utils/dates'
 
-// Formulaire de création (POST /api/demandes). Départements, fonctions et postes viennent du backend.
+// Formulaire de création (POST /api/demandes). Département, fonctions et postes viennent du backend.
+// Département : celui du manager connecté (son poste), non modifiable.
 // creations : postes à créer = une fonction + un effectif (le poste n'existe pas encore)
-// remplacements : postes existants du département à remplir (1 poste = 1 siège, pas d'effectif)
+// remplacements : postes existants du département à remplir (1 poste = 1 siège, pas d'effectif) ;
+//   le backend ne propose pas les postes des autres comptes (managers, supérieurs), mais bien le mien
 // Le backend revérifie tout (règles dans DemandeService) : ses erreurs s'affichent dans <Erreur>.
 
 // Délai : 3 mois par défaut, au moins 1 semaine
@@ -19,7 +21,7 @@ const DELAI_DEFAUT = dansLe({ mois: 3 })
 
 const router = useRouter()
 const form = reactive({
-  idDepartement: '',
+  idDepartement: null,
   creations: [], // [{ idFonction, label, effectif }]
   remplacements: [], // [{ id, label }]
   motif: '',
@@ -29,9 +31,15 @@ const form = reactive({
 const erreur = ref('')
 const envoi = ref(false)
 
-const { donnees: departements, erreur: erreurDepartements } = useChargement(referentiel.departements, [])
-const { donnees: fonctions, erreur: erreurFonctions } = useChargement(referentiel.fonctions, [])
 const postesDuDepartement = ref([])
+// Mon département, puis ses postes remplaçables
+const departement = useChargement(async () => {
+  const d = await referentiel.monDepartement()
+  form.idDepartement = d.id
+  postesDuDepartement.value = await referentiel.postes(d.id)
+  return d
+}, null)
+const { donnees: fonctions, erreur: erreurFonctions } = useChargement(referentiel.fonctions, [])
 
 // Fonctions pas encore ajoutées (l'effectif sert à en demander plusieurs)
 const fonctionsDisponibles = computed(() =>
@@ -45,22 +53,6 @@ function ajouterCreation(fonction) {
 // Postes existants pas encore choisis
 const postesRemplacables = computed(() =>
   postesDuDepartement.value.filter((p) => !form.remplacements.some((r) => r.id === p.id)),
-)
-
-// Changer de département vide la sélection et recharge ses postes
-watch(
-  () => form.idDepartement,
-  async (id) => {
-    form.creations = []
-    form.remplacements = []
-    postesDuDepartement.value = []
-    if (!id) return
-    try {
-      postesDuDepartement.value = await referentiel.postes(id)
-    } catch (e) {
-      erreur.value = e.message
-    }
-  },
 )
 
 async function envoyer() {
@@ -96,23 +88,16 @@ async function envoyer() {
   <form class="form demande-form" @submit.prevent="envoyer">
     <div class="form-col">
       <label for="departement">Département</label>
-      <select
+      <!-- Pas de choix : un manager ne fait de demande que pour son département -->
+      <input
         id="departement"
-        v-model="form.idDepartement"
-        :class="{ 'a-remplir': !form.idDepartement }"
+        :value="departement.donnees.value?.label ?? (departement.chargement.value ? 'Chargement…' : '')"
+        readonly
         aria-describedby="departement-aide"
-        required
-      >
-        <option value="" disabled>Choisir un département</option>
-        <option v-for="d in departements" :key="d.id" :value="d.id">{{ d.label }}</option>
-      </select>
+      />
+      <p id="departement-aide" class="help">Votre département : vos demandes ne concernent que lui.</p>
 
-      <!-- Les postes restent visibles mais grisés et inutilisables tant qu'aucun département n'est choisi -->
-      <p v-if="!form.idDepartement" id="departement-aide" class="a-remplir-aide">
-        Choisissez d'abord un département pour ajouter ou remplacer des postes.
-      </p>
-
-      <Erreur :message="erreurDepartements || erreurFonctions" />
+      <Erreur :message="departement.erreur.value || erreurFonctions" />
 
       <fieldset :disabled="!form.idDepartement">
         <legend><label for="ajout-poste">Ajouter un poste</label></legend>
