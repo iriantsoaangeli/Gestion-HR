@@ -22,54 +22,23 @@
   margin-bottom: 0.75rem;
 }
 
-/* Filtres au-dessus du tableau des demandes : département, manager, puis tri + sens (partagé avec le tableau) */
+/* Puces de département et de manager au-dessus du tableau des demandes (tri : en-têtes du tableau) */
 .offre-filtres {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 1rem;
-  padding: 0.75rem 0.75rem 0;
+  flex-direction: column;
+  gap: 0.6rem;
   margin-bottom: 1rem;
+  padding: 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-background-soft);
 }
 
-.offre-filtre {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 12rem;
-}
-
-.offre-filtre label {
-  margin-bottom: 0.25rem;
+/* Titre d'une ligne de puces (Département, Manager) */
+.offre-filtre-titre {
+  display: block;
+  margin-bottom: 0.3rem;
   font-size: 0.9rem;
-}
-
-.offre-tri {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.offre-tri select {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Bouton croissant / décroissant, à côté du tri */
-.offre-sens {
-  margin-bottom: 1rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-background);
-  color: var(--color-text);
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-.offre-sens:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
 }
 
 /* Tableau des demandes plus court ici : laisse la place aux filtres au-dessus */

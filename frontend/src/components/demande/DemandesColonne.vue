@@ -18,6 +18,8 @@ const props = defineProps({
   lien: { type: Function, default: (d) => `/demandes/${d.id}` },
   vide: { type: String, default: 'Pas de demande' },
   masquer: { type: Array, default: () => [] }, // clés des colonnes à ne pas afficher (ex. ['statut'])
+  // false : pas de puces de statut (ex. demandes toutes approuvées ; les filtres sont alors au-dessus)
+  pucesStatut: { type: Boolean, default: true },
 })
 
 // Transmis au tableau : sélection (v-model:selection, activée seulement si le parent la lie) et tri
@@ -61,6 +63,7 @@ const lignes = computed(() =>
 
     <div class="filtres">
       <FiltrePuces
+        v-if="pucesStatut"
         v-model="filtre"
         :elements="demandes"
         :code="(d) => d.statut"

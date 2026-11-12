@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import CaseOption from '../ui/CaseOption.vue'
 import Erreur from '../ui/Erreur.vue'
+import FiltrePuces from '../ui/FiltrePuces.vue'
 import DemandesColonne from '../demande/DemandesColonne.vue'
 import * as api from '../../api/offres'
 import { useChargement } from '../../utils/chargement'
@@ -10,8 +11,8 @@ import { dateLongue, dansLe } from '../../utils/dates'
 
 // Création d'une offre d'emploi (HR) à partir d'une demande déjà traitée et approuvée.
 // Deux colonnes : l'offre à gauche, le tableau des demandes à droite.
-// 1. Filtres (département, manager, tri, sens) au-dessus du tableau des demandes (même tableau que les pages de demandes).
-//    Le tri est partagé avec le tableau : le changer ici ou par un en-tête revient au même.
+// 1. Puces de département et de manager au-dessus du tableau des demandes (même tableau que les pages
+//    de demandes) ; le tri se fait en cliquant sur les en-têtes du tableau.
 //    Un clic sur une ligne choisit la demande, un second clic la désélectionne.
 // 2. Le formulaire reste grisé et inutilisable tant qu'aucune demande n'est choisie.
 // Données statiques (api/offres.js) : rien n'est encore envoyé au backend.
@@ -19,33 +20,21 @@ import { dateLongue, dansLe } from '../../utils/dates'
 const { donnees: demandes, chargement, erreur: erreurDemandes } = useChargement(api.demandesApprouvees, [])
 const { donnees: typesContrat } = useChargement(api.typesContrat, [])
 
-// ---------- Filtres et tri ----------
+// ---------- Filtres ----------
 
-// Clés = colonnes triables du tableau (components/demande/DemandesColonne.vue)
-const TRIS = [
-  { cle: 'date', label: 'Date de la demande' },
-  { cle: 'delai', label: 'Délai' },
-  { cle: 'id', label: 'N° de demande' },
-  { cle: 'departement', label: 'Département' },
-  { cle: 'nombre', label: 'Nombre de postes' },
-]
-
+// '' = tous ; manager = login du demandeur (puces : components/ui/FiltrePuces.vue)
 const filtre = reactive({ departement: '', manager: '' })
-const tri = ref({ cle: 'date', sens: -1 }) // plus récentes d'abord ; lié au tableau (v-model:tri)
 
-// Un choix par manager présent dans les demandes
-const managers = computed(() => {
-  const vus = new Map()
-  demandes.value.forEach((d) => vus.set(d.demandeur.login, d.demandeur))
-  return [...vus.values()].sort((a, b) => a.detenteur.localeCompare(b.detenteur, 'fr'))
+// Les managers proposés dépendent du département choisi (un manager = un département)
+const demandesDuDepartement = computed(() =>
+  demandes.value.filter((d) => !filtre.departement || d.departement === filtre.departement),
+)
+// Changer de département remet « Tous » si le manager choisi n'y est pas
+watch(demandesDuDepartement, (liste) => {
+  if (filtre.manager && !liste.some((d) => d.demandeur.login === filtre.manager)) filtre.manager = ''
 })
 
-// Un choix par département présent dans les demandes
-const departements = computed(() =>
-  [...new Set(demandes.value.map((d) => d.departement))].sort((a, b) => a.localeCompare(b, 'fr')),
-)
-
-// Le tri est appliqué par le tableau
+// Le tri est appliqué par le tableau (clic sur un en-tête)
 const demandesFiltrees = computed(() =>
   demandes.value.filter(
     (d) =>
@@ -198,39 +187,22 @@ function publier() {
 
       <div class="offre-filtres">
         <div class="offre-filtre">
-          <label for="filtre-departement">Département</label>
-          <select id="filtre-departement" v-model="filtre.departement">
-            <option value="">Tous les départements</option>
-            <option v-for="dep in departements" :key="dep" :value="dep">{{ dep }}</option>
-          </select>
+          <span class="offre-filtre-titre">Département</span>
+          <FiltrePuces
+            v-model="filtre.departement"
+            :elements="demandes"
+            aria-label="Département de la demande"
+          />
         </div>
-
         <div class="offre-filtre">
-          <label for="filtre-manager">Manager</label>
-          <select id="filtre-manager" v-model="filtre.manager">
-            <option value="">Tous les managers</option>
-            <option v-for="m in managers" :key="m.login" :value="m.login">{{ m.detenteur }} ({{ m.login }})</option>
-          </select>
-        </div>
-
-        <div class="offre-filtre">
-          <label for="filtre-tri">Trier par</label>
-          <div class="offre-tri">
-            <select id="filtre-tri" :value="tri.cle" @change="tri = { ...tri, cle: $event.target.value }">
-              <option v-for="t in TRIS" :key="t.cle" :value="t.cle">{{ t.label }}</option>
-              <!-- Tri choisi par un en-tête sans équivalent ici (postes, statut) -->
-              <option v-if="!TRIS.some((t) => t.cle === tri.cle)" :value="tri.cle" disabled>Colonne du tableau</option>
-            </select>
-            <button
-              type="button"
-              class="offre-sens"
-              :aria-label="tri.sens === 1 ? 'Ordre croissant (cliquer pour décroissant)' : 'Ordre décroissant (cliquer pour croissant)'"
-              :title="tri.sens === 1 ? 'Croissant' : 'Décroissant'"
-              @click="tri = { ...tri, sens: -tri.sens }"
-            >
-              {{ tri.sens === 1 ? '▲ Croissant' : '▼ Décroissant' }}
-            </button>
-          </div>
+          <span class="offre-filtre-titre">Manager</span>
+          <FiltrePuces
+            v-model="filtre.manager"
+            :elements="demandesDuDepartement"
+            :code="(d) => d.demandeur.login"
+            :libelle="(d) => d.demandeur.detenteur"
+            aria-label="Manager qui a fait la demande"
+          />
         </div>
       </div>
 
@@ -240,7 +212,7 @@ function publier() {
         :vide="chargement ? 'Chargement…' : 'Aucune demande pour ce filtre'"
         :masquer="['statut']"
         v-model:selection="idDemande"
-        v-model:tri="tri"
+        :puces-statut="false"
         :class="{ 'a-choisir': !idDemande }"
       />
       <p class="help">{{ demandesFiltrees.length }} demande(s) sur {{ demandes.length }}.</p>
