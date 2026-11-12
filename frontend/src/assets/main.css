@@ -5,7 +5,8 @@
  *              et classes utilitaires (.badge, .help, .error…). Le modifier change toute l'application.
  * css/<dossier>/<Nom>.css  styles DU composant components/<dossier>/<Nom>.vue (même dossier, même nom) :
  *   layout/   cadre de toutes les pages (menu, contenu)
- *   ui/       petits composants réutilisables partout (message d'erreur, liste avec recherche, progression)
+ *   ui/       petits composants réutilisables partout (message d'erreur, liste avec recherche, progression,
+ *             tableau trié et défilant)
  *   demande/  composants des demandes de personnel
  *   offre/    composants des offres d'emploi
  *   views/<dossier>/  pages (views/<dossier>/<Nom>.vue) qui ont leurs propres styles
@@ -24,6 +25,7 @@
 @import './css/ui/Erreur.css';
 @import './css/ui/RechercheSelect.css';
 @import './css/ui/Progression.css';
+@import './css/ui/Tableau.css';
 
 /* Pages */
 @import './css/views/auth/LoginView.css';

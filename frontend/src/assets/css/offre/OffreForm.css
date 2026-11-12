@@ -22,7 +22,7 @@
   margin-bottom: 0.75rem;
 }
 
-/* Filtres au-dessus du tableau des demandes : manager, puis tri + sens (partagé avec le tableau) */
+/* Filtres au-dessus du tableau des demandes : département, manager, puis tri + sens (partagé avec le tableau) */
 .offre-filtres {
   display: flex;
   flex-wrap: wrap;

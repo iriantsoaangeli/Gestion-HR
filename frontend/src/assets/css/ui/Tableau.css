@@ -1,0 +1,67 @@
+/* Tableau réutilisable (components/ui/Tableau.vue) : tri par en-tête, défilement, sélection.
+   Les cellules et en-têtes eux-mêmes : .table dans css/global/elements.css (en-têtes fixes au défilement). */
+
+/* Défile dans sa propre hauteur : jamais plus haut que l'écran (moins le titre et les marges de la page).
+   Dans un conteneur en colonne (flex) plus petit, il se réduit pour y tenir. */
+.tableau {
+  min-height: 0;
+  max-height: calc(100dvh - 7rem);
+}
+
+/* Aucune ligne : message centré */
+.tableau-vide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 4rem;
+  margin: 0;
+  opacity: 0.6;
+}
+
+/* En-têtes cliquables pour trier */
+.table th .tri {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table th .tri:hover {
+  color: var(--color-primary);
+}
+
+.tri-fleche {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.table th[aria-sort='ascending'] .tri-fleche,
+.table th[aria-sort='descending'] .tri-fleche {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+/* Ligne entière cliquable (ouvrir ou sélectionner) */
+.ligne-cliquable {
+  cursor: pointer;
+}
+
+.ligne-cliquable:hover td {
+  background: var(--color-primary-soft);
+}
+
+/* Mode sélection : ligne choisie */
+.ligne-cliquable.selectionnee td {
+  background: var(--color-primary-soft);
+  font-weight: 600;
+}
+
+.ligne-cliquable.selectionnee td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}

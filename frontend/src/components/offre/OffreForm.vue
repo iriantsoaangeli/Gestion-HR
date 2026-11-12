@@ -9,7 +9,7 @@ import { dateLongue, dansLe } from '../../utils/dates'
 
 // Création d'une offre d'emploi (HR) à partir d'une demande déjà traitée et approuvée.
 // Deux colonnes : l'offre à gauche, le tableau des demandes à droite.
-// 1. Filtres (manager, tri, sens) au-dessus du tableau des demandes (même tableau que les pages de demandes).
+// 1. Filtres (département, manager, tri, sens) au-dessus du tableau des demandes (même tableau que les pages de demandes).
 //    Le tri est partagé avec le tableau : le changer ici ou par un en-tête revient au même.
 //    Un clic sur une ligne choisit la demande, un second clic la désélectionne.
 // 2. Le formulaire reste grisé et inutilisable tant qu'aucune demande n'est choisie.
@@ -29,7 +29,7 @@ const TRIS = [
   { cle: 'nombre', label: 'Nombre de postes' },
 ]
 
-const filtre = reactive({ manager: '' })
+const filtre = reactive({ departement: '', manager: '' })
 const tri = ref({ cle: 'date', sens: -1 }) // plus récentes d'abord ; lié au tableau (v-model:tri)
 
 // Un choix par manager présent dans les demandes
@@ -39,9 +39,18 @@ const managers = computed(() => {
   return [...vus.values()].sort((a, b) => a.detenteur.localeCompare(b.detenteur, 'fr'))
 })
 
+// Un choix par département présent dans les demandes
+const departements = computed(() =>
+  [...new Set(demandes.value.map((d) => d.departement))].sort((a, b) => a.localeCompare(b, 'fr')),
+)
+
 // Le tri est appliqué par le tableau
 const demandesFiltrees = computed(() =>
-  demandes.value.filter((d) => !filtre.manager || d.demandeur.login === filtre.manager),
+  demandes.value.filter(
+    (d) =>
+      (!filtre.departement || d.departement === filtre.departement) &&
+      (!filtre.manager || d.demandeur.login === filtre.manager),
+  ),
 )
 
 // ---------- Demande choisie ----------
@@ -192,6 +201,14 @@ function publier() {
 
       <div class="offre-filtres">
         <div class="offre-filtre">
+          <label for="filtre-departement">Département</label>
+          <select id="filtre-departement" v-model="filtre.departement">
+            <option value="">Tous les départements</option>
+            <option v-for="dep in departements" :key="dep" :value="dep">{{ dep }}</option>
+          </select>
+        </div>
+
+        <div class="offre-filtre">
           <label for="filtre-manager">Manager</label>
           <select id="filtre-manager" v-model="filtre.manager">
             <option value="">Tous les managers</option>
@@ -224,6 +241,7 @@ function publier() {
         titre="Demandes traitées (approuvées)"
         :demandes="demandesFiltrees"
         :vide="chargement ? 'Chargement…' : 'Aucune demande pour ce filtre'"
+        :masquer="['statut']"
         v-model:selection="idDemande"
         v-model:tri="tri"
         :class="{ 'a-choisir': !idDemande }"

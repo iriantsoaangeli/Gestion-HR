@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { contient, normaliser } from '../../utils/texte'
 
 // Liste déroulante avec recherche : les suggestions se filtrent pendant la saisie.
 // options : [{ id, label }] — creation : propose « Créer "texte" » si aucun libellé identique
@@ -18,9 +19,10 @@ const ouvert = ref(false)
 const actif = ref(0)
 
 const suggestions = computed(() => {
-  const t = texte.value.trim().toLowerCase()
-  const liste = props.options.filter((o) => o.label.toLowerCase().includes(t))
-  const existe = props.options.some((o) => o.label.toLowerCase() === t)
+  // Insensible à la casse et aux accents (utils/texte.js)
+  const t = texte.value.trim()
+  const liste = props.options.filter((o) => contient(o.label, t))
+  const existe = props.options.some((o) => normaliser(o.label) === normaliser(t))
   if (props.creation && t && !existe) liste.push({ label: texte.value.trim(), nouveau: true })
   return liste
 })

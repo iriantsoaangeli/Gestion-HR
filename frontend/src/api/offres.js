@@ -314,8 +314,5 @@ const TYPES_CONTRAT = [
   { id: 'TEMPORAIRE', label: 'Contrat de travail temporaire' },
 ]
 
-// Statut ajouté pour l'affichage dans le tableau des demandes (components/demande/DemandesColonne.vue)
-const APPROUVEE = { statut: 'APPROUVEE', statutLibelle: 'Approuvée', etapeValideur: null, historique: [] }
-export const demandesApprouvees = () =>
-  Promise.resolve(structuredClone(DEMANDES_APPROUVEES.map((d) => ({ ...d, ...APPROUVEE }))))
+export const demandesApprouvees = () => Promise.resolve(structuredClone(DEMANDES_APPROUVEES))
 export const typesContrat = () => Promise.resolve(structuredClone(TYPES_CONTRAT))
