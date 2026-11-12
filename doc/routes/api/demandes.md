@@ -93,7 +93,7 @@ Règles dans `Model/Statut.java` (enum, ids = table `status`) et `Service/Demand
 
 `backend/src/main/java/gestion/hr/` : `Controller/DemandeController`, `Controller/ReferentielController`, `Service/DemandeService`,
 `Model/` (Demande, DemandeFonction, DemandePoste, HistoDemande, Statut, …), `Repository/`, `Dto/`, `Exception/`.
-Tests : `src/test/java/gestion/hr/Controller/DemandeControllerTest` (sur la base locale, annulés à la fin).
+Tests : `src/test/java/gestion/hr/demande/Controller/DemandeControllerTest` (sur la base locale, annulés à la fin).
 
 ## Front
 

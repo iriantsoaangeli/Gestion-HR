@@ -1,6 +1,6 @@
 package gestion.hr.auth.Dto;
 
-import gestion.hr.Model.Statut;
+import gestion.hr.demande.Model.Statut;
 import gestion.hr.auth.Model.Role;
 import gestion.hr.auth.Model.Utilisateur;
 
