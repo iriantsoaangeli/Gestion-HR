@@ -8,7 +8,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/** Toutes les erreurs de l'API en JSON {code, message}. */
+/** C'est un controller qui attrape les exceptions grossomodo*/
 @RestControllerAdvice
 public class GestionErreurs {
 
