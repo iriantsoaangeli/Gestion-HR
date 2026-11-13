@@ -5,7 +5,7 @@ import { droitEvaluer, heure } from '../../utils/entretien'
 import { utilisateur } from '../../auth/session'
 import { dateLongue } from '../../utils/dates'
 
-// Fiche d'un entretien (api/entretiens.js, données statiques) : en-tête, chiffres, infos, offre,
+// Fiche d'un entretien (api/entretiens.js) : en-tête, chiffres, infos, offre,
 // évaluations (une par interviewer) et, à droite, le bouton « Évaluer » puis les interviewers.
 // Les classes .fiche-* viennent de la fiche demande (css/demande/FicheDemande.css).
 const props = defineProps({ entretien: { type: Object, required: true } })
@@ -13,13 +13,13 @@ const e = computed(() => props.entretien)
 
 const router = useRouter()
 
-// Bouton « Évaluer » : grisé avec la raison si je ne suis pas interviewer ou si j'ai déjà évalué
-const droit = computed(() => droitEvaluer(e.value, utilisateur.value))
+// Bouton « Évaluer » : grisé avec la raison si je ne peux pas évaluer ; lien vers mon évaluation si je l'ai rendue
+const droit = computed(() => droitEvaluer(e.value))
 const evaluer = () => router.push(`/entretiens/${e.value.id}/evaluation`)
 
 const aEvalue = (i) => e.value.evaluations.some((v) => v.idPoste === i.idPoste)
 
-// Lien vers la fiche de l'offre : grisé si la route n'existe pas ou m'est réservée (meta.acces du router)
+// Lien vers la fiche de l'offre : caché si la route n'existe pas ou m'est réservée (meta.acces du router)
 const lienOffre = computed(() => `/offres/${e.value.idOffre}`)
 const offreOuvrable = computed(() => {
   const r = router.resolve(lienOffre.value)
@@ -35,9 +35,7 @@ const offreOuvrable = computed(() => {
         <h1>N° {{ e.id }} — {{ e.candidat }}</h1>
         <p class="help">{{ e.poste }} · {{ e.departement }}</p>
       </div>
-      <span class="badge" :class="e.statut === 'FINI' ? 'ok' : 'attente'">{{
-        e.statutLibelle
-      }}</span>
+      <span class="badge" :class="e.fini ? 'ok' : 'attente'">{{ e.statutLibelle }}</span>
     </header>
 
     <!-- Chiffres clés -->
@@ -88,9 +86,6 @@ const offreOuvrable = computed(() => {
         <RouterLink v-if="offreOuvrable" :to="lienOffre" class="fiche-lien"
           >Voir l'offre →</RouterLink
         >
-        <span v-else class="fiche-lien inactif" title="Fiche de l'offre non accessible">
-          Voir l'offre → <span class="help">(non accessible)</span>
-        </span>
       </section>
 
       <section class="fiche-bloc fiche-evaluations">
@@ -136,7 +131,19 @@ const offreOuvrable = computed(() => {
               droit.raison || 'Vous êtes interviewer de cet entretien : écrivez votre évaluation.'
             }}
           </p>
-          <button type="button" :disabled="!!droit.raison" :title="droit.raison" @click="evaluer">
+          <RouterLink
+            v-if="e.idEvaluation"
+            :to="`/evaluations/${e.idEvaluation}`"
+            class="fiche-lien"
+            >Voir mon évaluation ({{ e.maNote }}/100) →</RouterLink
+          >
+          <button
+            v-else
+            type="button"
+            :disabled="!!droit.raison"
+            :title="droit.raison"
+            @click="evaluer"
+          >
             Évaluer
           </button>
         </section>

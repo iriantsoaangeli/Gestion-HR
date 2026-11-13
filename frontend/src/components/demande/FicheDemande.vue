@@ -54,17 +54,24 @@ const delai = computed(() => {
       <section class="fiche-bloc">
         <h2>Informations</h2>
         <dl class="fiche-infos">
-          <dt>N° de demande</dt><dd>{{ d.id }}</dd>
-          <dt>Département</dt><dd>{{ d.departement }}</dd>
-          <dt>Demandeur</dt><dd>{{ d.demandeur }}</dd>
-          <dt>Date de création</dt><dd>{{ dateLongue(d.date) }}</dd>
+          <dt>N° de demande</dt>
+          <dd>{{ d.id }}</dd>
+          <dt>Département</dt>
+          <dd>{{ d.departement }}</dd>
+          <dt>Demandeur</dt>
+          <dd>{{ d.demandeur }}</dd>
+          <dt>Date de création</dt>
+          <dd>{{ dateLongue(d.date) }}</dd>
           <dt>Délai</dt>
           <dd>
             {{ d.delai ? dateLongue(d.delai) : '—' }}
-            <span v-if="delai.classe" class="badge petit" :class="delai.classe">{{ delai.texte }}</span>
+            <span v-if="delai.classe" class="badge petit" :class="delai.classe">{{
+              delai.texte
+            }}</span>
             <span v-else class="help">{{ delai.texte }}</span>
           </dd>
-          <dt>Statut</dt><dd>{{ texteStatut(d) }}</dd>
+          <dt>Statut</dt>
+          <dd>{{ texteStatut(d) }}</dd>
         </dl>
       </section>
 
@@ -74,10 +81,16 @@ const delai = computed(() => {
       </section>
 
       <section class="fiche-bloc fiche-postes">
-        <h2>Postes demandés <span class="count">{{ totalPostes(d) }}</span></h2>
+        <h2>
+          Postes demandés <span class="count">{{ totalPostes(d) }}</span>
+        </h2>
         <table class="table">
           <thead>
-            <tr><th>Intitulé</th><th>Nature</th><th class="nombre">Effectif</th></tr>
+            <tr>
+              <th>Intitulé</th>
+              <th>Nature</th>
+              <th class="nombre">Effectif</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="l in lignesPostes(d)" :key="l.cle">
@@ -85,7 +98,9 @@ const delai = computed(() => {
                 {{ l.label }}
                 <span v-if="l.idPoste" class="help">(poste n° {{ l.idPoste }})</span>
               </td>
-              <td><span class="badge petit nature" :class="l.nature">{{ NATURES[l.nature] }}</span></td>
+              <td>
+                <span class="badge petit nature" :class="l.nature">{{ NATURES[l.nature] }}</span>
+              </td>
               <td class="nombre">{{ l.effectif ?? '—' }}</td>
             </tr>
           </tbody>
@@ -101,7 +116,10 @@ const delai = computed(() => {
             <li v-for="e in d.suivi" :key="e.libelle" :class="e.etat">
               <strong>{{ e.libelle }}</strong>
               <span>
-                {{ e.texte }}<template v-if="e.date"> le <time :datetime="e.date">{{ dateLongue(e.date) }}</time></template>
+                {{ e.texte
+                }}<template v-if="e.date">
+                  le <time :datetime="e.date">{{ dateLongue(e.date) }}</time></template
+                >
               </span>
               <!-- Détenteur du poste et son rôle : celui qui a agi, ou ceux qui décideront -->
               <span v-for="p in e.personnel" :key="p.idUtilisateur" class="suivi-personnel">

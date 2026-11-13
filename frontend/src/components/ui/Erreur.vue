@@ -33,7 +33,13 @@ const messages = computed(() =>
       <slot />
     </div>
 
-    <button v-if="fermable" type="button" class="erreur-fermer" aria-label="Fermer" @click="$emit('fermer')">
+    <button
+      v-if="fermable"
+      type="button"
+      class="erreur-fermer"
+      aria-label="Fermer"
+      @click="$emit('fermer')"
+    >
       ✕
     </button>
   </div>

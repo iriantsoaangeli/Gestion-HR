@@ -9,7 +9,7 @@ import { dossiersDeLOffre } from '../../api/dossiers'
 import { entretiensDeLOffre } from '../../api/entretiens'
 
 // Fiche d'une offre d'emploi (HR) : /offres/:id, avec ses candidats (dossiers) et ses entretiens.
-// Données statiques pour l'instant (api/offres.js, api/dossiers.js, api/entretiens.js).
+//
 const props = defineProps({ id: { type: String, required: true } })
 
 const donnees = ref(null) // { offre, dossiers, entretiens, demande }

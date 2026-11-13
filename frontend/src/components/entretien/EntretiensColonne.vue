@@ -4,11 +4,12 @@ import { useRouter } from 'vue-router'
 import Tableau from '../ui/Tableau.vue'
 import FiltrePuces from '../ui/FiltrePuces.vue'
 import BarreRecherche from '../ui/BarreRecherche.vue'
+import { dateHeure } from '../../utils/dates'
 import { contient } from '../../utils/texte'
 
 // Carte « entretiens » : titre, filtre (puces de département + recherche) et tableau,
 // sur le modèle de components/demande/DemandesColonne.vue (mêmes classes .colonne, .filtres, .puces).
-// Données statiques pour l'instant (api/entretiens.js).
+//
 const props = defineProps({
   titre: { type: String, required: true },
   entretiens: { type: Array, required: true },
@@ -18,10 +19,6 @@ const props = defineProps({
   // Page ouverte par une ligne (par défaut la fiche de l'entretien)
   lien: { type: Function, default: (e) => `/entretiens/${e.id}` },
 })
-
-// « 18/11/2026 09:00 »
-const dateHeure = (texte) =>
-  new Date(texte).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
 
 const COLONNES = [
   { cle: 'id', label: 'N°', classe: 'nombre' },

@@ -1,10 +1,9 @@
 <script setup>
 import { computed } from 'vue'
 import { heure } from '../../utils/entretien'
-import { utilisateur } from '../../auth/session'
 import { dateLongue } from '../../utils/dates'
 
-// Fiche d'une évaluation (api/entretiens.js, données statiques) : la note et les remarques d'un
+// Fiche d'une évaluation (api/entretiens.js) : la note et les remarques d'un
 // interviewer, l'entretien évalué et, à droite, les autres évaluations du même entretien.
 // Mise en page commune : .fiche-* (css/demande/FicheDemande.css), .note-barre et .interviewers
 // (css/entretien/FicheEntretien.css).
@@ -12,8 +11,8 @@ const props = defineProps({ evaluation: { type: Object, required: true } })
 const v = computed(() => props.evaluation)
 const e = computed(() => props.evaluation.entretien)
 
-// DONNÉES STATIQUES : mon évaluation = celle écrite par le poste de mon compte (retrouvé par le login)
-const deMoi = computed(() => v.value.login === utilisateur.value?.login)
+// Mon évaluation : deMoi, renvoyé par l'API
+const deMoi = computed(() => v.value.deMoi)
 
 // Autres interviewers du même entretien : leur évaluation (lien) ou « pas encore évalué »
 const autres = computed(() =>
@@ -85,7 +84,7 @@ const autres = computed(() =>
           <dd>{{ dateLongue(e.date) }} à {{ heure(e.date) }}</dd>
           <dt>Statut</dt>
           <dd>
-            <span class="badge petit" :class="e.statut === 'FINI' ? 'ok' : 'attente'">{{
+            <span class="badge petit" :class="e.fini ? 'ok' : 'attente'">{{
               e.statutLibelle
             }}</span>
           </dd>

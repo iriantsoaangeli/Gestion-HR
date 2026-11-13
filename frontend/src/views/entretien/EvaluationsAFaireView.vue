@@ -9,7 +9,7 @@ import { useChargement } from '../../utils/chargement'
 // à gauche les entretiens dont je suis interviewer et que je n'ai pas encore évalués (une ligne ouvre
 // directement le formulaire d'évaluation), à droite ceux que j'ai déjà évalués (une ligne ouvre
 // la fiche de mon évaluation).
-// Données statiques pour l'instant (api/entretiens.js).
+//
 const aEvaluer = useChargement(api.aEvaluer, [])
 const evalues = useChargement(api.evaluesParMoi, [])
 </script>

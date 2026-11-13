@@ -5,7 +5,8 @@ import Tableau from '../ui/Tableau.vue'
 import FiltrePuces from '../ui/FiltrePuces.vue'
 import BarreRecherche from '../ui/BarreRecherche.vue'
 import { contient } from '../../utils/texte'
-import { dateLongue, joursAvant } from '../../utils/dates'
+import { dateCourte, dateHeure, dateLongue, joursAvant } from '../../utils/dates'
+import { lienPieceJointe } from '../../api/dossiers'
 
 // Fiche d'une offre d'emploi : en-tête (sur le modèle de components/demande/FicheDemande.vue),
 // informations, description, puis deux tableaux : candidats (dossiers) et entretiens de l'offre.
@@ -17,23 +18,17 @@ const props = defineProps({
   demande: { type: Object, default: null },
 })
 const o = computed(() => props.offre)
-const ouverte = computed(() => o.value.status === 'OUVERT')
+const ouverte = computed(() => o.value.ouverte)
 
 const router = useRouter()
 // Formulaire de préparation d'un entretien, pour l'offre (et un candidat si donné)
+const deposer = () => router.push({ path: '/dossiers/nouveau', query: { offre: o.value.id } })
 const preparer = (dossier) =>
   router.push({
     path: '/entretiens/nouveau',
     query: dossier ? { offre: o.value.id, dossier: dossier.id } : { offre: o.value.id },
   })
 const lienEntretien = (e) => `/entretiens/${e.id}`
-
-// « 18/11/2026 » ou « 18/11/2026 09:00 »
-const dateCourte = (texte, heure = false) =>
-  new Date(texte).toLocaleString(
-    'fr-FR',
-    heure ? { dateStyle: 'short', timeStyle: 'short' } : { dateStyle: 'short' },
-  )
 
 // Date limite : texte + urgence (moins de 2 semaines = proche), seulement si l'offre est ouverte
 const delai = computed(() => {
@@ -43,7 +38,7 @@ const delai = computed(() => {
   return { texte: `${j} jour(s) restant(s)`, classe: j < 14 ? 'attente' : 'ok' }
 })
 
-const classeEntretien = (e) => (e.statut === 'FINI' ? 'ok' : 'attente')
+const classeEntretien = (e) => (e.fini ? 'ok' : 'attente')
 
 // --- Candidats : un dossier = un candidat, avec ses entretiens (un candidat peut en avoir plusieurs) ---
 const candidats = computed(() =>
@@ -80,7 +75,7 @@ const lignesCandidats = computed(() =>
 const interviewers = (e) => e.interviewers.map((i) => i.detenteur).join(', ')
 const COLONNES_ENTRETIENS = [
   { cle: 'id', label: 'N°', classe: 'nombre' },
-  { cle: 'date', label: 'Date', valeur: (e) => dateCourte(e.date, true), valeurTri: (e) => e.date },
+  { cle: 'date', label: 'Date', valeur: (e) => dateHeure(e.date), valeurTri: (e) => e.date },
   { cle: 'candidat', label: 'Candidat' }, // interviewers en dessous
   { cle: 'statut', label: 'Statut', valeur: (e) => e.statutLibelle },
   {
@@ -110,18 +105,30 @@ const lignesEntretiens = computed(() =>
     <header class="fiche-entete">
       <div>
         <p class="fiche-sur-titre">Offre d'emploi</p>
-        <h1>N° {{ o.id }} — {{ o.poste }}</h1>
+        <h1>N° {{ o.id }} — {{ o.intitule }}</h1>
         <p class="help">{{ o.departement }} · responsable : {{ o.responsable }}</p>
       </div>
       <div class="fiche-offre-actions">
-        <span class="badge" :class="{ ok: ouverte }">{{ o.statusLibelle }}</span>
+        <span class="badge" :class="{ ok: ouverte }">{{ o.statutLibelle }}</span>
         <button
           type="button"
           :disabled="!ouverte"
           :title="
             ouverte
               ? undefined
-              : `Offre ${o.statusLibelle.toLowerCase()} : plus d'entretien à préparer`
+              : `Offre ${o.statutLibelle.toLowerCase()} : plus de dossier à déposer`
+          "
+          @click="deposer"
+        >
+          Déposer un dossier
+        </button>
+        <button
+          type="button"
+          :disabled="!ouverte"
+          :title="
+            ouverte
+              ? undefined
+              : `Offre ${o.statutLibelle.toLowerCase()} : plus d'entretien à préparer`
           "
           @click="preparer()"
         >
@@ -134,8 +141,8 @@ const lignesEntretiens = computed(() =>
       <section class="fiche-bloc">
         <h2>Informations</h2>
         <dl class="fiche-infos">
-          <dt>Poste</dt>
-          <dd>{{ o.poste }}</dd>
+          <dt>Postes</dt>
+          <dd>{{ o.postes.length }} : {{ o.postes.map((p) => p.code).join(', ') }}</dd>
           <dt>Département</dt>
           <dd>{{ o.departement }}</dd>
           <dt>Responsable</dt>
@@ -156,6 +163,10 @@ const lignesEntretiens = computed(() =>
       <section class="fiche-bloc">
         <h2>Description</h2>
         <blockquote class="fiche-motif">{{ o.description }}</blockquote>
+        <template v-if="o.profil">
+          <h2>Profil recherché</h2>
+          <blockquote class="fiche-motif">{{ o.profil }}</blockquote>
+        </template>
       </section>
     </div>
 
@@ -188,6 +199,16 @@ const lignesEntretiens = computed(() =>
           <template #candidat="{ ligne }">
             {{ ligne.candidat }}
             <span class="cellule-detail">{{ ligne.employe ? 'Employé(e)' : 'Externe' }}</span>
+          </template>
+          <template #fichiers="{ ligne }">
+            <a
+              v-for="pj in ligne.piecesJointes"
+              :key="pj.id"
+              :href="lienPieceJointe(pj.id)"
+              class="cellule-entretien"
+              @click.stop
+              >{{ pj.nom }}</a
+            >
           </template>
           <template #entretiens="{ ligne }">
             <RouterLink

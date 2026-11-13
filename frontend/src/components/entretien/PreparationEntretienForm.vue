@@ -7,7 +7,7 @@ import BarreRecherche from '../ui/BarreRecherche.vue'
 import * as apiDossiers from '../../api/dossiers'
 import * as apiEntretiens from '../../api/entretiens'
 import { useChargement } from '../../utils/chargement'
-import { dateLongue } from '../../utils/dates'
+import { dateCourte, dateHeure, dateLongue } from '../../utils/dates'
 import { contient } from '../../utils/texte'
 
 // Préparation d'un entretien (HR) : une offre ouverte, un candidat (dossier déposé pour cette offre),
@@ -15,7 +15,7 @@ import { contient } from '../../utils/texte'
 // À gauche : l'offre puis le candidat (grisé tant qu'aucune offre n'est choisie).
 // À droite : la date, les interviewers, le bouton et le récapitulatif.
 // offre / dossier : choix déjà faits (query ?offre=…&dossier=…, ex. depuis le détail d'une offre).
-// Données statiques (api/dossiers.js, api/entretiens.js) : l'entretien reste en mémoire.
+// Envoi : POST /api/entretiens (api/entretiens.js, doc/routes/api/entretiens.md).
 const props = defineProps({
   offre: { type: [String, Number], default: null },
   dossier: { type: [String, Number], default: null },
@@ -27,12 +27,6 @@ const { donnees: interviewers, erreur: erreurInterviewers } = useChargement(
   apiEntretiens.interviewersPossibles,
   [],
 )
-
-const dateCourte = (texte) =>
-  texte ? new Date(`${texte.slice(0, 10)}T00:00:00`).toLocaleDateString('fr-FR') : null
-// « 18/11/2026 09:00 »
-const dateHeure = (texte) =>
-  new Date(texte).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
 
 // Filtre d'un tableau : recherche (sans accents) + département ('' = tous)
 function filtrer(liste, filtre, texte) {
@@ -50,7 +44,7 @@ const offre = computed(() => offres.value.find((o) => o.id === idOffre.value) ??
 
 const COLONNES_OFFRE = [
   { cle: 'id', label: 'N°', classe: 'nombre' },
-  { cle: 'poste', label: 'Poste' },
+  { cle: 'intitule', label: 'Poste' },
   { cle: 'departement', label: 'Département' },
   { cle: 'responsable', label: 'Responsable' },
   {
@@ -64,7 +58,7 @@ const COLONNES_OFFRE = [
 const filtreOffre = reactive({ recherche: '', departement: '' })
 const offresFiltrees = computed(() =>
   filtrer(offres.value, filtreOffre, (o) =>
-    [o.id, o.poste, o.departement, o.responsable, o.description].join(' '),
+    [o.id, o.intitule, o.departement, o.responsable, o.description].join(' '),
   ),
 )
 
@@ -187,18 +181,22 @@ const erreur = ref('')
 const envoi = ref(false)
 const prepare = ref(null) // entretien créé (récapitulatif)
 
+// Premier problème du formulaire, '' si tout va bien
+function verifier() {
+  if (!offre.value) return 'Choisissez une offre.'
+  if (!candidat.value) return 'Choisissez un candidat (un dossier déposé pour cette offre).'
+  if (!date.value) return "Indiquez la date et l'heure de l'entretien."
+  if (date.value <= maintenant()) return "La date de l'entretien doit être dans le futur."
+  if (!choisis.value.length) return "Choisissez au moins une personne qui fait l'entretien."
+  return ''
+}
+
+// Une erreur affichée disparaît dès qu'on corrige le formulaire
+watch([idOffre, idDossier, date, () => choisis.value.length], () => (erreur.value = ''))
+
 async function valider() {
-  erreur.value = !offre.value
-    ? 'Choisissez une offre.'
-    : !candidat.value
-      ? 'Choisissez un candidat (un dossier déposé pour cette offre).'
-      : !date.value
-        ? "Indiquez la date et l'heure de l'entretien."
-        : date.value <= maintenant()
-          ? "La date de l'entretien doit être dans le futur."
-          : !choisis.value.length
-            ? "Choisissez au moins une personne qui fait l'entretien."
-            : ''
+  prepare.value = null // pas de vieux récapitulatif à côté d'une nouvelle erreur
+  erreur.value = verifier()
   if (erreur.value) return
 
   envoi.value = true
@@ -242,6 +240,7 @@ async function valider() {
           />
         </div>
         <Tableau
+          infobulles
           v-model:selection="idOffre"
           :lignes="offresFiltrees"
           :colonnes="COLONNES_OFFRE"
@@ -251,7 +250,7 @@ async function valider() {
         />
         <Erreur :message="erreurOffres" />
         <p v-if="offre" class="preparation-rappel">
-          <strong>N° {{ offre.id }} — {{ offre.poste }}</strong> ({{ offre.departement }}) ·
+          <strong>N° {{ offre.id }} — {{ offre.intitule }}</strong> ({{ offre.departement }}) ·
           responsable : {{ offre.responsable }} · date limite :
           {{ offre.delai ? dateLongue(offre.delai) : 'aucune' }}
         </p>
@@ -278,6 +277,7 @@ async function valider() {
           />
         </div>
         <Tableau
+          infobulles
           v-model:selection="idDossier"
           :lignes="candidatsFiltres"
           :colonnes="COLONNES_CANDIDAT"
@@ -334,6 +334,7 @@ async function valider() {
           />
         </div>
         <Tableau
+          infobulles
           :lignes="interviewersFiltres"
           :colonnes="COLONNES_INTERVIEWER"
           v-model:selection="choisis"

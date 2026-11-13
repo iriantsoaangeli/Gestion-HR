@@ -6,7 +6,7 @@ import * as api from '../../api/entretiens'
 import { useChargement } from '../../utils/chargement'
 
 // Liste des entretiens (DIRECTION, MANAGER, HR) : à gauche ceux en attente, à droite ceux finis (évalués).
-// Données statiques pour l'instant (api/entretiens.js).
+//
 const enAttente = useChargement(api.enAttente, [])
 const finis = useChargement(api.finis, [])
 </script>

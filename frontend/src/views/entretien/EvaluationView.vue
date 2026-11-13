@@ -7,7 +7,7 @@ import Erreur from '../../components/ui/Erreur.vue'
 import * as api from '../../api/entretiens'
 
 // Évaluation d'un entretien : /entretiens/:id/evaluation. Après l'enregistrement, on ouvre la fiche de mon évaluation.
-// Données statiques pour l'instant (api/entretiens.js).
+//
 const props = defineProps({ id: { type: String, required: true } })
 
 const entretien = ref(null)

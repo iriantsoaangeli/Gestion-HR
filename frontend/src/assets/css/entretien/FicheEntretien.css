@@ -79,11 +79,6 @@
   align-self: flex-start;
 }
 
-.fiche-lien.inactif {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 /* Liste des interviewers : nom + poste à gauche, a évalué ou pas à droite */
 .interviewers {
   margin: 0;

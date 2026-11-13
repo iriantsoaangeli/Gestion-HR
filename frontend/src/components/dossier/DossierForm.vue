@@ -1,37 +1,50 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import Erreur from '../ui/Erreur.vue'
 import Tableau from '../ui/Tableau.vue'
 import FiltrePuces from '../ui/FiltrePuces.vue'
 import BarreRecherche from '../ui/BarreRecherche.vue'
 import * as api from '../../api/dossiers'
 import { useChargement } from '../../utils/chargement'
-import { dateLongue, iso } from '../../utils/dates'
+import { dateCourte, dateLongue, iso } from '../../utils/dates'
 import { contient, normaliser } from '../../utils/texte'
 
 // Dépôt d'un dossier de candidature (HR) : une offre ouverte, un candidat, des pièces jointes.
 // À gauche : l'offre, puis les fichiers (30 Mo au total). À droite : le candidat,
 // choisi dans la base (employé ou externe) ou ajouté avec le formulaire « Nouvelle personne ».
-// Données statiques (api/dossiers.js) : rien n'est encore envoyé au backend.
+// Envoi : POST /api/dossiers en multipart (api/dossiers.js, doc/routes/api/dossiers.md).
+
+// offre : id d'une offre à choisir d'avance (si elle est ouverte)
+const props = defineProps({ offre: { type: [String, Number], default: null } })
 
 const TAILLE_MAX = 30 * 1024 * 1024 // 30 Mo pour tout le dossier
 const AUJOURDHUI = iso(new Date())
 
-const { donnees: personnes, erreur: erreurPersonnes } = useChargement(api.personnes, [])
+const {
+  donnees: personnes,
+  erreur: erreurPersonnes,
+  recharger: rechargerPersonnes,
+} = useChargement(api.personnes, [])
 const { donnees: offres, erreur: erreurOffres } = useChargement(api.offresOuvertes, [])
 
 // ---------- Offre ----------
 
 const idOffre = ref(null)
 const offre = computed(() => offres.value.find((o) => o.id === idOffre.value) ?? null)
-
-const dateCourte = (texte) =>
-  texte ? new Date(`${texte}T00:00:00`).toLocaleDateString('fr-FR') : null
+// Offre reçue en query : choisie dès que la liste des offres ouvertes arrive
+watch(
+  offres,
+  (liste) => {
+    const voulue = Number(props.offre)
+    if (liste.some((o) => o.id === voulue)) idOffre.value = voulue
+  },
+  { once: true },
+)
 
 // Colonnes de la table offre (libellés à la place des id) ; la description s'affiche au survol
 const COLONNES_OFFRE = [
   { cle: 'id', label: 'N°', classe: 'nombre' },
-  { cle: 'poste', label: 'Poste' },
+  { cle: 'intitule', label: 'Poste' },
   { cle: 'departement', label: 'Département' },
   { cle: 'responsable', label: 'Responsable' },
   {
@@ -48,7 +61,7 @@ const COLONNES_OFFRE = [
     valeur: (o) => `N° ${o.idDemande}`,
   },
 ]
-const libelleOffre = (o) => `N° ${o.id} — ${o.poste} (${o.departement})`
+const libelleOffre = (o) => `N° ${o.id} — ${o.intitule} (${o.departement})`
 
 // Filtre au-dessus du tableau : recherche (sans accents, utils/texte.js) + département
 const filtreOffre = reactive({ recherche: '', departement: '' }) // '' = tous les départements
@@ -57,7 +70,7 @@ const offresFiltrees = computed(() =>
     (o) =>
       (!filtreOffre.departement || o.departement === filtreOffre.departement) &&
       contient(
-        [o.id, o.poste, o.departement, o.responsable, o.description].join(' '),
+        [o.id, o.intitule, o.departement, o.responsable, o.description].join(' '),
         filtreOffre.recherche,
       ),
   ),
@@ -131,10 +144,11 @@ const champFichiers = ref(null)
 const total = computed(() => fichiers.value.reduce((s, f) => s + f.size, 0))
 const pourcentage = computed(() => Math.min(100, Math.round((total.value / TAILLE_MAX) * 100)))
 
-const taille = (octets) =>
-  octets < 1024 * 1024
-    ? `${Math.max(1, Math.round(octets / 1024))} Ko`
-    : `${(octets / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} Mo`
+function taille(octets) {
+  if (octets === 0) return '0 Ko'
+  if (octets < 1024 * 1024) return `${Math.max(1, Math.round(octets / 1024))} Ko`
+  return `${(octets / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} Mo`
+}
 
 function ajouter(liste) {
   refuses.value = []
@@ -166,33 +180,55 @@ const retirer = (i) => fichiers.value.splice(i, 1)
 // ---------- Envoi ----------
 
 const erreur = ref('')
-const envoye = ref(null)
+const envoye = ref(null) // dossier renvoyé par l'API
+const envoi = ref(false)
 
-function deposer() {
-  erreur.value = !offre.value
-    ? 'Choisissez une offre.'
-    : mode.value === 'existante' && !personne.value
-      ? 'Choisissez un candidat dans la base, ou ajoutez une nouvelle personne.'
-      : doublon.value
-        ? `Cette personne existe déjà (${nomComplet(doublon.value)}) : sélectionnez-la au lieu de la recréer.`
-        : !fichiers.value.length
-          ? 'Joignez au moins un fichier (CV, lettre de motivation…).'
-          : ''
+// Premier problème du formulaire, '' si tout va bien
+function verifier() {
+  if (!offre.value) return 'Choisissez une offre.'
+  if (mode.value === 'existante' && !personne.value)
+    return 'Choisissez un candidat dans la base, ou ajoutez une nouvelle personne.'
+  if (doublon.value)
+    return `Cette personne existe déjà (${nomComplet(doublon.value)}) : sélectionnez-la au lieu de la recréer.`
+  if (!fichiers.value.length) return 'Joignez au moins un fichier (CV, lettre de motivation…).'
+  return ''
+}
+
+// Une erreur affichée disparaît dès qu'on corrige le formulaire
+watch(
+  [idOffre, idPersonne, mode, () => fichiers.value.length, nouvelle],
+  () => (erreur.value = ''),
+  {
+    deep: true,
+  },
+)
+
+async function deposer() {
+  envoye.value = null // pas de vieux message de succès à côté d'une nouvelle erreur
+  erreur.value = verifier()
   if (erreur.value) return
 
-  // Pas encore de backend : on affiche seulement le récapitulatif
-  const candidat = mode.value === 'existante' ? personne.value : { ...nouvelle, poste: null }
-  envoye.value = {
-    offre: libelleOffre(offre.value),
-    candidat: nomComplet(candidat),
-    employe: Boolean(candidat.poste),
-    nouvelle: mode.value === 'nouvelle',
-    fichiers: fichiers.value.length,
+  const candidat =
+    mode.value === 'existante'
+      ? { idPersonne: personne.value.id }
+      : Object.fromEntries(Object.entries(nouvelle).map(([k, v]) => [k, v.trim()]))
+  envoi.value = true
+  try {
+    const d = await api.deposer(offre.value.id, candidat, fichiers.value)
+    envoye.value = { ...d, offre: libelleOffre(offre.value), nouvelle: mode.value === 'nouvelle' }
+    if (mode.value === 'nouvelle') {
+      await rechargerPersonnes() // la nouvelle personne est maintenant dans la base
+      mode.value = 'existante'
+    }
+    idPersonne.value = null
+    Object.assign(nouvelle, vide())
+    fichiers.value = []
+    refuses.value = []
+  } catch (e) {
+    erreur.value = e.message
+  } finally {
+    envoi.value = false
   }
-  idPersonne.value = null
-  Object.assign(nouvelle, vide())
-  fichiers.value = []
-  refuses.value = []
 }
 </script>
 
@@ -218,6 +254,7 @@ function deposer() {
           />
         </div>
         <Tableau
+          infobulles
           v-model:selection="idOffre"
           :lignes="offresFiltrees"
           :colonnes="COLONNES_OFFRE"
@@ -232,7 +269,7 @@ function deposer() {
 
         <dl v-if="offre" class="dossier-rappel">
           <dt>Poste</dt>
-          <dd>{{ offre.poste }}</dd>
+          <dd>{{ offre.intitule }}</dd>
           <dt>Département</dt>
           <dd>{{ offre.departement }}</dd>
           <dt>Responsable</dt>
@@ -293,7 +330,13 @@ function deposer() {
           </li>
         </ul>
 
-        <Erreur :message="refuses" titre="Fichiers non ajoutés" fermable @fermer="refuses = []" />
+        <Erreur
+          v-if="refuses.length"
+          :message="refuses"
+          titre="Fichiers non ajoutés"
+          fermable
+          @fermer="refuses = []"
+        />
       </fieldset>
     </div>
 
@@ -331,6 +374,7 @@ function deposer() {
             />
           </div>
           <Tableau
+            infobulles
             v-model:selection="idPersonne"
             :lignes="personnesFiltrees"
             :colonnes="COLONNES_PERSONNE"
@@ -454,13 +498,15 @@ function deposer() {
       </fieldset>
 
       <Erreur :message="erreur" fermable @fermer="erreur = ''" />
-      <button type="submit">Déposer le dossier</button>
+      <button type="submit" :disabled="envoi">
+        {{ envoi ? 'Envoi…' : 'Déposer le dossier' }}
+      </button>
 
       <p v-if="envoye" class="success" role="status">
-        Dossier de {{ envoye.candidat }} ({{ envoye.employe ? 'employé(e)' : 'externe'
-        }}{{ envoye.nouvelle ? ', nouvelle personne' : '' }}) prêt pour l'offre «
-        {{ envoye.offre }} », {{ envoye.fichiers }} fichier(s) — pas encore enregistré (aucun
-        backend pour les dossiers).
+        Dossier n° {{ envoye.id }} de {{ envoye.candidat }} ({{
+          envoye.employe ? 'employé(e)' : 'externe'
+        }}{{ envoye.nouvelle ? ', nouvelle personne' : '' }}) déposé pour l'offre «
+        {{ envoye.offre }} », {{ envoye.fichiers.length }} fichier(s).
       </p>
     </div>
   </form>

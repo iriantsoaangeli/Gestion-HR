@@ -23,10 +23,13 @@ async function jetonCsrf() {
   return decodeURIComponent(lireCookie('XSRF-TOKEN') ?? '')
 }
 
-// Appel générique : renvoie le JSON (ou null si 204), lève ErreurApi sinon
+// Appel générique : renvoie le JSON (ou null si 204), lève ErreurApi sinon.
+// corps : un objet (envoyé en JSON) ou un FormData (envoi de fichiers, multipart : le navigateur
+// pose lui-même le Content-Type avec sa frontière)
 export async function appel(methode, url, corps) {
+  const formulaire = corps instanceof FormData
   const entetes = { Accept: 'application/json' }
-  if (corps !== undefined) entetes['Content-Type'] = 'application/json'
+  if (corps !== undefined && !formulaire) entetes['Content-Type'] = 'application/json'
   if (methode !== 'GET') entetes['X-XSRF-TOKEN'] = await jetonCsrf()
 
   let reponse
@@ -35,16 +38,24 @@ export async function appel(methode, url, corps) {
       method: methode,
       credentials: 'include',
       headers: entetes,
-      body: corps === undefined ? undefined : JSON.stringify(corps),
+      body: corps === undefined ? undefined : formulaire ? corps : JSON.stringify(corps),
     })
   } catch {
-    throw new ErreurApi(0, 'SERVEUR_INJOIGNABLE', 'Le serveur ne répond pas. Réessayez dans quelques instants.')
+    throw new ErreurApi(
+      0,
+      'SERVEUR_INJOIGNABLE',
+      'Le serveur ne répond pas. Réessayez dans quelques instants.',
+    )
   }
 
   if (reponse.status === 204) return null
   const json = await reponse.json().catch(() => null)
   if (!reponse.ok) {
-    throw new ErreurApi(reponse.status, json?.code ?? 'ERREUR', json?.message ?? `Erreur ${reponse.status}.`)
+    throw new ErreurApi(
+      reponse.status,
+      json?.code ?? 'ERREUR',
+      json?.message ?? `Erreur ${reponse.status}.`,
+    )
   }
   return json
 }

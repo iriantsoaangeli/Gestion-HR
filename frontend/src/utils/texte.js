@@ -7,4 +7,5 @@ export const normaliser = (texte) =>
     .toLowerCase()
 
 // Vrai si `texte` contient `recherche` (recherche vide = tout correspond)
-export const contient = (texte, recherche) => normaliser(texte).includes(normaliser(recherche).trim())
+export const contient = (texte, recherche) =>
+  normaliser(texte).includes(normaliser(recherche).trim())

@@ -16,6 +16,9 @@ const props = defineProps({
   cleLigne: { type: String, default: 'id' }, // champ unique d'une ligne (clé Vue et sélection)
   cliquable: { type: Boolean, default: false }, // un clic sur une ligne émet « ouvrir »
   titreLigne: { type: Function, default: null }, // infobulle d'une ligne
+  // Infobulle sur chaque cellule : son texte complet (utile quand le CSS coupe les cellules par « … »),
+  // suivi de titreLigne s'il y en a un
+  infobulles: { type: Boolean, default: false },
   vide: { type: String, default: 'Aucune donnée' },
   // 'case' : cases à cocher, choix multiple (selection = liste de cleLigne) ;
   // 'radio' : boutons radio, choix unique (selection = une cleLigne ou null) ; null : pas de colonne
@@ -34,6 +37,15 @@ const selectionnable = computed(() => selection.value !== undefined)
 const tri = defineModel('tri', { default: () => ({ cle: null, sens: 1 }) })
 
 const valeur = (colonne, ligne) => (colonne.valeur ? colonne.valeur(ligne) : ligne[colonne.cle])
+// Infobulle d'une cellule (undefined : celle de la ligne s'applique)
+function titreCellule(colonne, ligne) {
+  if (!props.infobulles) return undefined
+  const texte = valeur(colonne, ligne)
+  return (
+    [texte == null ? '' : String(texte), props.titreLigne?.(ligne)].filter(Boolean).join('\n') ||
+    undefined
+  )
+}
 const valeurTri = (colonne, ligne) =>
   colonne.valeurTri ? colonne.valeurTri(ligne) : valeur(colonne, ligne)
 
@@ -149,7 +161,7 @@ const ariaTri = (cle) =>
               @change="choisir(l)"
             />
           </td>
-          <td v-for="c in colonnes" :key="c.cle" :class="c.classe">
+          <td v-for="c in colonnes" :key="c.cle" :class="c.classe" :title="titreCellule(c, l)">
             <slot :name="c.cle" :ligne="l" :valeur="valeur(c, l)">{{ valeur(c, l) ?? '—' }}</slot>
           </td>
         </tr>

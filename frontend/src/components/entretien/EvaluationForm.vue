@@ -3,7 +3,6 @@ import { computed, reactive, ref } from 'vue'
 import ChampNombre from '../ui/ChampNombre.vue'
 import Erreur from '../ui/Erreur.vue'
 import * as api from '../../api/entretiens'
-import { utilisateur } from '../../auth/session'
 import { dateLongue } from '../../utils/dates'
 import { droitEvaluer, heure } from '../../utils/entretien'
 
@@ -15,7 +14,7 @@ const props = defineProps({ entretien: { type: Object, required: true } })
 const emit = defineEmits(['evaluee'])
 
 const e = computed(() => props.entretien)
-const droit = computed(() => droitEvaluer(e.value, utilisateur.value))
+const droit = computed(() => droitEvaluer(e.value))
 const aEvalue = (i) => e.value.evaluations.some((v) => v.idPoste === i.idPoste)
 
 const form = reactive({ note: null, remarques: '' })
@@ -32,7 +31,6 @@ async function envoyer() {
   erreur.value = ''
   try {
     const maj = await api.evaluer(e.value.id, {
-      idPoste: droit.value.moi.idPoste,
       note: form.note,
       remarques: form.remarques.trim(),
     })
@@ -53,9 +51,7 @@ async function envoyer() {
         <h1>N° {{ e.id }} — {{ e.candidat }}</h1>
         <p class="help">{{ e.poste }} · {{ e.departement }}</p>
       </div>
-      <span class="badge" :class="e.statut === 'FINI' ? 'ok' : 'attente'">{{
-        e.statutLibelle
-      }}</span>
+      <span class="badge" :class="e.fini ? 'ok' : 'attente'">{{ e.statutLibelle }}</span>
     </header>
 
     <div class="evaluation-grille">
@@ -126,6 +122,9 @@ async function envoyer() {
             required
             placeholder="Points forts, points faibles, avis sur le candidat…"
           ></textarea>
+          <p v-if="noteValide && !form.remarques.trim()" class="help">
+            Les remarques sont obligatoires pour enregistrer l'évaluation.
+          </p>
         </fieldset>
 
         <Erreur :message="erreur" />

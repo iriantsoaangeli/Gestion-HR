@@ -6,7 +6,7 @@ import FicheEntretien from '../../components/entretien/FicheEntretien.vue'
 import Erreur from '../../components/ui/Erreur.vue'
 import * as api from '../../api/entretiens'
 
-// Fiche d'un entretien : /entretiens/:id. Données statiques pour l'instant (api/entretiens.js).
+// Fiche d'un entretien : /entretiens/:id.
 const props = defineProps({ id: { type: String, required: true } })
 
 const entretien = ref(null)

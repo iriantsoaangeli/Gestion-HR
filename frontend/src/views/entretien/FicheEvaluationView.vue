@@ -6,7 +6,7 @@ import FicheEvaluation from '../../components/entretien/FicheEvaluation.vue'
 import Erreur from '../../components/ui/Erreur.vue'
 import * as api from '../../api/entretiens'
 
-// Fiche d'une évaluation : /evaluations/:id. Données statiques pour l'instant (api/entretiens.js).
+// Fiche d'une évaluation : /evaluations/:id.
 const props = defineProps({ id: { type: String, required: true } })
 
 const evaluation = ref(null)

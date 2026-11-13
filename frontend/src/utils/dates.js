@@ -16,7 +16,11 @@ export const jour = (texte) => (texte ? String(texte).slice(0, 10) : texte)
 
 // « 11 novembre 2026 »
 export const dateLongue = (texte) =>
-  new Date(`${jour(texte)}T00:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  new Date(`${jour(texte)}T00:00:00`).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 
 // Jours restants avant une date (négatif si dépassée), null sans date
 export function joursAvant(texte) {
@@ -25,3 +29,11 @@ export function joursAvant(texte) {
   aujourdhui.setHours(0, 0, 0, 0)
   return Math.round((new Date(`${jour(texte)}T00:00:00`) - aujourdhui) / 86400000)
 }
+
+// « 18/11/2026 » (null sans date) ; accepte une date ou une date-heure de l'API
+export const dateCourte = (texte) =>
+  texte ? new Date(`${jour(texte)}T00:00:00`).toLocaleDateString('fr-FR') : null
+
+// « 18/11/2026 09:00 » (null sans date)
+export const dateHeure = (texte) =>
+  texte ? new Date(texte).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : null

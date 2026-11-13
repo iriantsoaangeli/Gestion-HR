@@ -8,7 +8,7 @@ import { contient } from '../../utils/texte'
 
 // Carte « offres » : titre, filtre (puces de département + recherche) et tableau, sur le modèle de
 // components/entretien/EntretiensColonne.vue et components/demande/DemandesColonne.vue (mêmes classes).
-// offres : offres de api/offres.js, avec en plus « candidats » et « entretiens » (nombres, calculés par la vue).
+// offres : offres de api/offres.js (avec « candidats »), plus « entretiens » (nombre, calculé par la vue).
 const props = defineProps({
   titre: { type: String, required: true },
   offres: { type: Array, required: true },
@@ -18,7 +18,7 @@ const props = defineProps({
 const COLONNES = [
   { cle: 'id', label: 'N°', classe: 'nombre' },
   // Département et responsable sous le poste : la place manque pour deux colonnes de plus
-  { cle: 'poste', label: 'Poste' },
+  { cle: 'intitule', label: 'Poste' },
   { cle: 'delai', label: 'Limite', classe: 'sans-coupure', valeurTri: (o) => o.delai || '9999' }, // sans date = en dernier
   { cle: 'candidats', label: 'Candidats', classe: 'nombre' },
   { cle: 'entretiens', label: 'Entretiens', classe: 'nombre' },
@@ -37,7 +37,14 @@ const lignes = computed(() =>
     (o) =>
       (!filtre.departement || o.departement === filtre.departement) &&
       contient(
-        [o.id, o.poste, o.departement, o.responsable, o.description].join(' '),
+        [
+          o.id,
+          o.intitule,
+          ...o.postes.map((p) => p.code),
+          o.departement,
+          o.responsable,
+          o.description,
+        ].join(' '),
         filtre.recherche,
       ),
   ),
@@ -58,7 +65,7 @@ const lignes = computed(() =>
       />
       <BarreRecherche
         v-model="filtre.recherche"
-        placeholder="Rechercher (n°, poste, responsable)…"
+        placeholder="Rechercher (n°, poste, code, responsable)…"
         :aria-label="`Rechercher dans ${titre}`"
       />
     </div>
@@ -75,8 +82,8 @@ const lignes = computed(() =>
       <template #id="{ ligne }">
         <RouterLink :to="lien(ligne)" @click.stop>{{ ligne.id }}</RouterLink>
       </template>
-      <template #poste="{ ligne }">
-        {{ ligne.poste }}
+      <template #intitule="{ ligne }">
+        {{ ligne.intitule }}
         <span class="cellule-detail">{{ ligne.departement }} · {{ ligne.responsable }}</span>
       </template>
     </Tableau>

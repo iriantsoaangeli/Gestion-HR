@@ -6,4 +6,5 @@ export const departements = () => appel('GET', '/api/referentiel/departements')
 export const monDepartement = () => appel('GET', '/api/referentiel/mon-departement')
 export const fonctions = () => appel('GET', '/api/referentiel/fonctions')
 // Postes que je peux faire remplacer (sans ceux des autres comptes : managers, supérieurs)
-export const postes = (idDepartement) => appel('GET', `/api/referentiel/postes?departement=${idDepartement}`)
+export const postes = (idDepartement) =>
+  appel('GET', `/api/referentiel/postes?departement=${idDepartement}`)

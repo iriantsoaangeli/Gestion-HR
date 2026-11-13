@@ -33,9 +33,10 @@ async function decider(action) {
   erreur.value = ''
   try {
     const d = await (action === 'valider' ? api.valider : api.refuser)(props.demande.id)
-    message.value = action === 'valider'
-      ? `Demande n° ${d.id} validée : ${d.statutLibelle.toLowerCase()}.`
-      : `Demande n° ${d.id} refusée.`
+    message.value =
+      action === 'valider'
+        ? `Demande n° ${d.id} validée : ${d.statutLibelle.toLowerCase()}.`
+        : `Demande n° ${d.id} refusée.`
     emit('decidee', d)
     recharger()
   } catch (e) {
@@ -51,10 +52,16 @@ async function decider(action) {
     <h2>Ma décision</h2>
 
     <template v-if="demande.aMoiDeDecider">
-      <p class="help">Validez pour transmettre la demande à l'étape suivante, ou refusez-la pour l'arrêter.</p>
+      <p class="help">
+        Validez pour transmettre la demande à l'étape suivante, ou refusez-la pour l'arrêter.
+      </p>
       <div class="actions">
-        <button type="button" class="btn-success" :disabled="envoi" @click="decider('valider')">Valider</button>
-        <button type="button" class="btn-danger" :disabled="envoi" @click="decider('refuser')">Refuser</button>
+        <button type="button" class="btn-success" :disabled="envoi" @click="decider('valider')">
+          Valider
+        </button>
+        <button type="button" class="btn-danger" :disabled="envoi" @click="decider('refuser')">
+          Refuser
+        </button>
       </div>
     </template>
     <p v-else-if="message" class="success">{{ message }}</p>
@@ -63,7 +70,9 @@ async function decider(action) {
   </section>
 
   <section class="fiche-bloc">
-    <h2>Attendent ma décision <span class="count">{{ autres.length }}</span></h2>
+    <h2>
+      Attendent ma décision <span class="count">{{ autres.length }}</span>
+    </h2>
     <ul v-if="autres.length" class="file-attente">
       <li v-for="x in autres" :key="x.id">
         <RouterLink :to="`/demandes/${x.id}`">

@@ -4,6 +4,7 @@ import { chargerSession, utilisateur } from '../auth/session'
 // Une route = une vue de views/<dossier>/<Nom>View.vue (même découpage que components/)
 // meta.public : accessible sans être connecté
 // meta.acces(utilisateur) : page réservée, d'après ce que le backend renvoie sur l'utilisateur
+//   (sinon retour à l'accueil, avec un message affiché par components/layout/AppLayout.vue)
 
 const auth = [
   {
@@ -59,14 +60,14 @@ function accueil(u) {
 
 const offre = [
   {
-    // Données statiques pour l'instant (api/offres.js). Rôle lu en direct : le backend n'a pas encore de droit « offres »
+    // Rôle lu en direct : le backend n'a pas encore de droit « offres »
     path: '/offres/nouvelle',
     name: 'creation-offre',
     meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
     component: () => import('../views/offre/CreationOffreView.vue'),
   },
   {
-    // Offres ouvertes / closes. Données statiques pour l'instant (api/offres.js, dossiers.js, entretiens.js)
+    // Offres ouvertes / closes.
     path: '/offres',
     name: 'offres',
     meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
@@ -84,17 +85,18 @@ const offre = [
 
 const dossier = [
   {
-    // Dépôt de dossier (bloc 2 : « Dépôt de dossier : hr »). Données statiques pour l'instant (api/dossiers.js)
+    // Dépôt de dossier (bloc 2 : « Dépôt de dossier : hr »).
     path: '/dossiers/nouveau',
     name: 'depot-dossier',
     meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
+    props: (route) => ({ offre: route.query.offre ?? null }),
     component: () => import('../views/dossier/DepotDossierView.vue'),
   },
 ]
 
 const entretien = [
   {
-    // Liste des entretiens : en attente / finis. Données statiques pour l'instant (api/entretiens.js)
+    // Liste des entretiens : en attente / finis.
     path: '/entretiens',
     name: 'entretiens',
     meta: { acces: (u) => ['DIRECTION', 'MANAGER', 'HR'].includes(u.role) },
@@ -117,7 +119,7 @@ const entretien = [
   },
   {
     // Préparer un entretien (HR) : offre ouverte, candidat (dossier), date, interviewers.
-    // ?offre=<id>&dossier=<id> : choix déjà faits. Données statiques pour l'instant (api/entretiens.js)
+    // ?offre=<id>&dossier=<id> : choix déjà faits.
     path: '/entretiens/nouveau',
     name: 'preparation-entretien',
     meta: { acces: (u) => u.role === 'HR' }, // HR uniquement
@@ -162,12 +164,12 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
   }
   if (!utilisateur.value) return
-  const versAccueil =
-    to.name === 'login' ||
-    to.name === 'accueil' ||
-    (to.meta.acces && !to.meta.acces(utilisateur.value))
+  const refusee = Boolean(to.meta.acces && !to.meta.acces(utilisateur.value))
+  const versAccueil = to.name === 'login' || to.name === 'accueil' || refusee
   // Comparaison au chemin : un rôle sans page (accueil = /login) reste sur le login au lieu de boucler
-  if (versAccueil && accueil(utilisateur.value) !== to.path) return accueil(utilisateur.value)
+  // refusee : AppLayout affiche « page réservée » (query.refusee = la page demandée)
+  if (versAccueil && accueil(utilisateur.value) !== to.path)
+    return { path: accueil(utilisateur.value), query: refusee ? { refusee: to.path } : {} }
 })
 
 export default router

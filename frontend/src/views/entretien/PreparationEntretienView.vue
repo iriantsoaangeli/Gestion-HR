@@ -3,7 +3,7 @@ import AppLayout from '../../components/layout/AppLayout.vue'
 import PreparationEntretienForm from '../../components/entretien/PreparationEntretienForm.vue'
 
 // Préparation d'un entretien (HR uniquement). offre / dossier : choix déjà faits, lus dans la query
-// par la route (?offre=…&dossier=…). Données statiques pour l'instant (api/entretiens.js).
+// par la route (?offre=…&dossier=…).
 defineProps({
   offre: { type: [String, Number], default: null },
   dossier: { type: [String, Number], default: null },
