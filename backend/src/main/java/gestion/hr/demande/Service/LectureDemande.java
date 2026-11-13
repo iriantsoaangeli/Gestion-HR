@@ -2,6 +2,7 @@ package gestion.hr.demande.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -85,6 +86,17 @@ class LectureDemande {
     List<DemandeResponse> traitees() {
         Utilisateur moi = courant.get();
         return conversion.enReponses(demandes.findTraiteesPar(moi.getId()), moi);
+    }
+
+    /** Demandes approuvées, les plus récentes d'abord. Sans contrôle d'accès : réservé aux offres (rôle vérifié là-bas). */
+    List<DemandeResponse> approuvees() {
+        return conversion.enReponses(demandes.findByStatutOrderByDateDescIdDesc(Statut.APPROUVEE), courant.get());
+    }
+
+    /** Une demande quel que soit son statut, vide si elle n'existe pas. Sans contrôle d'accès : réservé aux offres. */
+    Optional<DemandeResponse> pourOffre(Integer id) {
+        Utilisateur moi = courant.get();
+        return demandes.findById(id).map(d -> conversion.enReponse(d, moi));
     }
 
     /** Étapes du workflow pour une demande pas encore créée (progression du formulaire). */

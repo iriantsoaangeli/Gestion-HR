@@ -1,6 +1,7 @@
 package gestion.hr.demande.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,8 @@ import gestion.hr.demande.Dto.DemandeResponse;
  * - LectureDemande   : fiche, listes, validateurs, étapes (qui voit quoi)
  * - ConversionDemande : Demande -> DemandeResponse (libellés, historique, suivi)
  * Les transactions sont ouvertes ici.
+ * approuvees et pourOffre ne contrôlent pas l'accès : elles servent seulement à OffreService (qui exige HR),
+ * aucun Controller ne doit les appeler.
  */
 @Service
 public class DemandeService {
@@ -84,5 +87,19 @@ public class DemandeService {
     @Transactional(readOnly = true)
     public List<DemandeResponse.Etape> etapes() {
         return lecture.etapes();
+    }
+
+    // ---------- Lire pour les offres (sans contrôle d'accès, voir plus haut) ----------
+
+    /** Demandes approuvées, les plus récentes d'abord (formulaire de création d'offre). */
+    @Transactional(readOnly = true)
+    public List<DemandeResponse> approuvees() {
+        return lecture.approuvees();
+    }
+
+    /** Une demande, quel que soit son statut ; vide si elle n'existe pas (publication d'une offre). */
+    @Transactional(readOnly = true)
+    public Optional<DemandeResponse> pourOffre(Integer id) {
+        return lecture.pourOffre(id);
     }
 }

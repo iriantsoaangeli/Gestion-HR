@@ -11,6 +11,7 @@ public class Departement {
 
     @Id
     private Integer id;
+    private String code; // court et unique (RH, INF…), préfixe du code des postes
     private String label;
     private Integer nb;
 
@@ -19,6 +20,10 @@ public class Departement {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getCode() {
+        return code;
     }
 
     public String getLabel() {

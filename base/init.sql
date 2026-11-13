@@ -18,9 +18,10 @@ CREATE TABLE personne (
     email VARCHAR(100) NOT NULL
 );
 
--- Le departement d'un poste
+-- Le departement d'un poste ; code court et unique (RH, INF…), prefixe du code des postes
 CREATE TABLE departement (
     id SERIAL PRIMARY KEY,
+    code VARCHAR(10) NOT NULL UNIQUE,
     label VARCHAR(100) NOT NULL,
     nb INTEGER NOT NULL DEFAULT 0
 );
@@ -43,8 +44,8 @@ CREATE TABLE status (
     label VARCHAR(50) NOT NULL
 );
 
--- Le status de l'offre (repris par un entretien)
-CREATE TABLE statusOffre (
+-- Le statut d'un entretien : 1 EN_ATTENTE, 2 FINI (id repris par l'enum Java, base/data.sql)
+CREATE TABLE statusEntretien (
     id SERIAL PRIMARY KEY,
     label VARCHAR(50) NOT NULL
 );
@@ -54,8 +55,10 @@ CREATE TABLE statusOffre (
 -- =====================================================================
 
 -- Un poste est comme un siege ; son detenteur est dans emploi
+-- code : identifiant lisible et unique, distinct de l'id : <code du departement>-<annee>-<compteur> (INF-2026-0007)
 CREATE TABLE poste (
     id SERIAL PRIMARY KEY,
+    code VARCHAR(20) NOT NULL UNIQUE,
     label VARCHAR(100) NOT NULL,
     idDepartement INTEGER NOT NULL REFERENCES departement (id)
 );
@@ -193,25 +196,29 @@ CREATE TABLE histoDemande (
 -- Offres d'emploi
 -- =====================================================================
 
--- Offre d'emploi pour un poste, issue d'une demande approuvee (idDemande)
+-- Offre d'emploi issue d'une demande approuvee (idDemande) ; ses postes sont dans offrePoste
 -- idPosteResponsable = poste qui suit le recrutement ; idEmetteur = compte qui a publie l'offre
--- delai : date limite de candidature (facultative) ; status : offre ouverte ou close
+-- delai : date limite de candidature (facultative) ; profil : profil recherche (facultatif)
+-- status : offre ouverte ou close
 CREATE TABLE offre (
     id SERIAL PRIMARY KEY,
+    intitule VARCHAR(150) NOT NULL,
     delai DATE DEFAULT NULL,
-    idPoste INTEGER NOT NULL REFERENCES poste (id),
     idPosteResponsable INTEGER NOT NULL REFERENCES poste (id),
     description TEXT NOT NULL,
+    profil TEXT DEFAULT NULL,
     status VARCHAR(10) NOT NULL DEFAULT 'OUVERT' CHECK (status IN ('OUVERT', 'CLOS')),
     idDemande INTEGER NOT NULL REFERENCES demande (id),
     idEmetteur INTEGER NOT NULL REFERENCES utilisateur (id)
 );
 
--- Ceux qui font les entretiens et les evaluations d'une offre (plusieurs postes par offre)
-CREATE TABLE interviewer (
+-- Les postes couverts par une offre : remplacement = le poste existant ;
+-- creation = postes vides crees par le backend a la publication (un par effectif)
+CREATE TABLE offrePoste (
     id SERIAL PRIMARY KEY,
+    idOffre INTEGER NOT NULL REFERENCES offre (id),
     idPoste INTEGER NOT NULL REFERENCES poste (id),
-    idOffre INTEGER NOT NULL REFERENCES offre (id)
+    UNIQUE (idOffre, idPoste)
 );
 
 -- =====================================================================
@@ -228,18 +235,49 @@ CREATE TABLE dossier (
     UNIQUE (idOffre, idPersonne)
 );
 
+-- Piece jointe d'une personne (CV, lettre…) ; contenu stocke en base ; taille en octets
+CREATE TABLE pieceJointe (
+    id SERIAL PRIMARY KEY,
+    idPersonne INTEGER NOT NULL REFERENCES personne (id),
+    nom VARCHAR(255) NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    taille INTEGER NOT NULL CHECK (taille >= 0),
+    contenu BYTEA NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Les pieces jointes d'un dossier (30 Mo au total par dossier, controle par le backend)
+CREATE TABLE pieceJointeDossier (
+    id SERIAL PRIMARY KEY,
+    idPieceJointe INTEGER NOT NULL REFERENCES pieceJointe (id),
+    idDossier INTEGER NOT NULL REFERENCES dossier (id),
+    UNIQUE (idPieceJointe, idDossier)
+);
+
 -- Entretien d'un candidat : l'offre et le candidat se retrouvent par le dossier
+-- idStatusEntretien : EN_ATTENTE a la preparation, FINI quand tous les interviewers ont evalue
 CREATE TABLE entretien (
     id SERIAL PRIMARY KEY,
     date TIMESTAMP NOT NULL,
     idDossier INTEGER NOT NULL REFERENCES dossier (id),
-    idStatusOffre INTEGER NOT NULL REFERENCES statusOffre (id)
+    idStatusEntretien INTEGER NOT NULL REFERENCES statusEntretien (id)
 );
 
--- Evaluation d'un entretien : note sur 100 et remarques
+-- Ceux qui font l'entretien et l'evaluent (postes des comptes)
+CREATE TABLE interviewer (
+    id SERIAL PRIMARY KEY,
+    idPoste INTEGER NOT NULL REFERENCES poste (id),
+    idEntretien INTEGER NOT NULL REFERENCES entretien (id),
+    UNIQUE (idEntretien, idPoste)
+);
+
+-- Evaluation d'un entretien : une par interviewer (idPoste), note sur 100 et remarques
 CREATE TABLE evaluation (
     id SERIAL PRIMARY KEY,
     idEntretien INTEGER NOT NULL REFERENCES entretien (id),
+    idPoste INTEGER NOT NULL REFERENCES poste (id),
     note INTEGER NOT NULL CHECK (note BETWEEN 0 AND 100),
-    remarques TEXT DEFAULT NULL
+    remarques TEXT NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (idEntretien, idPoste)
 );

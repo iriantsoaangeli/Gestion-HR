@@ -9,12 +9,19 @@ INSERT INTO status (id, label) VALUES
     (5, 'REFUSEE');
 SELECT setval('status_id_seq', 5);
 
+-- Statuts d'un entretien : les id sont repris par l'enum Java du statut d'entretien (ne pas les changer)
+INSERT INTO statusEntretien (id, label) VALUES
+    (1, 'EN_ATTENTE'),
+    (2, 'FINI');
+SELECT setval('statusEntretien_id_seq', 2);
+
 -- Référentiel de test
-INSERT INTO departement (label) VALUES
-    ('Ressources humaines'),
-    ('Informatique'),
-    ('Finance'),
-    ('Direction générale');
+-- code : préfixe du code des postes (RH-2026-0001…)
+INSERT INTO departement (code, label) VALUES
+    ('RH',  'Ressources humaines'),
+    ('INF', 'Informatique'),
+    ('FIN', 'Finance'),
+    ('DG',  'Direction générale');
 
 INSERT INTO fonction (label) VALUES
     ('Chargé de recrutement'),
@@ -25,20 +32,21 @@ INSERT INTO fonction (label) VALUES
     ('Contrôleur de gestion');
 
 -- Postes existants (sièges), vacants (emploi.idPersonne NULL, plus bas)
-INSERT INTO poste (label, idDepartement) VALUES
-    ('Chargé de recrutement', 1),
-    ('Gestionnaire paie', 1),
-    ('Développeur', 2),
-    ('Administrateur système', 2),
-    ('Comptable', 3);
+-- code : <code du département>-<année>-<compteur>, un compteur par département et par année
+INSERT INTO poste (code, label, idDepartement) VALUES
+    ('RH-2026-0001',  'Chargé de recrutement', 1),
+    ('RH-2026-0002',  'Gestionnaire paie', 1),
+    ('INF-2026-0001', 'Développeur', 2),
+    ('INF-2026-0002', 'Administrateur système', 2),
+    ('FIN-2026-0001', 'Comptable', 3);
 
 -- Postes d'importance tenus par les comptes de l'application (un compte = 1 poste, voir utilisateur)
-INSERT INTO poste (label, idDepartement) VALUES
-    ('Manager informatique', 2),
-    ('Responsable RH', 1),
-    ('Directeur général', 4),
-    ('Directeur financier', 3),
-    ('Administrateur de l''application', 2);
+INSERT INTO poste (code, label, idDepartement) VALUES
+    ('INF-2026-0003', 'Manager informatique', 2),
+    ('RH-2026-0003',  'Responsable RH', 1),
+    ('DG-2026-0001',  'Directeur général', 4),
+    ('FIN-2026-0002', 'Directeur financier', 3),
+    ('INF-2026-0004', 'Administrateur de l''application', 2);
 
 -- Détenteurs des postes des comptes (emploi.idPersonne) : affichés à chaque étape d'une demande
 INSERT INTO personne (nom, prenom, naissance, adresse, tel, email) VALUES

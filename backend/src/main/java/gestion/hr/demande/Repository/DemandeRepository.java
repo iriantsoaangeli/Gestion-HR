@@ -16,6 +16,9 @@ public interface DemandeRepository extends JpaRepository<Demande, Integer> {
 
     List<Demande> findAllByOrderByDateDescIdDesc();
 
+    /** Demandes à ce statut, les plus récentes d'abord (ex. APPROUVEE pour les offres). */
+    List<Demande> findByStatutOrderByDateDescIdDesc(Statut statut);
+
     /** Demandes en attente à ces statuts, les plus anciennes d'abord (file à traiter). */
     List<Demande> findByStatutInOrderByDateAscIdAsc(List<Statut> statuts);
 

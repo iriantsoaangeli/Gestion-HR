@@ -3,10 +3,12 @@
 ## Organisation
 
 **Un poste est comme un siege, son detenteur est dans emploi (idPersonne nulle si ce n'est pas occupe)**  
-poste(**id**, label, #idDepartment)
+poste(**id**, code, label, #idDepartment)  
+> code : identifiant lisible, unique, distinct de l'id : `<code du département>-<année>-<compteur>` (ex. INF-2026-0007)
 
 **Le departement d'un poste**  
-departement(**id**, label, nb)
+departement(**id**, code, label, nb)  
+> code : court et unique (RH, INF, FIN, DG), préfixe du code des postes
 
 **Historique de status d'un poste**    
 histoPoste(**id**, #idPoste, status:true/false,datetime)
@@ -76,11 +78,13 @@ historiqueUtilisateurs(**id**, #idUtilisateur, #idPoste, status:true/false, date
 
 ## Creation d'offre d'emploi 
 
-**Une offre d'emploi**  
-offre(**id**,delai?,#idPoste,#idPosteResponsable,description,status:ouvert/clos,#idDemande,#idEmetteur)  
+**Une offre d'emploi**, issue d'une demande approuvée ; ses postes sont dans offrePoste  
+offre(**id**,intitule,delai?,#idPosteResponsable,description,profil?,status:ouvert/clos,#idDemande,#idEmetteur)  
 
-**Ceux qui vont faire l'entretien et les evalutations , du many to one**  
-interviewer(**id**,#idPoste,#idOffre)
+**Les postes couverts par une offre** : remplacement = le poste existant ; création = postes vides créés par le backend
+à la publication (un par effectif)  
+offrePoste(**id**,#idOffre,#idPoste)  
+> UNIQUE (idOffre, idPoste)
 
 ## Recrutement et entretien
 
@@ -88,11 +92,24 @@ interviewer(**id**,#idPoste,#idOffre)
 dossier(**id**,datetime,#idOffre,#idPersonne)  
 > une personne dépose au plus un dossier par offre (UNIQUE idOffre, idPersonne)
 
+**Une pièce jointe** appartient à une personne (CV, lettre…) ; contenu stocké en base  
+pieceJointe(**id**,#idPersonne,nom,type,taille,contenu,datetime)  
+
+**Les pièces jointes d'un dossier** (30 Mo au total par dossier)  
+pieceJointeDossier(**id**,#idPieceJointe,#idDossier)  
+> UNIQUE (idPieceJointe, idDossier)
+
+**Le statut d'un entretien**  
+statusEntretien(**id**,label)  
+> 1 EN_ATTENTE, 2 FINI (base/data.sql, repris par un enum Java : ne pas changer les id)
+
 **L'entretien d'un candidat** : l'offre et le candidat se retrouvent par le dossier  
-entretien(**id**,datetime,#idDossier,#idStatusOffre)      
+entretien(**id**,datetime,#idDossier,#idStatusEntretien)  
 
-**L'evaluation d'un entretien**  
-evaluation(**id**,#idEntretien,Note/100,Remarques  )  
+**Ceux qui font l'entretien et l'évaluent** (postes des comptes)  
+interviewer(**id**,#idPoste,#idEntretien)  
+> UNIQUE (idEntretien, idPoste)
 
-**Le status de l'offre**
-statusOffre(**id**,label)  
+**L'évaluation d'un entretien** : une par interviewer  
+evaluation(**id**,#idEntretien,#idPoste,note/100,remarques,datetime)  
+> UNIQUE (idEntretien, idPoste) ; idPoste = l'interviewer qui l'a écrite

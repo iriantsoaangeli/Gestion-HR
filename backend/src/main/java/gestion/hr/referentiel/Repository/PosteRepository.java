@@ -12,6 +12,9 @@ public interface PosteRepository extends JpaRepository<Poste, Integer> {
 
     List<Poste> findByIdDepartementOrderByLabel(Integer idDepartement);
 
+    /** Postes dont le code commence par ce préfixe (ex. « INF-2026- ») : sert à calculer le compteur suivant. */
+    List<Poste> findByCodeStartingWith(String prefixe);
+
     /** Département d'un compte = département de son poste. */
     @Query("select p.idDepartement from Poste p, Utilisateur u where u.id = :idUtilisateur and p.id = u.idPoste")
     Optional<Integer> departementDe(Integer idUtilisateur);
