@@ -33,7 +33,7 @@ personne(**id**, nom, prenom, naissance,adresse,tel,email)
 historiquePersonne(**id**,#idPersonne,nom?,prenom?,naissance?,adresse?,tel?,mail?,datetime)  
 
 **On emploie une personne pour un poste sinon l'id est null**  
-emploi(**id**, #idPoste, #idPersonne?)
+emploi(**id**, #idPoste, #idPersonne?,#idContrat)
 
 **Les types de mouvements : entree/sortie**  
 mouvement(**id**, label)
@@ -48,7 +48,7 @@ historiqueEmploi(**id**, datetime, #idMouvement, #idPersonne, #idPoste)
 status(**id**, label)
 
 **Demande de personnel**  
-demande(**id**, #idDepartement, #idStatus, #idDemandeur, datetime, motif, delai?)  
+demande(**id**, #idDepartement, #idStatus, #idDemandeur, datetime, motif, delai?,budget)  
 > idDemandeur = utilisateur (manager) qui a créé la demande
 
 
@@ -113,3 +113,16 @@ interviewer(**id**,#idPoste,#idEntretien)
 **L'évaluation d'un entretien** : une par interviewer  
 evaluation(**id**,#idEntretien,#idPoste,note/100,remarques,datetime)  
 > UNIQUE (idEntretien, idPoste) ; idPoste = l'interviewer qui l'a écrite
+
+
+## Proposition d'embauche 
+
+**La liste des propositions avec contrats**  
+proposition(**id**,#idOffre,#idPersonne,#idContrat,#idTypeContrat)    
+
+
+**Type de contrat**  
+typeContrat(**id**,labels)  
+
+**Un contrat**  
+contrat(**id**,#idTypeContrat,duree(jours)?,delai?)  
